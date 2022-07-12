@@ -1,4 +1,4 @@
-.PHONY: test docker_net migrate_up migrate_up1 migrate_down migrate_down1 sqlc format swag pull init server_init docker_build docker_run
+.PHONY: test docker_net migrate_up migrate_up1 migrate_down migrate_down1 sqlc format swag pull init server_init docker_build docker_run run run_back
 test: # 运行所有的测试程序
 	go test -v -cover ./... -count=1
 docker_net: # 创建docker网络
