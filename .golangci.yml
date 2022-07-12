@@ -1,0 +1,21 @@
+linters-settings:
+  golint:
+    min-confidence: 0
+  gosimple:
+    go: "1.17"
+    checks: [ "all" ]
+linters:
+  disable-all: true
+  enable:
+    - typecheck
+    - goimports
+    - misspell
+    - govet
+    - ineffassign
+    - gosimple
+    - deadcode
+    #    - structcheck
+    - unused
+    - errcheck
+service:
+  golangci-lint-version: 1.45.2
