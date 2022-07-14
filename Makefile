@@ -12,13 +12,13 @@ migrate_install: # 安装migrate
 migrate_init_db: # 初始化数据库
 	migrate create -ext sql -dir src/dao/postgres/migration -seq init_schema
 migrate_up: # 向上迁移数据库
-	migrate -path src/dao/postgresql/migration -database "postgresql://root:123456@localhost:5432/ttms?sslmode=disable" -verbose up
+	migrate -path src/dao/postgres/migration -database "postgresql://root:123456@localhost:5432/chat?sslmode=disable" -verbose up
 migrate_up1: # 向上迁移一级数据库
-	migrate -path src/dao/postgresql/migration -database "postgresql://root:123456@localhost:5432/ttms?sslmode=disable" -verbose up 1
+	migrate -path src/dao/postgres/migration -database "postgresql://root:123456@localhost:5432/chat?sslmode=disable" -verbose up 1
 migrate_down: # 向下迁移数据库
-	migrate -path src/dao/postgresql/migration -database "postgresql://root:123456@localhost:5432/ttms?sslmode=disable" -verbose down
+	migrate -path src/dao/postgres/migration -database "postgresql://root:123456@localhost:5432/chat?sslmode=disable" -verbose down
 migrate_down1: # 向下迁移一级数据库
-	migrate -path src/dao/postgresql/migration -database "postgresql://root:123456@localhost:5432/ttms?sslmode=disable" -verbose down 1
+	migrate -path src/dao/postgres/migration -database "postgresql://root:123456@localhost:5432/chat?sslmode=disable" -verbose down 1
 sqlc: # sqlc生成go代码
 	sqlc generate
 goimports_install: # goimports安装
