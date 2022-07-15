@@ -20,5 +20,8 @@ drop type if exists filetype cascade;
 drop function if exists pin_timestamp() cascade;
 drop function if exists cs_timestamp() cascade;
 drop function if exists show_timestamp() cascade;
+-- 触发器
+drop trigger if exists message_msg_content_tsv on message cascade;
+drop trigger if exists group_notify_msg_content_tsv on group_notify cascade;
 -- 语言
-drop text search configuration chinese;
+drop text search configuration if exists chinese;

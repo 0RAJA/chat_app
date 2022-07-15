@@ -1,4 +1,4 @@
-module chat
+module github.com/0RAJA/chat_app
 
 go 1.17
 
