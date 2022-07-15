@@ -33,10 +33,10 @@ create type FileType As ENUM ('img','file');
 -- 用户
 create table "user"
 (
-    id        bigserial primary key,                          -- 用户id
-    email     varchar(255) not null unique,                   -- 邮箱
-    password  varchar(255) not null,                          -- 密码
-    create_at timestamp    not null default current_timestamp -- 创建时间
+    id        bigserial primary key,              -- 用户id
+    email     varchar(255) not null unique,       -- 邮箱
+    password  varchar(255) not null,              -- 密码
+    create_at timestamptz  not null default now() -- 创建时间
 );
 
 -- 账号
@@ -48,7 +48,8 @@ create table account
     avatar    varchar(255) not null,                                                            -- 账号头像
     gender    Gender       not null default '未知',                                               -- 账号性别
     signature text         not null default '这个用户很懒,什么也没留下',                                    -- 签名
-    create_at timestamp    not null default current_timestamp                                   -- 创建时间
+    create_at timestamptz  not null default now(),                                              -- 创建时间
+    constraint account_unique_name unique (user_id, name)                                       -- 一个用户的不同账号名不能重复
 );
 
 -- 群组或好友
@@ -58,7 +59,7 @@ create table relation
     relation_type RelationType not null,                             -- 关系类型 group:群组,friend:好友
     group_type    GroupType,                                         -- 群组信息 只有群组才有这个字段 否则为null
     friend_type   FriendType,                                        -- 好友信息 只有好友才有这个字段 否则为null
-    create_at     timestamp default current_timestamp,               -- 创建时间
+    create_at     timestamptz default now(),                         -- 创建时间
     check ( ((group_type is null) or (friend_type is null)) and
             ((group_type is not null) or (friend_type is not null))) -- 只能存在一种信息
 );
@@ -68,14 +69,16 @@ create table relation_setting
 (
     account_id     bigint       not null references account (id) on delete cascade on update cascade,  -- 账号id
     relation_id    bigint       not null references relation (id) on delete cascade on update cascade, -- 关系id
-    nickName       varchar(255) not null,                                                              -- 昵称
+    nick_name      varchar(255) not null,                                                              -- 昵称，默认是账号名或者群组名
     is_not_disturb boolean      not null default false,                                                -- 是否免打扰
     is_pin         boolean      not null default false,                                                -- 是否置顶
-    pin_time       timestamp    not null default current_timestamp,                                    -- 置顶时间
+    pin_time       timestamptz  not null default now(),                                                -- 置顶时间
     is_show        boolean      not null default true,                                                 -- 是否显示
-    last_show      timestamp    not null default current_timestamp,                                    -- 最后一次显示时间
-    is_leader      boolean      not null default false                                                 -- 是否群主
+    last_show      timestamptz  not null default now(),                                                -- 最后一次显示时间
+    is_leader      boolean      not null default false                                                 -- 是否群主 仅仅对群组有效
 );
+-- 昵称索引
+create index relation_setting_nickname on relation_setting (nick_name);
 
 -- 好友申请
 create table friend_application
@@ -85,40 +88,9 @@ create table friend_application
     apply_msg   text,                                                                                   -- 申请信息
     refuse_msg  text,                                                                                   -- 拒绝信息
     status      ApplicationStatus not null default '已申请',                                               -- 申请状态
-    create_at   timestamp                  default current_timestamp,                                   -- 创建时间
-    update_at   timestamp                  default current_timestamp                                    -- 更新时间
-);
-
--- 消息
-create table message
-(
-    id          bigserial primary key,                                                               -- 消息id
-    notify_type MsgNotifyType not null,                                                              -- 消息通知类型 system:系统消息,common:普通消息
-    msg_type    MsgType       not null,                                                              -- 消息类型 text:文本消息,file:文件消息
-    msg_content text          not null,                                                              -- 消息内容
-    msg_expand  json,                                                                                -- 消息扩展信息
-    account_id  bigint references account (id) on delete set null on update cascade,                 -- 发送账号id
-    rly_msg_id  bigint references message (id) on delete cascade on update cascade,                  -- 回复消息id
-    relation_id bigint        not null references relation (id) on delete cascade on update cascade, -- 关系id
-    create_at   timestamp     not null default current_timestamp,                                    -- 创建时间
-    is_revoke   boolean       not null default false,                                                -- 是否撤回
-    is_top      boolean       not null default false,                                                -- 是否置顶
-    is_pin      boolean       not null default false,                                                -- 是否置顶
-    pin_time    timestamp     not null default current_timestamp,                                    -- 置顶时间
-    read_ids    bigint[]      not null default '{}'::bigint[],                                       -- 已读用户id集合
-    check (notify_type = 'common' or (notify_type = 'system' and account_id is null))                -- 系统消息时发送账号id为null
-);
-
--- 群通知
-create table group_notify
-(
-    id          bigserial primary key,                                               -- 群通知id
-    relation_id bigint references relation (id) on delete cascade on update cascade, -- 关系id
-    msg_content text      not null,                                                  -- 消息内容
-    msg_expand  json,                                                                -- 消息扩展信息
-    account_id  bigint references account (id) on delete set null on update cascade, -- 发送账号id
-    create_at   timestamp not null default current_timestamp,                        -- 创建时间
-    read_ids    bigint[]  not null default '{}'::bigint[]                            -- 已读用户id集合
+    create_at   timestamptz                default now(),                                               -- 创建时间
+    update_at   timestamptz                default now(),                                               -- 更新时间
+    constraint f_a_pk primary key (account1_id, account2_id)
 );
 
 -- 文件记录
@@ -132,14 +104,71 @@ create table file
     url         varchar(255) not null,                                                -- 文件url
     relation_id bigint references relation (id) on delete set null on update cascade, -- 关系id
     account_id  bigint references account (id) on delete set null on update cascade,  -- 发送账号id
-    create_at   timestamp    not null default current_timestamp                       -- 创建时间
+    create_at   timestamptz  not null default now()                                   -- 创建时间
 );
+create index file_relation_id on file (relation_id);
+
+-- 消息
+create table message
+(
+    id              bigserial primary key,                                                               -- 消息id
+    notify_type     MsgNotifyType not null,                                                              -- 消息通知类型 system:系统消息,common:普通消息
+    msg_type        MsgType       not null,                                                              -- 消息类型 text:文本消息,file:文件消息
+    msg_content     text          not null,                                                              -- 消息内容
+    msg_expand      json,                                                                                -- 消息扩展信息
+    file_id         bigint references file (id) on delete cascade on update cascade,                     -- 文件id 如果不是文件类型则为null
+    account_id      bigint references account (id) on delete set null on update cascade,                 -- 发送账号id
+    rly_msg_id      bigint references message (id) on delete cascade on update cascade,                  -- 回复消息id
+    relation_id     bigint        not null references relation (id) on delete cascade on update cascade, -- 关系id
+    create_at       timestamptz   not null default now(),                                                -- 创建时间
+    is_revoke       boolean       not null default false,                                                -- 是否撤回
+    is_top          boolean       not null default false,                                                -- 是否置顶
+    is_pin          boolean       not null default false,                                                -- 是否置顶
+    pin_time        timestamptz   not null default now(),                                                -- 置顶时间
+    read_ids        bigint[]      not null default '{}'::bigint[],                                       -- 已读用户id集合
+    msg_content_tsv tsvector,                                                                            -- 消息分词
+    check (notify_type = 'common' or (notify_type = 'system' and account_id is null)),                   -- 系统消息时发送账号id为null
+    check ( msg_type = 'text' or (msg_type = 'file' and file_id is not null))                            -- 文件消息时文件id不为null
+);
+create index msg_create_at on message (create_at);
+-- 分词索引
+create index message_msg_content_tsv on message using gin (to_tsvector('chinese', msg_content));
+
+-- 触发器更新 message_msg_content_tsv
+CREATE TRIGGER message_msg_content_tsv
+    BEFORE INSERT OR UPDATE
+    ON message
+    FOR EACH ROW
+EXECUTE PROCEDURE
+    tsvector_update_trigger(msg_content_tsv, 'public.chinese', msg_content);
+
+-- 群通知
+create table group_notify
+(
+    id              bigserial primary key,                                               -- 群通知id
+    relation_id     bigint references relation (id) on delete cascade on update cascade, -- 关系id
+    msg_content     text        not null,                                                -- 消息内容
+    msg_expand      json,                                                                -- 消息扩展信息
+    account_id      bigint references account (id) on delete set null on update cascade, -- 发送账号id
+    create_at       timestamptz not null default now(),                                  -- 创建时间
+    read_ids        bigint[]    not null default '{}'::bigint[],                         -- 已读用户id集合
+    msg_content_tsv tsvector                                                             -- 消息分词
+);
+-- 分词索引
+create index group_notify_msg_content_tsv on group_notify using gin (to_tsvector('chinese', msg_content));
+-- 触发器更新 group_notify_msg_content_tsv
+CREATE TRIGGER group_notify_msg_content_tsv
+    BEFORE INSERT OR UPDATE
+    ON group_notify
+    FOR EACH ROW
+EXECUTE PROCEDURE
+    tsvector_update_trigger(msg_content_tsv, 'public.chinese', msg_content);
 
 -- 更新pin时间戳函数
 create or replace function pin_timestamp() returns trigger as
 $$
 begin
-    if new.is_pin then new.pin_time = current_timestamp; end if; return new;
+    if new.is_pin then new.pin_time = now(); end if; return new;
 end;
 $$ language plpgsql;
 
@@ -162,7 +191,7 @@ create or replace function cs_timestamp(
 ) returns trigger as
 $$
 begin
-    new.update_at = current_timestamp;
+    new.update_at = now();
     return new;
 end;
 $$ language plpgsql;
@@ -178,7 +207,7 @@ execute procedure cs_timestamp();
 create or replace function show_timestamp() returns trigger as
 $$
 begin
-    if new.is_show then new.last_show = current_timestamp; end if; return new;
+    if new.is_show then new.last_show = now(); end if; return new;
 end;
 $$ language plpgsql;
 
