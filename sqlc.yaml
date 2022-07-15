@@ -1,0 +1,16 @@
+# sqlc配置文件
+version: 1
+packages:
+  - name: "db" # package name
+    path: "src/dao/postgres/sqlc" # 生成代码路径
+    engine: "postgresql" # 引擎
+    schema: "src/dao/postgres/migration" # 表结构
+    queries: "src/dao/postgres/query" # 查询语句
+    emit_json_tags: true # 将json放到标签
+    emit_empty_slices: true # 查不到值返回空切片
+    emit_interface: true # 生成包含查询结构所有功能的接口
+    emit_result_struct_pointers: true # 生成查询结果结构指针
+    emit_params_struct_pointers: true # 生成查询参数结构指针
+    sql_package: pgx/v4
+
+
