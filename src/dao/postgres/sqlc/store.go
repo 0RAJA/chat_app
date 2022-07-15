@@ -17,6 +17,7 @@ type SqlStore struct {
 }
 
 // 通过事务执行回调函数
+// nolint:unused
 func (store *SqlStore) execTx(ctx context.Context, fn func(queries *Queries) error) error {
 	tx, err := store.DB.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel:       pgx.ReadCommitted,
