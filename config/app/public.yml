@@ -1,0 +1,53 @@
+Server: # 服务配置
+  RunMode: debug # release 为生产模式
+  Address: :8080 # 监听端口
+  ReadTimeout: 5s
+  WriteTimeout: 5s
+  DefaultContextTimeout: 30s #默认超时时间
+App: # App配置文件
+  Name: chat
+  Version: 1.0.0
+  StartTime: 2022-07-11
+Log: # 日志配置文件
+  Level: debug
+  LogSavePath: "storage/applogs/" # 日志保存路径
+  HighLevelFile: error          # 高级别日志文件名
+  LowLevelFile: info          # 低级别文件名
+  LogFileExt: .log          # 日志文件后缀
+  MaxSize: 10 # 日志文件最大大小 MB
+  MaxAge: 30 # 日志文件最大保存天数
+  MaxBackups: 7 # 最大备份数
+  Compress: false # 是否压缩
+Page: # 分页
+  DefaultPageSize: 10
+  MaxPageSize: 20
+  PageKey: page
+  PageSizeKey: page_size
+Rule: # 规则配置
+  UsernameLenMax: 32 # 用户名最大长度
+  UsernameLenMin: 1 # 用户名最小长度
+  PasswordLenMax: 32 # 密码最大长度
+  PasswordLenMin: 6 # 密码最小长度
+Auto: # 自动任务配置
+Worker: # 工作池配置
+  TaskChanCapacity: 50 # 任务队列容量
+  WorkerChanCapacity: 50 # 工作队列容量
+  WorkerNum: 10 # 工作池数量
+Limit: # 限流
+  IPLimit: # IP限流
+    Cap: 10           # 令牌桶容量
+    GenNum: 5         # 令牌产生数
+    GenTime: 1       # 令牌产生时间
+    Cost: 1           # 本次取走的令牌数
+  APILimit: # API限流
+    Email:
+      - Count: 5
+        Duration: 1s
+        Burst: 5
+      - Count: 30
+        Duration: 1m
+        Burst: 5
+    Upload:
+      - Count: 1
+        Duration: 1s
+        Burst: 1
