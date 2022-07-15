@@ -106,9 +106,9 @@ type Log struct {
 }
 
 type App struct {
-	Name      string    `yaml:"Name"`
-	Version   string    `yaml:"Version"`
-	StartTime time.Time `yaml:"StartTime"`
+	Name      string `yaml:"Name"`
+	Version   string `yaml:"Version"`
+	StartTime string `yaml:"StartTime"`
 }
 
 type Limit struct {
