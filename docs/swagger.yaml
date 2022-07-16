@@ -1,0 +1,14 @@
+basePath: /api
+host: chat.humraja.xyz
+info:
+  contact: {}
+  description: 在线聊天系统
+  license:
+    name: raja,chong
+  title: chat
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

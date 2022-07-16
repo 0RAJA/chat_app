@@ -1,0 +1,20 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "在线聊天系统",
+        "title": "chat",
+        "contact": {},
+        "license": {
+            "name": "raja,chong"
+        },
+        "version": "1.0"
+    },
+    "host": "chat.humraja.xyz",
+    "basePath": "/api",
+    "paths": {},
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
+}
