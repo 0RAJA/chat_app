@@ -24,12 +24,12 @@ type Querier interface {
 	GetAllEmails(ctx context.Context) ([]string, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*Application, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
-	GetUserByEmail(ctx context.Context, email string) (*GetUserByEmailRow, error)
-	GetUserByID(ctx context.Context, id int64) (*GetUserByIDRow, error)
+	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetUserByID(ctx context.Context, id int64) (*User, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) (*Account, error)
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
-	UpdateUser(ctx context.Context, arg *UpdateUserParams) (*User, error)
+	UpdateUser(ctx context.Context, arg *UpdateUserParams) error
 }
 
 var _ Querier = (*Queries)(nil)

@@ -9,23 +9,22 @@ from "user"
 where "id" = ?;
 
 -- name: GetUserByEmail :one
-select id, email, password
+select *
 from "user"
 where email = ?
 limit 1;
 
 -- name: GetUserByID :one
-select id, email, password
+select *
 from "user"
 where id = ?
 limit 1;
 
--- name: UpdateUser :one
+-- name: UpdateUser :exec
 update "user"
 set "email"    = ?,
     "password" = ?
-where "id" = ?
-returning *;
+where "id" = ?;
 
 -- name: ExistEmail :one
 select exists(select 1 from "user" where email = ?);

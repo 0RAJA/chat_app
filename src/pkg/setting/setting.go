@@ -1,4 +1,4 @@
-package pkg
+package setting
 
 func DoThat(err error, f func() error) error {
 	if err != nil {
