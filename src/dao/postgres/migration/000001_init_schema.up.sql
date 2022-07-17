@@ -42,7 +42,7 @@ create table "user"
 -- 账号
 create table account
 (
-    id        bigserial primary key,                                                            -- 账号id
+    id        bigint primary key,                                                               -- 账号id
     user_id   bigint       not null references "user" (id) on delete cascade on update cascade, -- 用户id
     name      varchar(255) not null,                                                            -- 账号名
     avatar    varchar(255) not null,                                                            -- 账号头像
@@ -81,7 +81,7 @@ create table relation_setting
 create index relation_setting_nickname on relation_setting (nick_name);
 
 -- 好友申请
-create table friend_application
+create table application
 (
     account1_id bigint            not null references account (id) on delete cascade on update cascade, -- 申请者账号id
     account2_id bigint            not null references account (id) on delete cascade on update cascade, -- 被申请者账号id
@@ -199,7 +199,7 @@ $$ language plpgsql;
 -- 申请表更新时间戳触发器
 create trigger application_update_at_trigger
     before update
-    on friend_application
+    on application
     for each row
 execute procedure cs_timestamp();
 

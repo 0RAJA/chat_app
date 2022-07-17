@@ -9,6 +9,7 @@ import (
 )
 
 type Store interface {
+	Querier
 }
 
 type SqlStore struct {

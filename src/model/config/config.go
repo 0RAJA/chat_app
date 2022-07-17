@@ -72,10 +72,13 @@ type Worker struct {
 }
 
 type Rule struct {
-	UsernameLenMax int `yaml:"UsernameLenMax"`
-	UsernameLenMin int `yaml:"UsernameLenMin"`
-	PasswordLenMax int `yaml:"PasswordLenMax"`
-	PasswordLenMin int `yaml:"PasswordLenMin"`
+	UsernameLenMax   int           `yaml:"UsernameLenMax"`
+	UsernameLenMin   int           `yaml:"UsernameLenMin"`
+	PasswordLenMax   int           `yaml:"PasswordLenMax"`
+	PasswordLenMin   int           `yaml:"PasswordLenMin"`
+	UserMarkDuration time.Duration `yaml:"UserMarkDuration"`
+	CodeMarkDuration time.Duration `yaml:"CodeMarkDuration"`
+	CodeLength       int           `yaml:"CodeLength"`
 }
 
 type Server struct {
@@ -134,4 +137,11 @@ type APILimit struct {
 	Email  []Bucket `yaml:"Email"`
 }
 
-type Auto struct{}
+type Auto struct {
+	Retry Retry `yaml:"Retry"`
+}
+
+type Retry struct {
+	Duration time.Duration `yaml:"Duration"`
+	MaxTimes int           `yaml:"MaxTimes"`
+}

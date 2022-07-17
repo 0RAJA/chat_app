@@ -28,7 +28,13 @@ Rule: # 规则配置
   UsernameLenMin: 1 # 用户名最小长度
   PasswordLenMax: 32 # 密码最大长度
   PasswordLenMin: 6 # 密码最小长度
+  CodeLength: 6 # 验证码长度
+  UserMarkDuration: 60s # 用户发送验证码间隔时间
+  CodeMarkDuration: 1h # 验证码有效时间
 Auto: # 自动任务配置
+  Retry:
+    Duration: 5s # 重试间隔时间
+    MaxTimes: 3 # 最大重试次数
 Worker: # 工作池配置
   TaskChanCapacity: 50 # 任务队列容量
   WorkerChanCapacity: 50 # 工作队列容量
