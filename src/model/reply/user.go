@@ -9,7 +9,3 @@ type CreateUser struct {
 	Email    string    `json:"email"`
 	CreateAt time.Time `json:"create_at"`
 }
-
-type ExistEmail struct {
-	Exist bool `json:"exist"`
-}

@@ -19,6 +19,8 @@ import (
 type user struct {
 }
 
+// TODO: 用户的登陆
+
 // 通过ID获取用户信息
 func getUserInfo(c *gin.Context, userID int64) (*db.User, errcode.Err) {
 	userInfo, err := dao.Group.DB.GetUserByID(c, userID)
@@ -59,6 +61,7 @@ func (user) CreateUser(c *gin.Context, emailStr, pwd, code string) (*reply.Creat
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		reTry("addEmail:"+emailStr, func() error { return dao.Group.Redis.AddEmails(c, emailStr) })
 	}
+	// TODO: 注册后返回token
 	return &reply.CreateUser{
 		ID:       userInfo.ID,
 		Email:    userInfo.Email,
