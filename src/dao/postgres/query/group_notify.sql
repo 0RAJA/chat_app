@@ -17,8 +17,19 @@ set id         = $1,
     account_id = $5,
     create_at  = $6,
     read_ids   = $7
+where id=$8;
+
+-- name: UpdateGroupNotify :one
+update group_notify
+set id         = $1,
+    relation_id= $2,
+    msg_content= $3,
+    msg_expand = $4,
+    account_id = $5,
+    create_at  = $6,
+    read_ids   = $7
 where id=$8
-returning *;
+    returning *;
 
 -- name: GetGroupNotifyByID :one
 select *
