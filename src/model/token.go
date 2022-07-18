@@ -16,6 +16,10 @@ type Content struct {
 	ID   int64     `json:"id"`
 }
 
+func NewTokenContent(t TokenType, ID int64) *Content {
+	return &Content{Type: t, ID: ID}
+}
+
 func (c *Content) Marshal() ([]byte, error) {
 	return json.Marshal(c)
 }

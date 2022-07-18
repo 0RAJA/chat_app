@@ -10,8 +10,8 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-insert into "user" ("email", "password")
-values (?, ?)
+insert into "user" (email, password)
+values ($1, $2)
 returning id, email, password, create_at
 `
 
@@ -35,7 +35,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*User,
 const deleteUser = `-- name: DeleteUser :exec
 delete
 from "user"
-where "id" = ?
+where "id" = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
@@ -44,11 +44,22 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const existEmail = `-- name: ExistEmail :one
-select exists(select 1 from "user" where email = ?)
+select exists(select 1 from "user" where email = $1)
 `
 
 func (q *Queries) ExistEmail(ctx context.Context, email string) (bool, error) {
 	row := q.db.QueryRow(ctx, existEmail, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const existsUserByID = `-- name: ExistsUserByID :one
+select exists(select 1 from "user" where id = $1)
+`
+
+func (q *Queries) ExistsUserByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, existsUserByID, id)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -82,7 +93,7 @@ func (q *Queries) GetAllEmails(ctx context.Context) ([]string, error) {
 const getUserByEmail = `-- name: GetUserByEmail :one
 select id, email, password, create_at
 from "user"
-where email = ?
+where email = $1
 limit 1
 `
 
@@ -101,7 +112,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*User, erro
 const getUserByID = `-- name: GetUserByID :one
 select id, email, password, create_at
 from "user"
-where id = ?
+where id = $1
 limit 1
 `
 
@@ -119,9 +130,9 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (*User, error) {
 
 const updateUser = `-- name: UpdateUser :exec
 update "user"
-set "email"    = ?,
-    "password" = ?
-where "id" = ?
+set "email"    = $1,
+    "password" = $2
+where "id" = $3
 `
 
 type UpdateUserParams struct {

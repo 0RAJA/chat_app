@@ -10,6 +10,8 @@ import (
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
+	"github.com/0RAJA/chat_app/src/model"
+	"github.com/0RAJA/chat_app/src/model/common"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
@@ -19,10 +21,8 @@ import (
 type user struct {
 }
 
-// TODO: 用户的登陆
-
-// 通过ID获取用户信息
-func getUserInfo(c *gin.Context, userID int64) (*db.User, errcode.Err) {
+// getUserInfoByID 通过ID获取用户信息
+func getUserInfoByID(c *gin.Context, userID int64) (*db.User, errcode.Err) {
 	userInfo, err := dao.Group.DB.GetUserByID(c, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -34,7 +34,20 @@ func getUserInfo(c *gin.Context, userID int64) (*db.User, errcode.Err) {
 	return userInfo, nil
 }
 
-func (user) CreateUser(c *gin.Context, emailStr, pwd, code string) (*reply.CreateUser, errcode.Err) {
+// getUserInfoByEmail 通过email获取用户信息
+func getUserInfoByEmail(c *gin.Context, email string) (*db.User, errcode.Err) {
+	userInfo, err := dao.Group.DB.GetUserByEmail(c, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, myerr.UserNotFound
+		}
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return nil, errcode.ErrServer
+	}
+	return userInfo, nil
+}
+
+func (user) Register(c *gin.Context, emailStr, pwd, code string) (*reply.Register, errcode.Err) {
 	// 判断邮箱没有被注册
 	if err := CheckEmailNotExists(c, emailStr); err != nil {
 		return nil, err
@@ -61,16 +74,27 @@ func (user) CreateUser(c *gin.Context, emailStr, pwd, code string) (*reply.Creat
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		reTry("addEmail:"+emailStr, func() error { return dao.Group.Redis.AddEmails(c, emailStr) })
 	}
-	// TODO: 注册后返回token
-	return &reply.CreateUser{
-		ID:       userInfo.ID,
-		Email:    userInfo.Email,
-		CreateAt: userInfo.CreateAt,
+	// 创建token
+	userToken, payload, err := newToken(model.UserToken, userInfo.ID)
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return nil, errcode.ErrServer
+	}
+	return &reply.Register{
+		UserInfo: reply.UserInfo{
+			ID:       userInfo.ID,
+			Email:    userInfo.Email,
+			CreateAt: userInfo.CreateAt,
+		},
+		UserToken: common.Token{
+			Token:     userToken,
+			ExpiredAt: payload.ExpiredAt,
+		},
 	}, nil
 }
 
 func (user) DeleteUser(c *gin.Context, userID int64) errcode.Err {
-	userInfo, err := getUserInfo(c, userID)
+	userInfo, err := getUserInfoByID(c, userID)
 	if err != nil {
 		return err
 	}
@@ -88,7 +112,7 @@ func (user) DeleteUser(c *gin.Context, userID int64) errcode.Err {
 
 func (user) UpdateUserEmail(c *gin.Context, userID int64, newEmail, code string) errcode.Err {
 	// 判断邮箱是否更改
-	userInfo, err := getUserInfo(c, userID)
+	userInfo, err := getUserInfoByID(c, userID)
 	if err != nil {
 		return err
 	}
@@ -121,7 +145,7 @@ func (user) UpdateUserEmail(c *gin.Context, userID int64, newEmail, code string)
 
 func (user) UpdateUserPassword(c *gin.Context, userID int64, oldPwd, newPwd string) errcode.Err {
 	// 检查旧密码是否匹配
-	userInfo, merr := getUserInfo(c, userID)
+	userInfo, merr := getUserInfoByID(c, userID)
 	if merr != nil {
 		return merr
 	}
@@ -143,4 +167,31 @@ func (user) UpdateUserPassword(c *gin.Context, userID int64, oldPwd, newPwd stri
 		return errcode.ErrServer
 	}
 	return nil
+}
+
+func (user) Login(c *gin.Context, email, pwd string) (*reply.Login, errcode.Err) {
+	userInfo, merr := getUserInfoByEmail(c, email)
+	if merr != nil {
+		return nil, merr
+	}
+	if err := encode.CheckPassword(pwd, userInfo.Password); err != nil {
+		return nil, myerr.PasswordNotValid
+	}
+	// 创建token
+	userToken, payload, err := newToken(model.UserToken, userInfo.ID)
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return nil, errcode.ErrServer
+	}
+	return &reply.Login{
+		UserInfo: reply.UserInfo{
+			ID:       userInfo.ID,
+			Email:    userInfo.Email,
+			CreateAt: userInfo.CreateAt,
+		},
+		UserToken: common.Token{
+			Token:     userToken,
+			ExpiredAt: payload.ExpiredAt,
+		},
+	}, nil
 }

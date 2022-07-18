@@ -1,4 +1,126 @@
 basePath: /api
+definitions:
+  common.State:
+    properties:
+      data:
+        description: 失败时返回空
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+    type: object
+  common.Token:
+    properties:
+      expired_at:
+        description: token过期时间
+        type: string
+      token:
+        description: token
+        type: string
+    type: object
+  reply.ExistEmail:
+    properties:
+      exist:
+        type: boolean
+    type: object
+  reply.Login:
+    properties:
+      user_info:
+        $ref: '#/definitions/reply.UserInfo'
+        description: 用户信息
+      user_token:
+        $ref: '#/definitions/common.Token'
+        description: 用户令牌
+    type: object
+  reply.Register:
+    properties:
+      user_info:
+        $ref: '#/definitions/reply.UserInfo'
+        description: 用户信息
+      user_token:
+        $ref: '#/definitions/common.Token'
+        description: 用户令牌
+    type: object
+  reply.UserInfo:
+    properties:
+      create_at:
+        description: 创建时间
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      id:
+        description: user id
+        type: integer
+    type: object
+  request.Login:
+    properties:
+      email:
+        maxLength: 50
+        type: string
+      password:
+        maxLength: 50
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.Register:
+    properties:
+      code:
+        maxLength: 6
+        minLength: 6
+        type: string
+      email:
+        maxLength: 50
+        type: string
+      password:
+        maxLength: 50
+        minLength: 6
+        type: string
+    required:
+    - code
+    - email
+    - password
+    type: object
+  request.SendEmail:
+    properties:
+      email:
+        maxLength: 50
+        type: string
+    required:
+    - email
+    type: object
+  request.UpdateUserEmail:
+    properties:
+      code:
+        maxLength: 6
+        minLength: 6
+        type: string
+      email:
+        maxLength: 50
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  request.UpdateUserPassword:
+    properties:
+      new_password:
+        maxLength: 50
+        minLength: 6
+        type: string
+      old_password:
+        maxLength: 50
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
 host: chat.humraja.xyz
 info:
   contact: {}
@@ -7,7 +129,183 @@ info:
     name: raja,chong
   title: chat
   version: "1.0"
-paths: {}
+paths:
+  /api/email/exist:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        maxLength: 50
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 是否存在该email
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.ExistEmail'
+              type: object
+      summary: 是否已经存在该email
+      tags:
+      - email
+  /api/email/send:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: email
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SendEmail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发送情况
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 发送邮件
+      tags:
+      - email
+  /api/user/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.State'
+      security:
+      - BasicAuth: []
+      summary: 删除当前用户
+      tags:
+      - user
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户登陆信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登陆后user_token和用户信息
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.Login'
+              type: object
+      summary: 用户登陆
+      tags:
+      - user
+  /api/user/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户注册信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.Register'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 注册后user_token和用户信息
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.Register'
+              type: object
+      summary: 用户注册
+      tags:
+      - user
+  /api/user/update/email:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 新邮箱和验证码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserEmail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.State'
+      security:
+      - BasicAuth: []
+      summary: 更新用户邮箱
+      tags:
+      - user
+  /api/user/update/pwd:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 旧密码和新密码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.State'
+      security:
+      - BasicAuth: []
+      summary: 更新用户密码
+      tags:
+      - user
 securityDefinitions:
   BasicAuth:
     type: basic

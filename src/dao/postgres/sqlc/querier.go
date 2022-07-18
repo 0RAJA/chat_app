@@ -19,6 +19,8 @@ type Querier interface {
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
+	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
+	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, id int64) (*Account, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)

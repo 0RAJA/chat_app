@@ -18,7 +18,473 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {},
+    "paths": {
+        "/api/email/exist": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "email"
+                ],
+                "summary": "是否已经存在该email",
+                "parameters": [
+                    {
+                        "maxLength": 50,
+                        "type": "string",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "是否存在该email",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.ExistEmail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/email/send": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "email"
+                ],
+                "summary": "发送邮件",
+                "parameters": [
+                    {
+                        "description": "email",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SendEmail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发送情况",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "删除当前用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "用户登陆",
+                "parameters": [
+                    {
+                        "description": "用户登陆信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登陆后user_token和用户信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.Login"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/register": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "用户注册",
+                "parameters": [
+                    {
+                        "description": "用户注册信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.Register"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "注册后user_token和用户信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.Register"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/update/email": {
+            "put": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "更新用户邮箱",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "新邮箱和验证码",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateUserEmail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/update/pwd": {
+            "put": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "更新用户密码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "旧密码和新密码",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateUserPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "common.State": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "失败时返回空"
+                },
+                "status_code": {
+                    "description": "状态码，0-成功，其他值-失败",
+                    "type": "integer"
+                },
+                "status_msg": {
+                    "description": "返回状态描述",
+                    "type": "string"
+                }
+            }
+        },
+        "common.Token": {
+            "type": "object",
+            "properties": {
+                "expired_at": {
+                    "description": "token过期时间",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "token",
+                    "type": "string"
+                }
+            }
+        },
+        "reply.ExistEmail": {
+            "type": "object",
+            "properties": {
+                "exist": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "reply.Login": {
+            "type": "object",
+            "properties": {
+                "user_info": {
+                    "description": "用户信息",
+                    "$ref": "#/definitions/reply.UserInfo"
+                },
+                "user_token": {
+                    "description": "用户令牌",
+                    "$ref": "#/definitions/common.Token"
+                }
+            }
+        },
+        "reply.Register": {
+            "type": "object",
+            "properties": {
+                "user_info": {
+                    "description": "用户信息",
+                    "$ref": "#/definitions/reply.UserInfo"
+                },
+                "user_token": {
+                    "description": "用户令牌",
+                    "$ref": "#/definitions/common.Token"
+                }
+            }
+        },
+        "reply.UserInfo": {
+            "type": "object",
+            "properties": {
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "邮箱",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "user id",
+                    "type": "integer"
+                }
+            }
+        },
+        "request.Login": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 6
+                }
+            }
+        },
+        "request.Register": {
+            "type": "object",
+            "required": [
+                "code",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "minLength": 6
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 6
+                }
+            }
+        },
+        "request.SendEmail": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 50
+                }
+            }
+        },
+        "request.UpdateUserEmail": {
+            "type": "object",
+            "required": [
+                "code",
+                "email"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "minLength": 6
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 50
+                }
+            }
+        },
+        "request.UpdateUserPassword": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 6
+                },
+                "old_password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 6
+                }
+            }
+        }
+    },
     "securityDefinitions": {
         "BasicAuth": {
             "type": "basic"
