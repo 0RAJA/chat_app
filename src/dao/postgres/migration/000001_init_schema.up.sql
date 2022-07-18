@@ -166,7 +166,7 @@ EXECUTE PROCEDURE
 
 -- 更新pin时间戳函数
 create or replace function pin_timestamp() returns trigger as
-$$
+              $$
 begin
     if new.is_pin then new.pin_time = now(); end if; return new;
 end;
@@ -189,10 +189,10 @@ execute procedure pin_timestamp();
 -- 更新时间戳函数
 create or replace function cs_timestamp(
 ) returns trigger as
-$$
+              $$
 begin
     new.update_at = now();
-    return new;
+return new;
 end;
 $$ language plpgsql;
 
@@ -201,11 +201,11 @@ create trigger application_update_at_trigger
     before update
     on application
     for each row
-execute procedure cs_timestamp();
+    execute procedure cs_timestamp();
 
 -- 更新show时间戳函数
 create or replace function show_timestamp() returns trigger as
-$$
+              $$
 begin
     if new.is_show then new.last_show = now(); end if; return new;
 end;
