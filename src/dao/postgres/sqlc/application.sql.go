@@ -12,7 +12,7 @@ import (
 
 const createApplication = `-- name: CreateApplication :exec
 insert into application (account1_id, account2_id, apply_msg)
-values (?, ?, ?)
+values ($1, $2, $3)
 `
 
 type CreateApplicationParams struct {
@@ -29,8 +29,8 @@ func (q *Queries) CreateApplication(ctx context.Context, arg *CreateApplicationP
 const deleteApplication = `-- name: DeleteApplication :exec
 delete
 from application
-where account1_id = ?
-  and account2_id = ?
+where account1_id = $1
+  and account2_id = $2
 `
 
 type DeleteApplicationParams struct {
@@ -87,9 +87,9 @@ func (q *Queries) GetApplications(ctx context.Context, arg *GetApplicationsParam
 
 const updateApplication = `-- name: UpdateApplication :exec
 update application
-set status = ? and refuse_msg = ?
-where account1_id = ?
-  and account2_id = ?
+set status = $1 and refuse_msg = $2
+where account1_id = $3
+  and account2_id = $4
 `
 
 type UpdateApplicationParams struct {

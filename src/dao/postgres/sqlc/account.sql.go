@@ -11,7 +11,7 @@ import (
 
 const createAccount = `-- name: CreateAccount :one
 insert into account (id, user_id, name, avatar)
-values (?, ?, ?, ?)
+values ($1, $2, $3, $4)
 returning id, user_id, name, avatar, gender, signature, create_at
 `
 
@@ -45,7 +45,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg *CreateAccountParams) (
 const deleteAccount = `-- name: DeleteAccount :exec
 delete
 from account
-where id = ?
+where id = $1
 `
 
 func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
@@ -53,10 +53,25 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 	return err
 }
 
+const existsAccountByID = `-- name: ExistsAccountByID :one
+select exists(
+               select 1
+               from account
+               where id = $1
+           )
+`
+
+func (q *Queries) ExistsAccountByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, existsAccountByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getAccountByID = `-- name: GetAccountByID :one
 select id, user_id, name, avatar, gender, signature, create_at
 from account
-where id = ?
+where id = $1
 limit 1
 `
 
@@ -78,7 +93,7 @@ func (q *Queries) GetAccountByID(ctx context.Context, id int64) (*Account, error
 const getAccountsByUserID = `-- name: GetAccountsByUserID :many
 select id, name, avatar
 from account
-where user_id = ?
+where user_id = $1
 `
 
 type GetAccountsByUserIDRow struct {
@@ -109,11 +124,11 @@ func (q *Queries) GetAccountsByUserID(ctx context.Context, userID int64) ([]*Get
 
 const updateAccount = `-- name: UpdateAccount :one
 update account
-set name      = ?,
-    avatar    = ?,
-    gender    = ?,
-    signature = ?
-where id = ?
+set name      = $1,
+    avatar    = $2,
+    gender    = $3,
+    signature = $4
+where id = $5
 returning id, user_id, name, avatar, gender, signature, create_at
 `
 

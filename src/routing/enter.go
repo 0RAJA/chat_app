@@ -1,4 +1,4 @@
-package v1
+package routing
 
 type group struct {
 	User  user

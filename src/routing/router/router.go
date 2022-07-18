@@ -5,6 +5,7 @@ import (
 	_ "github.com/0RAJA/chat_app/docs"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
+	"github.com/0RAJA/chat_app/src/routing"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -12,7 +13,7 @@ import (
 
 func NewRouter() *gin.Engine {
 	r := gin.New()
-	r.Use(mid.Cors(), mid.GinLogger(), mid.Recovery(true), mid.LogBody())
+	r.Use(mid.Cors(), mid.GinLogger(), mid.Recovery(true), mid.LogBody(), mid.Auth())
 	root := r.Group("api")
 	{
 		root.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -21,6 +22,9 @@ func NewRouter() *gin.Engine {
 			global.Logger.Info("ping", mid.ErrLogMsg(c)...)
 			rly.Reply(nil, "pang")
 		})
+		rg := routing.Group
+		rg.User.Init(root)
+		rg.Email.Init(root)
 	}
 	return r
 }

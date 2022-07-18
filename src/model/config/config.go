@@ -27,8 +27,8 @@ type Private struct {
 
 type Token struct {
 	Key                  string        `yaml:"key"`
-	AssessTokenDuration  time.Duration `yaml:"AssessTokenDuration"`
-	RefreshTokenDuration time.Duration `yaml:"RefreshTokenDuration"`
+	UserTokenDuration    time.Duration `yaml:"UserTokenDuration"`
+	AccountTokenDuration time.Duration `yaml:"AccountTokenDuration"`
 	AuthorizationKey     string        `yaml:"AuthorizationKey"`
 	AuthorizationType    string        `yaml:"AuthorizationType"`
 }
