@@ -1,8 +1,9 @@
 package v1
 
 type group struct {
-	User        user
-	Email       email
+	User  user
+	Email email
+	File file
 	Account     account
 	Application application
 }
