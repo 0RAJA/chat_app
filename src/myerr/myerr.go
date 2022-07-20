@@ -14,4 +14,5 @@ var (
 	AuthNotExist         = errcode.NewErr(2007, "身份不存在")
 	AuthenticationFailed = errcode.NewErr(2008, "身份验证失败")
 	AccountNotFound      = errcode.NewErr(2009, "账号不存在")
+	OSSFiledStore        = errcode.NewErr(2010, "存储文件失败")
 )
