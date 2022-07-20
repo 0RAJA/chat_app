@@ -23,11 +23,11 @@ type AliyunOSS struct{}
 // UploadFile 上传文件
 // 返回 访问地址，文件key，error
 func (*AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error) {
-	bucket, err := NewBucket()
-	if err != nil {
-		global.Logger.Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
-		return "", "", errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
-	}
+	//bucket, err := NewBucket()
+	//if err != nil {
+	//	global.Logger.Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
+	//	return "", "", errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
+	//}
 
 	// 读取本地文件。
 	f, openError := file.Open()
@@ -40,12 +40,12 @@ func (*AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error)
 	// yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
 	yunFileTmpPath := BasePath + time.Now().Format("2006-01-02 15:04:05.999999999") + "/" + file.Filename
 
-	// 上传文件流。
-	err = bucket.PutObject(yunFileTmpPath, f)
-	if err != nil {
-		global.Logger.Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
-		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
-	}
+	//上传文件流。
+	//err = bucket.PutObject(yunFileTmpPath, f)
+	//if err != nil {
+	//	global.Logger.Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
+	//	return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
+	//}
 
 	return BucketUrl + "/" + yunFileTmpPath, yunFileTmpPath, nil
 }
