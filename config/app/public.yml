@@ -5,9 +5,10 @@ Server: # 服务配置
   WriteTimeout: 5s
   DefaultContextTimeout: 30s #默认超时时间
 App: # App配置文件
-  Name: chat
-  Version: 1.0.0
-  StartTime: 2022-07-11
+  Name: chat  # App名称
+  Version: 1.0.0 # 版本号
+  StartTime: "2002-07-11" # 启动时间
+  MachineID: 0 # 机器ID
 Log: # 日志配置文件
   Level: debug
   LogSavePath: "storage/applogs/" # 日志保存路径
@@ -31,6 +32,7 @@ Rule: # 规则配置
   CodeLength: 6 # 验证码长度
   UserMarkDuration: 60s # 用户发送验证码间隔时间
   CodeMarkDuration: 1h # 验证码有效时间
+  AccountNumMax: 5 # 用户账号最大数量
 Auto: # 自动任务配置
   Retry:
     Duration: 5s # 重试间隔时间

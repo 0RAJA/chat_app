@@ -26,6 +26,7 @@ func NewRouter() *gin.Engine {
 		rg.User.Init(root)
 		rg.Email.Init(root)
 		rg.File.Init(root)
+		rg.Account.Init(root)
 	}
 	return r
 }

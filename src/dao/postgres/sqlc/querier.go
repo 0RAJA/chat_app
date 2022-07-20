@@ -10,7 +10,8 @@ import (
 )
 
 type Querier interface {
-	CreateAccount(ctx context.Context, arg *CreateAccountParams) (*Account, error)
+	CountAccountByUserID(ctx context.Context, userID int64) (int32, error)
+	CreateAccount(ctx context.Context, arg *CreateAccountParams) error
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) error
@@ -27,8 +28,10 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
+	ExistsAccountByNameAndUserID(ctx context.Context, arg *ExistsAccountByNameAndUserIDParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, id int64) (*Account, error)
+	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*Application, error)
@@ -39,7 +42,7 @@ type Querier interface {
 	GetRelationSetting(ctx context.Context, arg *GetRelationSettingParams) (*RelationSetting, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
-	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) (*Account, error)
+	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*GroupNotify, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error

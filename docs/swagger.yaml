@@ -20,10 +20,86 @@ definitions:
         description: token
         type: string
     type: object
+  reply.AccountInfo:
+    properties:
+      account_id:
+        description: 账号ID
+        type: integer
+      avatar:
+        description: 头像
+        type: string
+      name:
+        description: 名称
+        type: string
+    type: object
+  reply.CreateAccount:
+    properties:
+      account_Token:
+        $ref: '#/definitions/common.Token'
+        description: 账号Token
+      avatar:
+        description: 头像
+        type: string
+      id:
+        description: 账号ID
+        type: integer
+      name:
+        description: 名称
+        type: string
+    type: object
   reply.ExistEmail:
     properties:
       exist:
         type: boolean
+    type: object
+  reply.GetAccountByID:
+    properties:
+      avatar:
+        description: 头像
+        type: string
+      create_at:
+        description: 创建时间
+        type: string
+      gender:
+        description: 性别
+        type: string
+      id:
+        description: 账号ID
+        type: integer
+      name:
+        description: 名称
+        type: string
+      signature:
+        description: 个性签名
+        type: string
+    type: object
+  reply.GetAccountToken:
+    properties:
+      account_token:
+        $ref: '#/definitions/common.Token'
+        description: 账号Token
+    type: object
+  reply.GetAccountsByName:
+    properties:
+      list:
+        description: 账号列表
+        items:
+          $ref: '#/definitions/reply.AccountInfo'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  reply.GetAccountsByUserID:
+    properties:
+      list:
+        description: 账号列表
+        items:
+          $ref: '#/definitions/reply.AccountInfo'
+        type: array
+      total:
+        description: 总数
+        type: integer
     type: object
   reply.Login:
     properties:
@@ -55,12 +131,39 @@ definitions:
         description: user id
         type: integer
     type: object
+  request.CreateAccount:
+    properties:
+      avatar:
+        description: 头像
+        maxLength: 100
+        minLength: 1
+        type: string
+      name:
+        description: 名称
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - avatar
+    - name
+    type: object
+  request.DeleteAccount:
+    properties:
+      account_id:
+        description: 账号ID
+        minimum: 1
+        type: integer
+    required:
+    - account_id
+    type: object
   request.Login:
     properties:
       email:
+        description: 邮箱
         maxLength: 50
         type: string
       password:
+        description: 密码
         maxLength: 50
         minLength: 6
         type: string
@@ -71,13 +174,16 @@ definitions:
   request.Register:
     properties:
       code:
+        description: 验证码
         maxLength: 6
         minLength: 6
         type: string
       email:
+        description: 邮箱
         maxLength: 50
         type: string
       password:
+        description: 密码
         maxLength: 50
         minLength: 6
         type: string
@@ -89,18 +195,51 @@ definitions:
   request.SendEmail:
     properties:
       email:
+        description: 邮箱
         maxLength: 50
         type: string
     required:
     - email
     type: object
+  request.UpdateAccount:
+    properties:
+      avatar:
+        description: 头像
+        maxLength: 100
+        minLength: 1
+        type: string
+      gender:
+        description: 性别
+        enum:
+        - 男
+        - 女
+        - 未知
+        type: string
+      name:
+        description: 名称
+        maxLength: 20
+        minLength: 1
+        type: string
+      signature:
+        description: 个性签名
+        maxLength: 200
+        minLength: 1
+        type: string
+    required:
+    - avatar
+    - gender
+    - name
+    - signature
+    type: object
   request.UpdateUserEmail:
     properties:
       code:
+        description: 验证码
         maxLength: 6
         minLength: 6
         type: string
       email:
+        description: 邮箱
         maxLength: 50
         type: string
     required:
@@ -109,17 +248,19 @@ definitions:
     type: object
   request.UpdateUserPassword:
     properties:
-      new_password:
-        maxLength: 50
+      code:
+        description: 验证码
+        maxLength: 6
         minLength: 6
         type: string
-      old_password:
+      new_password:
+        description: 新密码
         maxLength: 50
         minLength: 6
         type: string
     required:
+    - code
     - new_password
-    - old_password
     type: object
 host: chat.humraja.xyz
 info:
@@ -130,12 +271,214 @@ info:
   title: chat
   version: "1.0"
 paths:
+  /api/account/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 创建账号信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2008:身份验证失败 2012:账号数量超过限制 2011:账号名已经存在
+            2007:身份不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.CreateAccount'
+              type: object
+      summary: 创建账号
+      tags:
+      - account
+  /api/account/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 删除账户
+      tags:
+      - account
+  /api/account/info:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 账号ID
+        in: query
+        minimum: 1
+        name: accountID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2009:权限不足 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetAccountByID'
+              type: object
+      summary: 获取账户信息
+      tags:
+      - account
+  /api/account/infos/name:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索名称
+        in: query
+        maxLength: 20
+        minLength: 1
+        name: name
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetAccountsByName'
+              type: object
+      summary: 通过昵称查找账户
+      tags:
+      - account
+  /api/account/infos/user:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1003:系统错误 2008:身份验证失败 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetAccountsByUserID'
+              type: object
+      summary: 获取用户的所有账户
+      tags:
+      - account
+  /api/account/token:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号ID
+        in: query
+        minimum: 1
+        name: accountID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误  1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetAccountToken'
+              type: object
+      summary: 获取账号令牌
+      tags:
+      - account
+  /api/account/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 更新账户信息
+      tags:
+      - account
   /api/email/exist:
     get:
       consumes:
       - application/json
       parameters:
-      - in: query
+      - description: 邮箱
+        in: query
         maxLength: 50
         name: email
         required: true
@@ -144,7 +487,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 是否存在该email
+          description: 1001:参数有误 1003:系统错误
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -170,7 +513,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 发送情况
+          description: 1001:参数有误 1003:系统错误 2006:邮箱已经注册 2003:邮件发送频繁，请稍后再试
           schema:
             $ref: '#/definitions/common.State'
       summary: 发送邮件
@@ -190,7 +533,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 1001:参数有误 1003:系统错误 2001:用户不存在 2007:身份不存在 2008:身份验证失败
           schema:
             $ref: '#/definitions/common.State'
       security:
@@ -213,7 +556,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 登陆后user_token和用户信息
+          description: 1001:参数有误 1003:系统错误 2001:用户不存在
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -239,7 +582,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 注册后user_token和用户信息
+          description: '1001:参数有误 1003:系统错误 2004:邮箱验证码校验失败 2006:邮箱已经注册 '
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -270,7 +613,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 1001:参数有误 1003:系统错误 2001:用户不存在 2004:邮箱验证码校验失败 2005:邮箱相同 2006:邮箱已经注册
+            2007:身份不存在 2008:身份验证失败
           schema:
             $ref: '#/definitions/common.State'
       security:
@@ -298,7 +642,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 1001:参数有误 1003:系统错误 2001:用户不存在 2004:邮箱验证码校验失败 2007:身份不存在 2008:身份验证失败
           schema:
             $ref: '#/definitions/common.State'
       security:

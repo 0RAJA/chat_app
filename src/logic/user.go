@@ -143,14 +143,15 @@ func (user) UpdateUserEmail(c *gin.Context, userID int64, newEmail, code string)
 	return nil
 }
 
-func (user) UpdateUserPassword(c *gin.Context, userID int64, oldPwd, newPwd string) errcode.Err {
+func (user) UpdateUserPassword(c *gin.Context, userID int64, code, newPwd string) errcode.Err {
 	// 检查旧密码是否匹配
 	userInfo, merr := getUserInfoByID(c, userID)
 	if merr != nil {
 		return merr
 	}
-	if err := encode.CheckPassword(oldPwd, userInfo.Password); err != nil {
-		return myerr.PasswordNotValid
+	// 校验验证码
+	if !global.EmailMark.CheckCode(userInfo.Email, code) {
+		return myerr.EmailCodeNotValid
 	}
 	hashPassword, err := encode.HashPassword(newPwd)
 	if err != nil {

@@ -79,6 +79,7 @@ type Rule struct {
 	UserMarkDuration time.Duration `yaml:"UserMarkDuration"`
 	CodeMarkDuration time.Duration `yaml:"CodeMarkDuration"`
 	CodeLength       int           `yaml:"CodeLength"`
+	AccountNumMax    int32         `yaml:"AccountNumMax"`
 }
 
 type Server struct {
@@ -112,6 +113,7 @@ type App struct {
 	Name      string `yaml:"Name"`
 	Version   string `yaml:"Version"`
 	StartTime string `yaml:"StartTime"`
+	MachineID int64  `yaml:"MachineID"`
 }
 
 type Limit struct {
