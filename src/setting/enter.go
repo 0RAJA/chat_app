@@ -9,6 +9,7 @@ type group struct {
 	Config    config
 	EmailMark emailMark
 	Load      load
+	GenID     genID
 }
 
 var Group = new(group)
@@ -21,5 +22,6 @@ func AllInit() {
 	Group.Page.Init()
 	Group.Worker.Init()
 	Group.EmailMark.Init()
+	Group.GenID.Init()
 	Group.Load.Init()
 }

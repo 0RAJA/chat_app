@@ -19,6 +19,333 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/account/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "创建账号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "创建账号信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2008:身份验证失败 2012:账号数量超过限制 2011:账号名已经存在 2007:身份不存在",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.CreateAccount"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/delete": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "删除账户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "账号ID",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DeleteAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/info": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "获取账户信息",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "账号ID",
+                        "name": "accountID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2009:权限不足 2010:账号不存在",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetAccountByID"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/infos/name": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "通过昵称查找账户",
+                "parameters": [
+                    {
+                        "maxLength": 20,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "搜索名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "第几页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetAccountsByName"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/infos/user": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "获取用户的所有账户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1003:系统错误 2008:身份验证失败 2010:账号不存在",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetAccountsByUserID"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/token": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "获取账号令牌",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "账号ID",
+                        "name": "accountID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误  1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetAccountToken"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/update": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "更新账户信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "账号信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
         "/api/email/exist": {
             "get": {
                 "consumes": [
@@ -35,6 +362,7 @@ const docTemplate = `{
                     {
                         "maxLength": 50,
                         "type": "string",
+                        "description": "邮箱",
                         "name": "email",
                         "in": "query",
                         "required": true
@@ -42,7 +370,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "是否存在该email",
+                        "description": "1001:参数有误 1003:系统错误",
                         "schema": {
                             "allOf": [
                                 {
@@ -87,7 +415,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "发送情况",
+                        "description": "1001:参数有误 1003:系统错误 2006:邮箱已经注册 2003:邮件发送频繁，请稍后再试",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -123,7 +451,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "1001:参数有误 1003:系统错误 2001:用户不存在 2007:身份不存在 2008:身份验证失败",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -156,7 +484,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "登陆后user_token和用户信息",
+                        "description": "1001:参数有误 1003:系统错误 2001:用户不存在",
                         "schema": {
                             "allOf": [
                                 {
@@ -201,7 +529,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "注册后user_token和用户信息",
+                        "description": "1001:参数有误 1003:系统错误 2004:邮箱验证码校验失败 2006:邮箱已经注册 ",
                         "schema": {
                             "allOf": [
                                 {
@@ -258,7 +586,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "1001:参数有误 1003:系统错误 2001:用户不存在 2004:邮箱验证码校验失败 2005:邮箱相同 2006:邮箱已经注册 2007:身份不存在 2008:身份验证失败",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -303,7 +631,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "1001:参数有误 1003:系统错误 2001:用户不存在 2004:邮箱验证码校验失败 2007:身份不存在 2008:身份验证失败",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -342,11 +670,119 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.AccountInfo": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "description": "账号ID",
+                    "type": "integer"
+                },
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string"
+                }
+            }
+        },
+        "reply.CreateAccount": {
+            "type": "object",
+            "properties": {
+                "account_Token": {
+                    "description": "账号Token",
+                    "$ref": "#/definitions/common.Token"
+                },
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "账号ID",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string"
+                }
+            }
+        },
         "reply.ExistEmail": {
             "type": "object",
             "properties": {
                 "exist": {
                     "type": "boolean"
+                }
+            }
+        },
+        "reply.GetAccountByID": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "性别",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "账号ID",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string"
+                },
+                "signature": {
+                    "description": "个性签名",
+                    "type": "string"
+                }
+            }
+        },
+        "reply.GetAccountToken": {
+            "type": "object",
+            "properties": {
+                "account_token": {
+                    "description": "账号Token",
+                    "$ref": "#/definitions/common.Token"
+                }
+            }
+        },
+        "reply.GetAccountsByName": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "description": "账号列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/reply.AccountInfo"
+                    }
+                },
+                "total": {
+                    "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.GetAccountsByUserID": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "description": "账号列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/reply.AccountInfo"
+                    }
+                },
+                "total": {
+                    "description": "总数",
+                    "type": "integer"
                 }
             }
         },
@@ -393,6 +829,40 @@ const docTemplate = `{
                 }
             }
         },
+        "request.CreateAccount": {
+            "type": "object",
+            "required": [
+                "avatar",
+                "name"
+            ],
+            "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                }
+            }
+        },
+        "request.DeleteAccount": {
+            "type": "object",
+            "required": [
+                "account_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "description": "账号ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "request.Login": {
             "type": "object",
             "required": [
@@ -401,10 +871,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
+                    "description": "邮箱",
                     "type": "string",
                     "maxLength": 50
                 },
                 "password": {
+                    "description": "密码",
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 6
@@ -420,15 +892,18 @@ const docTemplate = `{
             ],
             "properties": {
                 "code": {
+                    "description": "验证码",
                     "type": "string",
                     "maxLength": 6,
                     "minLength": 6
                 },
                 "email": {
+                    "description": "邮箱",
                     "type": "string",
                     "maxLength": 50
                 },
                 "password": {
+                    "description": "密码",
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 6
@@ -442,8 +917,47 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
+                    "description": "邮箱",
                     "type": "string",
                     "maxLength": 50
+                }
+            }
+        },
+        "request.UpdateAccount": {
+            "type": "object",
+            "required": [
+                "avatar",
+                "gender",
+                "name",
+                "signature"
+            ],
+            "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1
+                },
+                "gender": {
+                    "description": "性别",
+                    "type": "string",
+                    "enum": [
+                        "男",
+                        "女",
+                        "未知"
+                    ]
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                },
+                "signature": {
+                    "description": "个性签名",
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
                 }
             }
         },
@@ -455,11 +969,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "code": {
+                    "description": "验证码",
                     "type": "string",
                     "maxLength": 6,
                     "minLength": 6
                 },
                 "email": {
+                    "description": "邮箱",
                     "type": "string",
                     "maxLength": 50
                 }
@@ -468,16 +984,18 @@ const docTemplate = `{
         "request.UpdateUserPassword": {
             "type": "object",
             "required": [
-                "new_password",
-                "old_password"
+                "code",
+                "new_password"
             ],
             "properties": {
-                "new_password": {
+                "code": {
+                    "description": "验证码",
                     "type": "string",
-                    "maxLength": 50,
+                    "maxLength": 6,
                     "minLength": 6
                 },
-                "old_password": {
+                "new_password": {
+                    "description": "新密码",
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 6

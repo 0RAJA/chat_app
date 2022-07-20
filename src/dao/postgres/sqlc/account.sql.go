@@ -9,10 +9,22 @@ import (
 	"context"
 )
 
-const createAccount = `-- name: CreateAccount :one
+const countAccountByUserID = `-- name: CountAccountByUserID :one
+select count(id)::int
+from account
+where user_id = $1
+`
+
+func (q *Queries) CountAccountByUserID(ctx context.Context, userID int64) (int32, error) {
+	row := q.db.QueryRow(ctx, countAccountByUserID, userID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const createAccount = `-- name: CreateAccount :exec
 insert into account (id, user_id, name, avatar)
 values ($1, $2, $3, $4)
-returning id, user_id, name, avatar, gender, signature, create_at
 `
 
 type CreateAccountParams struct {
@@ -22,24 +34,14 @@ type CreateAccountParams struct {
 	Avatar string `json:"avatar"`
 }
 
-func (q *Queries) CreateAccount(ctx context.Context, arg *CreateAccountParams) (*Account, error) {
-	row := q.db.QueryRow(ctx, createAccount,
+func (q *Queries) CreateAccount(ctx context.Context, arg *CreateAccountParams) error {
+	_, err := q.db.Exec(ctx, createAccount,
 		arg.ID,
 		arg.UserID,
 		arg.Name,
 		arg.Avatar,
 	)
-	var i Account
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Name,
-		&i.Avatar,
-		&i.Gender,
-		&i.Signature,
-		&i.CreateAt,
-	)
-	return &i, err
+	return err
 }
 
 const deleteAccount = `-- name: DeleteAccount :exec
@@ -68,6 +70,27 @@ func (q *Queries) ExistsAccountByID(ctx context.Context, id int64) (bool, error)
 	return exists, err
 }
 
+const existsAccountByNameAndUserID = `-- name: ExistsAccountByNameAndUserID :one
+select exists(
+               select 1
+               from account
+               where user_id = $1
+                 and name = $2
+           )
+`
+
+type ExistsAccountByNameAndUserIDParams struct {
+	UserID int64  `json:"user_id"`
+	Name   string `json:"name"`
+}
+
+func (q *Queries) ExistsAccountByNameAndUserID(ctx context.Context, arg *ExistsAccountByNameAndUserIDParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsAccountByNameAndUserID, arg.UserID, arg.Name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getAccountByID = `-- name: GetAccountByID :one
 select id, user_id, name, avatar, gender, signature, create_at
 from account
@@ -88,6 +111,51 @@ func (q *Queries) GetAccountByID(ctx context.Context, id int64) (*Account, error
 		&i.CreateAt,
 	)
 	return &i, err
+}
+
+const getAccountsByName = `-- name: GetAccountsByName :many
+select id, name, avatar, count(*) over () as total
+from account
+where name = $1
+limit $2 offset $3
+`
+
+type GetAccountsByNameParams struct {
+	Name   string `json:"name"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+}
+
+type GetAccountsByNameRow struct {
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+	Total  int64  `json:"total"`
+}
+
+func (q *Queries) GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error) {
+	rows, err := q.db.Query(ctx, getAccountsByName, arg.Name, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetAccountsByNameRow{}
+	for rows.Next() {
+		var i GetAccountsByNameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Avatar,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAccountsByUserID = `-- name: GetAccountsByUserID :many
@@ -122,14 +190,13 @@ func (q *Queries) GetAccountsByUserID(ctx context.Context, userID int64) ([]*Get
 	return items, nil
 }
 
-const updateAccount = `-- name: UpdateAccount :one
+const updateAccount = `-- name: UpdateAccount :exec
 update account
 set name      = $1,
     avatar    = $2,
     gender    = $3,
     signature = $4
 where id = $5
-returning id, user_id, name, avatar, gender, signature, create_at
 `
 
 type UpdateAccountParams struct {
@@ -140,23 +207,13 @@ type UpdateAccountParams struct {
 	ID        int64  `json:"id"`
 }
 
-func (q *Queries) UpdateAccount(ctx context.Context, arg *UpdateAccountParams) (*Account, error) {
-	row := q.db.QueryRow(ctx, updateAccount,
+func (q *Queries) UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error {
+	_, err := q.db.Exec(ctx, updateAccount,
 		arg.Name,
 		arg.Avatar,
 		arg.Gender,
 		arg.Signature,
 		arg.ID,
 	)
-	var i Account
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Name,
-		&i.Avatar,
-		&i.Gender,
-		&i.Signature,
-		&i.CreateAt,
-	)
-	return &i, err
+	return err
 }
