@@ -20,7 +20,7 @@ type user struct {
 // @accept   application/json
 // @Produce  application/json
 // @Param    data  body      request.Register                   true  "用户注册信息"
-// @Success  200   {object}  common.State{data=reply.Register}  "注册后user_token和用户信息"
+// @Success  200   {object}  common.State{data=reply.Register}  "1001:参数有误 1003:系统错误 2004:邮箱验证码校验失败 2006:邮箱已经注册 "
 // @Router   /api/user/register [post]
 func (user) Register(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -39,7 +39,7 @@ func (user) Register(c *gin.Context) {
 // @accept   application/json
 // @Produce  application/json
 // @Param    data  body      request.Login                   true  "用户登陆信息"
-// @Success  200   {object}  common.State{data=reply.Login}  "登陆后user_token和用户信息"
+// @Success  200   {object}  common.State{data=reply.Login}  "1001:参数有误 1003:系统错误 2001:用户不存在"
 // @Router   /api/user/login [post]
 func (user) Login(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -60,7 +60,7 @@ func (user) Login(c *gin.Context) {
 // @Produce   application/json
 // @Param     Authorization  header    string                   true  "Bearer 用户令牌"
 // @Param     data           body      request.UpdateUserEmail  true  "新邮箱和验证码"
-// @Success   200            {object}  common.State{}
+// @Success   200            {object}  common.State{}`          "1001:参数有误 1003:系统错误 2001:用户不存在 2004:邮箱验证码校验失败 2005:邮箱相同 2006:邮箱已经注册 2007:身份不存在 2008:身份验证失败"
 // @Router    /api/user/update/email [put]
 func (user) UpdateUserEmail(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -86,7 +86,7 @@ func (user) UpdateUserEmail(c *gin.Context) {
 // @Produce   application/json
 // @Param     Authorization  header    string                      true  "Bearer 用户令牌"
 // @Param     data           body      request.UpdateUserPassword  true  "旧密码和新密码"
-// @Success   200            {object}  common.State{}
+// @Success   200            {object}  common.State{}              "1001:参数有误 1003:系统错误 2001:用户不存在 2004:邮箱验证码校验失败 2007:身份不存在 2008:身份验证失败"
 // @Router    /api/user/update/pwd [put]
 func (user) UpdateUserPassword(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -100,7 +100,7 @@ func (user) UpdateUserPassword(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	err := logic.Group.User.UpdateUserPassword(c, content.ID, params.OldPassword, params.NewPassword)
+	err := logic.Group.User.UpdateUserPassword(c, content.ID, params.Code, params.NewPassword)
 	rly.Reply(err)
 }
 
@@ -110,8 +110,8 @@ func (user) UpdateUserPassword(c *gin.Context) {
 // @Security  BasicAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     Authorization  header    string  true  "Bearer 用户令牌"
-// @Success   200            {object}  common.State{}
+// @Param     Authorization  header    string          true  "Bearer 用户令牌"
+// @Success   200            {object}  common.State{}  "1001:参数有误 1003:系统错误 2001:用户不存在 2007:身份不存在 2008:身份验证失败"
 // @Router    /api/user/delete [delete]
 func (user) DeleteUser(c *gin.Context) {
 	rly := app.NewResponse(c)

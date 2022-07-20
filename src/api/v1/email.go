@@ -17,7 +17,7 @@ type email struct {
 // @accept   application/json
 // @Produce  application/json
 // @Param    data  query     request.ExistEmail                   true  "email"
-// @Success  200   {object}  common.State{data=reply.ExistEmail}  "是否存在该email"
+// @Success  200   {object}  common.State{data=reply.ExistEmail}  "1001:参数有误 1003:系统错误"
 // @Router   /api/email/exist [get]
 func (email) ExistEmail(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -36,7 +36,7 @@ func (email) ExistEmail(c *gin.Context) {
 // @accept   application/json
 // @Produce  application/json
 // @Param    data  body      request.SendEmail  true  "email"
-// @Success  200   {object}  common.State{}     "发送情况"
+// @Success  200   {object}  common.State{}     "1001:参数有误 1003:系统错误 2006:邮箱已经注册 2003:邮件发送频繁，请稍后再试"
 // @Router   /api/email/send [post]
 func (email) SendEmail(c *gin.Context) {
 	rly := app.NewResponse(c)

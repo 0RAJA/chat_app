@@ -18,7 +18,7 @@ func (user) Init(router *gin.RouterGroup) {
 		{
 			updateGroup.PUT("email", v1.Group.User.UpdateUserEmail)
 			updateGroup.PUT("pwd", v1.Group.User.UpdateUserPassword)
+			updateGroup.DELETE("delete", mid.MustUser(), v1.Group.User.DeleteUser)
 		}
-		ug.DELETE("delete", mid.MustUser(), v1.Group.User.DeleteUser)
 	}
 }

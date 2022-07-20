@@ -84,7 +84,7 @@ func MustAccount() gin.HandlerFunc {
 			return
 		}
 		data := val.(*model.Content)
-		if data.Type != model.UserToken {
+		if data.Type != model.AccountToken {
 			rly.Reply(myerr.AuthenticationFailed)
 			c.Abort()
 			return

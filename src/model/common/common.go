@@ -19,7 +19,8 @@ type State struct {
 
 // List 列表
 type List struct {
-	List interface{} `json:"list"`
+	List  interface{} `json:"list"`  // 数据
+	Total int         `json:"total"` // 总数
 }
 
 // Token token
