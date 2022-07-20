@@ -17,13 +17,13 @@ values ($1, $2, $3, $4, $5, $6, $7) returning id, file_name, file_type, file_siz
 `
 
 type CreateFileParams struct {
-	FileName   string        `json:"file_name"`
-	FileType   Filetype      `json:"file_type"`
-	FileSize   int64         `json:"file_size"`
-	Key        string        `json:"key"`
-	Url        string        `json:"url"`
-	RelationID sql.NullInt64 `json:"relation_id"`
-	AccountID  sql.NullInt64 `json:"account_id"`
+	FileName   string `json:"file_name"`
+	FileType   string `json:"file_type"`
+	FileSize   int64  `json:"file_size"`
+	Key        string `json:"key"`
+	Url        string `json:"url"`
+	RelationID string `json:"relation_id"`
+	AccountID  string `json:"account_id"`
 }
 
 func (q *Queries) CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error) {
