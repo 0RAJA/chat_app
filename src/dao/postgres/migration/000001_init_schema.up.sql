@@ -85,11 +85,11 @@ create table application
 (
     account1_id bigint            not null references account (id) on delete cascade on update cascade, -- 申请者账号id
     account2_id bigint            not null references account (id) on delete cascade on update cascade, -- 被申请者账号id
-    apply_msg   text,                                                                                   -- 申请信息
-    refuse_msg  text,                                                                                   -- 拒绝信息
+    apply_msg   text              not null,                                                             -- 申请信息
+    refuse_msg  text              not null,                                                             -- 拒绝信息
     status      ApplicationStatus not null default '已申请',                                               -- 申请状态
-    create_at   timestamptz                default now(),                                               -- 创建时间
-    update_at   timestamptz                default now(),                                               -- 更新时间
+    create_at   timestamptz       not null default now(),                                               -- 创建时间
+    update_at   timestamptz       not null default now(),                                               -- 更新时间
     constraint f_a_pk primary key (account1_id, account2_id)
 );
 

@@ -11,9 +11,9 @@ import (
 type email struct {
 }
 
-// ExistEmail 是否已经存在该email
+// ExistEmail
 // @Tags     email
-// @Summary  是否已经存在该email
+// @Summary  是否已经注册过该email
 // @accept   application/json
 // @Produce  application/json
 // @Param    data  query     request.ExistEmail                   true  "email"

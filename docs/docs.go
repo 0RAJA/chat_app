@@ -128,7 +128,7 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "description": "账号ID",
-                        "name": "accountID",
+                        "name": "account_id",
                         "in": "query",
                         "required": true
                     }
@@ -279,7 +279,7 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "description": "账号ID",
-                        "name": "accountID",
+                        "name": "account_id",
                         "in": "query",
                         "required": true
                     }
@@ -346,6 +346,221 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/application/accept": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "application"
+                ],
+                "summary": "被申请者同意好友申请",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "需要同意的申请",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AcceptApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/application/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "application"
+                ],
+                "summary": "创建好友申请",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "申请信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/application/delete": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "application"
+                ],
+                "summary": "申请者删除好友申请",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "需要删除的申请",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DeleteApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 3002:申请不存在 3003:申请不合法",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/application/list": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "application"
+                ],
+                "summary": "账户查看和自身相关的好友申请(不论是申请者还是被申请者)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "第几页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1003:系统错误 2007:身份不存在 2008:身份验证失败",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.ListApplications"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/application/refuse": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "application"
+                ],
+                "summary": "被申请者拒绝好友申请",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "需要拒绝的申请",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AcceptApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
         "/api/email/exist": {
             "get": {
                 "consumes": [
@@ -357,7 +572,7 @@ const docTemplate = `{
                 "tags": [
                     "email"
                 ],
-                "summary": "是否已经存在该email",
+                "summary": "是否已经注册过该email",
                 "parameters": [
                     {
                         "maxLength": 50,
@@ -687,6 +902,55 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.ApplicationInfo": {
+            "type": "object",
+            "properties": {
+                "account1_avatar": {
+                    "description": "申请者头像",
+                    "type": "string"
+                },
+                "account1_id": {
+                    "description": "申请者账号ID",
+                    "type": "integer"
+                },
+                "account1_name": {
+                    "description": "申请者名称",
+                    "type": "string"
+                },
+                "account2_avatar": {
+                    "description": "目标账号头像",
+                    "type": "string"
+                },
+                "account2_id": {
+                    "description": "目标账号ID",
+                    "type": "integer"
+                },
+                "account2_name": {
+                    "description": "目标账号名称",
+                    "type": "string"
+                },
+                "apply_msg": {
+                    "description": "申请信息",
+                    "type": "string"
+                },
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "refuse_msg": {
+                    "description": "拒绝信息",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "状态 [已申请,已拒绝,已同意]",
+                    "type": "string"
+                },
+                "update_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
         "reply.CreateAccount": {
             "type": "object",
             "properties": {
@@ -712,6 +976,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "exist": {
+                    "description": "是否已经存在",
                     "type": "boolean"
                 }
             }
@@ -786,6 +1051,20 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.ListApplications": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/reply.ApplicationInfo"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "reply.Login": {
             "type": "object",
             "properties": {
@@ -829,6 +1108,19 @@ const docTemplate = `{
                 }
             }
         },
+        "request.AcceptApplication": {
+            "type": "object",
+            "required": [
+                "account_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "description": "目标账号ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "request.CreateAccount": {
             "type": "object",
             "required": [
@@ -850,6 +1142,25 @@ const docTemplate = `{
                 }
             }
         },
+        "request.CreateApplication": {
+            "type": "object",
+            "required": [
+                "account_id",
+                "apply_msg"
+            ],
+            "properties": {
+                "account_id": {
+                    "description": "目标账号ID",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "apply_msg": {
+                    "description": "申请信息",
+                    "type": "string",
+                    "maxLength": 200
+                }
+            }
+        },
         "request.DeleteAccount": {
             "type": "object",
             "required": [
@@ -858,6 +1169,19 @@ const docTemplate = `{
             "properties": {
                 "account_id": {
                     "description": "账号ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "request.DeleteApplication": {
+            "type": "object",
+            "required": [
+                "account_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "description": "目标账号ID",
                     "type": "integer",
                     "minimum": 1
                 }

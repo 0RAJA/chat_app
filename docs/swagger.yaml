@@ -32,6 +32,42 @@ definitions:
         description: 名称
         type: string
     type: object
+  reply.ApplicationInfo:
+    properties:
+      account1_avatar:
+        description: 申请者头像
+        type: string
+      account1_id:
+        description: 申请者账号ID
+        type: integer
+      account1_name:
+        description: 申请者名称
+        type: string
+      account2_avatar:
+        description: 目标账号头像
+        type: string
+      account2_id:
+        description: 目标账号ID
+        type: integer
+      account2_name:
+        description: 目标账号名称
+        type: string
+      apply_msg:
+        description: 申请信息
+        type: string
+      create_at:
+        description: 创建时间
+        type: string
+      refuse_msg:
+        description: 拒绝信息
+        type: string
+      status:
+        description: 状态 [已申请,已拒绝,已同意]
+        type: string
+      update_at:
+        description: 更新时间
+        type: string
+    type: object
   reply.CreateAccount:
     properties:
       account_Token:
@@ -50,6 +86,7 @@ definitions:
   reply.ExistEmail:
     properties:
       exist:
+        description: 是否已经存在
         type: boolean
     type: object
   reply.GetAccountByID:
@@ -101,6 +138,15 @@ definitions:
         description: 总数
         type: integer
     type: object
+  reply.ListApplications:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/reply.ApplicationInfo'
+        type: array
+      total:
+        type: integer
+    type: object
   reply.Login:
     properties:
       user_info:
@@ -131,6 +177,15 @@ definitions:
         description: user id
         type: integer
     type: object
+  request.AcceptApplication:
+    properties:
+      account_id:
+        description: 目标账号ID
+        minimum: 1
+        type: integer
+    required:
+    - account_id
+    type: object
   request.CreateAccount:
     properties:
       avatar:
@@ -147,10 +202,33 @@ definitions:
     - avatar
     - name
     type: object
+  request.CreateApplication:
+    properties:
+      account_id:
+        description: 目标账号ID
+        minimum: 1
+        type: integer
+      apply_msg:
+        description: 申请信息
+        maxLength: 200
+        type: string
+    required:
+    - account_id
+    - apply_msg
+    type: object
   request.DeleteAccount:
     properties:
       account_id:
         description: 账号ID
+        minimum: 1
+        type: integer
+    required:
+    - account_id
+    type: object
+  request.DeleteApplication:
+    properties:
+      account_id:
+        description: 目标账号ID
         minimum: 1
         type: integer
     required:
@@ -337,7 +415,7 @@ paths:
       - description: 账号ID
         in: query
         minimum: 1
-        name: accountID
+        name: account_id
         required: true
         type: integer
       produces:
@@ -428,7 +506,7 @@ paths:
       - description: 账号ID
         in: query
         minimum: 1
-        name: accountID
+        name: account_id
         required: true
         type: integer
       produces:
@@ -472,6 +550,144 @@ paths:
       summary: 更新账户信息
       tags:
       - account
+  /api/application/accept:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 需要同意的申请
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AcceptApplication'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 被申请者同意好友申请
+      tags:
+      - application
+  /api/application/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 申请信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateApplication'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 创建好友申请
+      tags:
+      - application
+  /api/application/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 需要删除的申请
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteApplication'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 3002:申请不存在
+            3003:申请不合法
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 申请者删除好友申请
+      tags:
+      - application
+  /api/application/list:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1003:系统错误 2007:身份不存在 2008:身份验证失败
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.ListApplications'
+              type: object
+      summary: 账户查看和自身相关的好友申请(不论是申请者还是被申请者)
+      tags:
+      - application
+  /api/application/refuse:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 需要拒绝的申请
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AcceptApplication'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 被申请者拒绝好友申请
+      tags:
+      - application
   /api/email/exist:
     get:
       consumes:
@@ -495,7 +711,7 @@ paths:
                 data:
                   $ref: '#/definitions/reply.ExistEmail'
               type: object
-      summary: 是否已经存在该email
+      summary: 是否已经注册过该email
       tags:
       - email
   /api/email/send:
