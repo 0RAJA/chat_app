@@ -141,11 +141,11 @@ type Account struct {
 type Application struct {
 	Account1ID int64             `json:"account1_id"`
 	Account2ID int64             `json:"account2_id"`
-	ApplyMsg   sql.NullString    `json:"apply_msg"`
-	RefuseMsg  sql.NullString    `json:"refuse_msg"`
+	ApplyMsg   string            `json:"apply_msg"`
+	RefuseMsg  string            `json:"refuse_msg"`
 	Status     Applicationstatus `json:"status"`
-	CreateAt   sql.NullTime      `json:"create_at"`
-	UpdateAt   sql.NullTime      `json:"update_at"`
+	CreateAt   time.Time         `json:"create_at"`
+	UpdateAt   time.Time         `json:"update_at"`
 }
 
 type File struct {

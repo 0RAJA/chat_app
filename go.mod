@@ -5,7 +5,7 @@ go 1.17
 require github.com/swaggo/swag v1.8.3
 
 require (
-	github.com/0RAJA/Rutils v1.3.8
+	github.com/0RAJA/Rutils v1.3.9
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/jackc/pgconn v1.12.1

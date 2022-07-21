@@ -10,7 +10,7 @@ type CreateAccount struct {
 }
 
 type GetAccountToken struct {
-	AccountID int64 `form:"account_id" binding:"required,gte=1"` // 账号ID
+	AccountID int64 `json:"account_id" form:"account_id" binding:"required,gte=1"` // 账号ID
 }
 
 type DeleteAccount struct {
@@ -25,10 +25,10 @@ type UpdateAccount struct {
 }
 
 type GetAccountByID struct {
-	AccountID int64 `form:"account_id" binding:"required,gte=1"` // 账号ID
+	AccountID int64 `json:"account_id" form:"account_id" binding:"required,gte=1"` // 账号ID
 }
 
 type GetAccountsByName struct {
-	Name string `form:"name" binding:"required,gte=1,lte=20"` // 搜索名称
+	Name string `json:"name" form:"name" binding:"required,gte=1,lte=20"` // 搜索名称
 	common.Pager
 }
