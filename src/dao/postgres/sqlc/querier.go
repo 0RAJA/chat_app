@@ -17,18 +17,20 @@ type Querier interface {
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) error
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
-	CreateRelationSetting(ctx context.Context, arg *CreateRelationSettingParams) (*RelationSetting, error)
+	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
 	DeleteApplication(ctx context.Context, arg *DeleteApplicationParams) error
 	DeleteFileByID(ctx context.Context, id int64) error
 	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteRelation(ctx context.Context, id int64) error
-	DeleteRelationSetting(ctx context.Context, arg *DeleteRelationSettingParams) error
+	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
 	ExistsAccountByNameAndUserID(ctx context.Context, arg *ExistsAccountByNameAndUserIDParams) (bool, error)
+	ExistsApplicationByID(ctx context.Context, arg *ExistsApplicationByIDParams) (bool, error)
+	ExistsApplicationByIDWithLock(ctx context.Context, arg *ExistsApplicationByIDWithLockParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, id int64) (*Account, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
@@ -38,15 +40,20 @@ type Querier interface {
 	GetFileByID(ctx context.Context, id int64) (*File, error)
 	GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error)
 	GetGroupNotifyByID(ctx context.Context, id int64) (*GroupNotify, error)
+	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
+	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
-	GetRelationSetting(ctx context.Context, arg *GetRelationSettingParams) (*RelationSetting, error)
+	GetSettingByID(ctx context.Context, arg *GetSettingByIDParams) (*Setting, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*GroupNotify, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
-	UpdateRelationSetting(ctx context.Context, arg *UpdateRelationSettingParams) (*RelationSetting, error)
+	UpdateSettingDisturb(ctx context.Context, arg *UpdateSettingDisturbParams) error
+	UpdateSettingLeader(ctx context.Context, arg *UpdateSettingLeaderParams) error
+	UpdateSettingNickName(ctx context.Context, arg *UpdateSettingNickNameParams) error
+	UpdateSettingPin(ctx context.Context, arg *UpdateSettingPinParams) error
 	UpdateUser(ctx context.Context, arg *UpdateUserParams) error
 }
 

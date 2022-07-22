@@ -7,6 +7,7 @@ require github.com/swaggo/swag v1.8.3
 require (
 	github.com/0RAJA/Rutils v1.3.2
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
+	github.com/0RAJA/Rutils v1.3.9
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/jackc/pgconn v1.12.1

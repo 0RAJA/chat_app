@@ -18,4 +18,8 @@ var (
 	AccountNameExists           = errcode.NewErr(2011, "账号名已经存在")
 	AccountNumExcessive         = errcode.NewErr(2012, "账号数量超过限制")
 	OSSFiledStore        = errcode.NewErr(2013, "存储文件失败")
+	ApplicationExists           = errcode.NewErr(3001, "申请已经存在")
+	ApplicationNotExists        = errcode.NewErr(3002, "申请不存在")
+	ApplicationNotValid         = errcode.NewErr(3003, "申请不合法")
+	ApplicationRepeatOpt        = errcode.NewErr(3004, "重复操作申请")
 )

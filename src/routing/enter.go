@@ -5,6 +5,7 @@ type group struct {
 	Email   email
 	Account account
 	File   file
+	Application application
 }
 
 var Group = new(group)

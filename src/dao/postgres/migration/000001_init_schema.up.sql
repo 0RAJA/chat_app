@@ -65,7 +65,7 @@ create table relation
 );
 
 -- 账号对群组或好友关系的设置
-create table relation_setting
+create table setting
 (
     account_id     bigint       not null references account (id) on delete cascade on update cascade,  -- 账号id
     relation_id    bigint       not null references relation (id) on delete cascade on update cascade, -- 关系id
@@ -78,18 +78,18 @@ create table relation_setting
     is_leader      boolean      not null default false                                                 -- 是否群主 仅仅对群组有效
 );
 -- 昵称索引
-create index relation_setting_nickname on relation_setting (nick_name);
+create index relation_setting_nickname on setting (nick_name);
 
 -- 好友申请
 create table application
 (
     account1_id bigint            not null references account (id) on delete cascade on update cascade, -- 申请者账号id
     account2_id bigint            not null references account (id) on delete cascade on update cascade, -- 被申请者账号id
-    apply_msg   text,                                                                                   -- 申请信息
-    refuse_msg  text,                                                                                   -- 拒绝信息
+    apply_msg   text              not null,                                                             -- 申请信息
+    refuse_msg  text              not null,                                                             -- 拒绝信息
     status      ApplicationStatus not null default '已申请',                                               -- 申请状态
-    create_at   timestamptz                default now(),                                               -- 创建时间
-    update_at   timestamptz                default now(),                                               -- 更新时间
+    create_at   timestamptz       not null default now(),                                               -- 创建时间
+    update_at   timestamptz       not null default now(),                                               -- 更新时间
     constraint f_a_pk primary key (account1_id, account2_id)
 );
 
@@ -175,7 +175,7 @@ $$ language plpgsql;
 -- 更新关系设置pin时间戳触发器
 create trigger pin_timestamp_trigger
     after update of is_pin
-    on relation_setting
+    on setting
     for each row
 execute procedure pin_timestamp();
 
@@ -214,6 +214,6 @@ $$ language plpgsql;
 -- 更新关系设置show时间戳触发器
 create trigger show_timestamp_trigger
     after update of is_show
-    on relation_setting
+    on setting
     for each row
 execute procedure show_timestamp();

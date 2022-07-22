@@ -7,18 +7,18 @@ package db
 
 import (
 	"context"
-	"database/sql"
+	"time"
 )
 
 const createApplication = `-- name: CreateApplication :exec
-insert into application (account1_id, account2_id, apply_msg)
-values ($1, $2, $3)
+insert into application (account1_id, account2_id, apply_msg, refuse_msg)
+values ($1, $2, $3, '')
 `
 
 type CreateApplicationParams struct {
-	Account1ID int64          `json:"account1_id"`
-	Account2ID int64          `json:"account2_id"`
-	ApplyMsg   sql.NullString `json:"apply_msg"`
+	Account1ID int64  `json:"account1_id"`
+	Account2ID int64  `json:"account2_id"`
+	ApplyMsg   string `json:"apply_msg"`
 }
 
 func (q *Queries) CreateApplication(ctx context.Context, arg *CreateApplicationParams) error {
@@ -43,29 +43,123 @@ func (q *Queries) DeleteApplication(ctx context.Context, arg *DeleteApplicationP
 	return err
 }
 
-const getApplications = `-- name: GetApplications :many
+const existsApplicationByID = `-- name: ExistsApplicationByID :one
+select exists(
+               select 1
+               from application
+               where (account1_id = $1 and account2_id = $2)
+                  or (account1_id = $2 and account2_id = $1))
+`
+
+type ExistsApplicationByIDParams struct {
+	Account1ID int64 `json:"account1_id"`
+	Account2ID int64 `json:"account2_id"`
+}
+
+func (q *Queries) ExistsApplicationByID(ctx context.Context, arg *ExistsApplicationByIDParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsApplicationByID, arg.Account1ID, arg.Account2ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const existsApplicationByIDWithLock = `-- name: ExistsApplicationByIDWithLock :one
+select exists(
+               select 1
+               from application
+               where (account1_id = $1 and account2_id = $2)
+                  or (account1_id = $2 and account2_id = $1)
+                   for update)
+`
+
+type ExistsApplicationByIDWithLockParams struct {
+	Account1ID int64 `json:"account1_id"`
+	Account2ID int64 `json:"account2_id"`
+}
+
+func (q *Queries) ExistsApplicationByIDWithLock(ctx context.Context, arg *ExistsApplicationByIDWithLockParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsApplicationByIDWithLock, arg.Account1ID, arg.Account2ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const getApplicationByID = `-- name: GetApplicationByID :one
 select account1_id, account2_id, apply_msg, refuse_msg, status, create_at, update_at
 from application
 where account1_id = $1
-   or account2_id = $1
-limit $2 offset $3
+  and account2_id = $2
+limit 1
+`
+
+type GetApplicationByIDParams struct {
+	Account1ID int64 `json:"account1_id"`
+	Account2ID int64 `json:"account2_id"`
+}
+
+func (q *Queries) GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error) {
+	row := q.db.QueryRow(ctx, getApplicationByID, arg.Account1ID, arg.Account2ID)
+	var i Application
+	err := row.Scan(
+		&i.Account1ID,
+		&i.Account2ID,
+		&i.ApplyMsg,
+		&i.RefuseMsg,
+		&i.Status,
+		&i.CreateAt,
+		&i.UpdateAt,
+	)
+	return &i, err
+}
+
+const getApplications = `-- name: GetApplications :many
+select app.account1_id, app.account2_id, app.apply_msg, app.refuse_msg, app.status, app.create_at, app.update_at, app.total,
+       a1.avatar as account1_avatar,
+       a1.name   as account1_name,
+       a2.avatar as account2_avatar,
+       a2.name   as account2_name
+from account a1,
+     account a2,
+     (select account1_id, account2_id, apply_msg, refuse_msg, status, create_at, update_at, count(*) over () as total
+      from application
+      where account1_id = $3
+         or account2_id = $3
+      order by create_at desc
+      limit $1 offset $2) as app
+where a1.id = app.account1_id
+  and a2.id = app.account2_id
 `
 
 type GetApplicationsParams struct {
-	Account1ID int64 `json:"account1_id"`
-	Limit      int32 `json:"limit"`
-	Offset     int32 `json:"offset"`
+	Limit     int32 `json:"limit"`
+	Offset    int32 `json:"offset"`
+	AccountID int64 `json:"account_id"`
 }
 
-func (q *Queries) GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*Application, error) {
-	rows, err := q.db.Query(ctx, getApplications, arg.Account1ID, arg.Limit, arg.Offset)
+type GetApplicationsRow struct {
+	Account1ID     int64             `json:"account1_id"`
+	Account2ID     int64             `json:"account2_id"`
+	ApplyMsg       string            `json:"apply_msg"`
+	RefuseMsg      string            `json:"refuse_msg"`
+	Status         Applicationstatus `json:"status"`
+	CreateAt       time.Time         `json:"create_at"`
+	UpdateAt       time.Time         `json:"update_at"`
+	Total          int64             `json:"total"`
+	Account1Avatar string            `json:"account1_avatar"`
+	Account1Name   string            `json:"account1_name"`
+	Account2Avatar string            `json:"account2_avatar"`
+	Account2Name   string            `json:"account2_name"`
+}
+
+func (q *Queries) GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error) {
+	rows, err := q.db.Query(ctx, getApplications, arg.Limit, arg.Offset, arg.AccountID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []*Application{}
+	items := []*GetApplicationsRow{}
 	for rows.Next() {
-		var i Application
+		var i GetApplicationsRow
 		if err := rows.Scan(
 			&i.Account1ID,
 			&i.Account2ID,
@@ -74,6 +168,11 @@ func (q *Queries) GetApplications(ctx context.Context, arg *GetApplicationsParam
 			&i.Status,
 			&i.CreateAt,
 			&i.UpdateAt,
+			&i.Total,
+			&i.Account1Avatar,
+			&i.Account1Name,
+			&i.Account2Avatar,
+			&i.Account2Name,
 		); err != nil {
 			return nil, err
 		}
@@ -87,14 +186,15 @@ func (q *Queries) GetApplications(ctx context.Context, arg *GetApplicationsParam
 
 const updateApplication = `-- name: UpdateApplication :exec
 update application
-set status = $1 and refuse_msg = $2
+set status     = $1,
+    refuse_msg = $2
 where account1_id = $3
   and account2_id = $4
 `
 
 type UpdateApplicationParams struct {
 	Status     Applicationstatus `json:"status"`
-	RefuseMsg  sql.NullString    `json:"refuse_msg"`
+	RefuseMsg  string            `json:"refuse_msg"`
 	Account1ID int64             `json:"account1_id"`
 	Account2ID int64             `json:"account2_id"`
 }
