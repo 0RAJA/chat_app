@@ -65,7 +65,7 @@ create table relation
 );
 
 -- 账号对群组或好友关系的设置
-create table relation_setting
+create table setting
 (
     account_id     bigint       not null references account (id) on delete cascade on update cascade,  -- 账号id
     relation_id    bigint       not null references relation (id) on delete cascade on update cascade, -- 关系id
@@ -78,7 +78,7 @@ create table relation_setting
     is_leader      boolean      not null default false                                                 -- 是否群主 仅仅对群组有效
 );
 -- 昵称索引
-create index relation_setting_nickname on relation_setting (nick_name);
+create index relation_setting_nickname on setting (nick_name);
 
 -- 好友申请
 create table application
@@ -175,7 +175,7 @@ $$ language plpgsql;
 -- 更新关系设置pin时间戳触发器
 create trigger pin_timestamp_trigger
     after update of is_pin
-    on relation_setting
+    on setting
     for each row
 execute procedure pin_timestamp();
 
@@ -214,6 +214,6 @@ $$ language plpgsql;
 -- 更新关系设置show时间戳触发器
 create trigger show_timestamp_trigger
     after update of is_show
-    on relation_setting
+    on setting
     for each row
 execute procedure show_timestamp();

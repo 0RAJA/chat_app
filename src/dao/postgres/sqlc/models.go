@@ -198,7 +198,7 @@ type Relation struct {
 	CreateAt     sql.NullTime   `json:"create_at"`
 }
 
-type RelationSetting struct {
+type Setting struct {
 	AccountID    int64     `json:"account_id"`
 	RelationID   int64     `json:"relation_id"`
 	NickName     string    `json:"nick_name"`
