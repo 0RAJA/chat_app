@@ -14,10 +14,12 @@ type Querier interface {
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) error
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
+	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
 	DeleteApplication(ctx context.Context, arg *DeleteApplicationParams) error
 	DeleteRelation(ctx context.Context, id int64) error
+	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
@@ -32,11 +34,16 @@ type Querier interface {
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
+	GetSettingByID(ctx context.Context, arg *GetSettingByIDParams) (*Setting, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
+	UpdateSettingDisturb(ctx context.Context, arg *UpdateSettingDisturbParams) error
+	UpdateSettingLeader(ctx context.Context, arg *UpdateSettingLeaderParams) error
+	UpdateSettingNickName(ctx context.Context, arg *UpdateSettingNickNameParams) error
+	UpdateSettingPin(ctx context.Context, arg *UpdateSettingPinParams) error
 	UpdateUser(ctx context.Context, arg *UpdateUserParams) error
 }
 
