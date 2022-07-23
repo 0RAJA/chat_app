@@ -14,7 +14,16 @@ type Store interface {
 }
 
 type TXer interface {
+	// CreateApplicationTx 先判断是否存在申请，不存在则创建申请
 	CreateApplicationTx(c context.Context, arg *CreateApplicationParams) error
+	// AcceptApplicationTx account1接受account2申请并建立好友关系和双方的关系设置
+	AcceptApplicationTx(c context.Context, account1, account2 *Account) error
+	// CreateAccountTx 创建账户并建立和自己的关系
+	CreateAccountTx(c context.Context, arg *CreateAccountParams) error
+	// DeleteAccountWithTx 删除账户并删除与之相关的好友关系
+	DeleteAccountWithTx(c context.Context, accountID int64) error
+	// DeleteUserTx 删除用户和他的所有账户并删除与之相关的好友关系
+	DeleteUserTx(c context.Context, userID int64) error
 }
 
 type SqlStore struct {

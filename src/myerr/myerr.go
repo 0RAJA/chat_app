@@ -22,4 +22,5 @@ var (
 	ApplicationNotExists        = errcode.NewErr(3002, "申请不存在")
 	ApplicationNotValid         = errcode.NewErr(3003, "申请不合法")
 	ApplicationRepeatOpt        = errcode.NewErr(3004, "重复操作申请")
+	RelationExists              = errcode.NewErr(4001, "关系已经存在")
 )

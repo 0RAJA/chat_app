@@ -29,11 +29,22 @@ func getApplication(c *gin.Context, account1ID, account2ID int64) (*db.Applicati
 }
 
 func (application) Create(c *gin.Context, account1ID, account2ID int64, applyMsg string) errcode.Err {
-	// TODO:检查两个账户是否已经有了联系
+	// 不能自己对自己发送申请
 	if account1ID == account2ID {
 		return myerr.ApplicationNotValid
 	}
-	err := dao.Group.DB.CreateApplicationTx(c, &db.CreateApplicationParams{Account1ID: account1ID, Account2ID: account2ID, ApplyMsg: applyMsg})
+	// 判断是否已经存在好友关系
+	id1, id2 := sortID(account1ID, account2ID)
+	exist, err := dao.Group.DB.ExistsFriendRelation(c, &db.ExistsFriendRelationParams{Account1ID: id1, Account2ID: id2})
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return errcode.ErrServer
+	}
+	if exist {
+		return myerr.RelationExists
+	}
+	// 创建申请
+	err = dao.Group.DB.CreateApplicationTx(c, &db.CreateApplicationParams{Account1ID: account1ID, Account2ID: account2ID, ApplyMsg: applyMsg})
 	switch err {
 	case nil:
 		return nil
@@ -60,6 +71,7 @@ func (application) Delete(c *gin.Context, account1ID, account2ID int64) errcode.
 	return nil
 }
 
+// Accept account1ID是被申请者，account2ID是申请者
 func (application) Accept(c *gin.Context, account1ID, account2ID int64) errcode.Err {
 	aply, merr := getApplication(c, account2ID, account1ID)
 	if merr != nil {
@@ -68,15 +80,18 @@ func (application) Accept(c *gin.Context, account1ID, account2ID int64) errcode.
 	if aply.Status == db.ApplicationstatusValue1 {
 		return myerr.ApplicationRepeatOpt
 	}
-	if err := dao.Group.DB.UpdateApplication(c, &db.UpdateApplicationParams{
-		Account1ID: account2ID,
-		Account2ID: account1ID,
-		Status:     db.ApplicationstatusValue1,
-	}); err != nil {
+	account1Info, merr := getAccountInfoByID(c, account1ID)
+	if merr != nil {
+		return merr
+	}
+	account2Info, merr := getAccountInfoByID(c, account2ID)
+	if merr != nil {
+		return merr
+	}
+	if err := dao.Group.DB.AcceptApplicationTx(c, account1Info, account2Info); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO: 创建聊天联系
 	return nil
 }
 

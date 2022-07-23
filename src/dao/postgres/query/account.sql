@@ -51,3 +51,9 @@ select exists(
 select count(id)::int
 from account
 where user_id = $1;
+
+-- name: DeleteAccountsByUserID :many
+delete
+from account
+where user_id = $1
+returning id;

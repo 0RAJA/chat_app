@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createSetting = `-- name: CreateSetting :exec
@@ -46,6 +47,163 @@ type DeleteSettingParams struct {
 func (q *Queries) DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error {
 	_, err := q.db.Exec(ctx, deleteSetting, arg.AccountID, arg.RelationID)
 	return err
+}
+
+const existsFriendSetting = `-- name: ExistsFriendSetting :one
+select exists(
+               select 1
+               from setting s,
+                    relation r
+               where r.relation_type = 'friend'
+                 and ((r.friend_type).account1_id = $1::bigint and
+                      (r.friend_type).account2_id = $2::bigint)
+                 and s.account_id = $1
+           )
+`
+
+type ExistsFriendSettingParams struct {
+	Account1ID int64 `json:"account1_id"`
+	Account2ID int64 `json:"account2_id"`
+}
+
+func (q *Queries) ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsFriendSetting, arg.Account1ID, arg.Account2ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const getFriendPinSettingsOrderByPinTime = `-- name: GetFriendPinSettingsOrderByPinTime :many
+select relation_id,
+       account1_id,
+       account1_avatar,
+       account2_id,
+       account2_avatar,
+       nick_name,
+       pin_time
+from setting_friend_info s
+where account_id = $1
+  and is_pin = true
+order by pin_time
+`
+
+type GetFriendPinSettingsOrderByPinTimeRow struct {
+	RelationID     int64     `json:"relation_id"`
+	Account1ID     int64     `json:"account1_id"`
+	Account1Avatar string    `json:"account1_avatar"`
+	Account2ID     int64     `json:"account2_id"`
+	Account2Avatar string    `json:"account2_avatar"`
+	NickName       string    `json:"nick_name"`
+	PinTime        time.Time `json:"pin_time"`
+}
+
+func (q *Queries) GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error) {
+	rows, err := q.db.Query(ctx, getFriendPinSettingsOrderByPinTime, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetFriendPinSettingsOrderByPinTimeRow{}
+	for rows.Next() {
+		var i GetFriendPinSettingsOrderByPinTimeRow
+		if err := rows.Scan(
+			&i.RelationID,
+			&i.Account1ID,
+			&i.Account1Avatar,
+			&i.Account2ID,
+			&i.Account2Avatar,
+			&i.NickName,
+			&i.PinTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFriendSettingsOrderByName = `-- name: GetFriendSettingsOrderByName :many
+select s.account_id, s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.account1_id, s.account1_avatar, s.account2_id, s.account2_avatar
+from setting_friend_info s
+where account_id = $1
+order by nick_name
+`
+
+func (q *Queries) GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*SettingFriendInfo, error) {
+	rows, err := q.db.Query(ctx, getFriendSettingsOrderByName, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*SettingFriendInfo{}
+	for rows.Next() {
+		var i SettingFriendInfo
+		if err := rows.Scan(
+			&i.AccountID,
+			&i.RelationID,
+			&i.NickName,
+			&i.IsNotDisturb,
+			&i.IsPin,
+			&i.PinTime,
+			&i.IsShow,
+			&i.LastShow,
+			&i.Account1ID,
+			&i.Account1Avatar,
+			&i.Account2ID,
+			&i.Account2Avatar,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFriendShowSettingsOrderByShowTime = `-- name: GetFriendShowSettingsOrderByShowTime :many
+select s.account_id, s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.account1_id, s.account1_avatar, s.account2_id, s.account2_avatar
+from setting_friend_info s
+where account_id = $1
+  and is_show = true
+order by last_show desc
+`
+
+func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*SettingFriendInfo, error) {
+	rows, err := q.db.Query(ctx, getFriendShowSettingsOrderByShowTime, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*SettingFriendInfo{}
+	for rows.Next() {
+		var i SettingFriendInfo
+		if err := rows.Scan(
+			&i.AccountID,
+			&i.RelationID,
+			&i.NickName,
+			&i.IsNotDisturb,
+			&i.IsPin,
+			&i.PinTime,
+			&i.IsShow,
+			&i.LastShow,
+			&i.Account1ID,
+			&i.Account1Avatar,
+			&i.Account2ID,
+			&i.Account2Avatar,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getSettingByID = `-- name: GetSettingByID :one
