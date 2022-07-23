@@ -98,7 +98,7 @@ func (user) DeleteUser(c *gin.Context, userID int64) errcode.Err {
 	if err != nil {
 		return err
 	}
-	if err := dao.Group.DB.DeleteUser(c, userID); err != nil {
+	if err := dao.Group.DB.DeleteUserTx(c, userID); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}

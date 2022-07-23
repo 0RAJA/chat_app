@@ -55,6 +55,33 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 	return err
 }
 
+const deleteAccountsByUserID = `-- name: DeleteAccountsByUserID :many
+delete
+from account
+where user_id = $1
+returning id
+`
+
+func (q *Queries) DeleteAccountsByUserID(ctx context.Context, userID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, deleteAccountsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const existsAccountByID = `-- name: ExistsAccountByID :one
 select exists(
                select 1

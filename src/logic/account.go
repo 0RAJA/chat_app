@@ -47,8 +47,8 @@ func (account) CreateAccount(c *gin.Context, userID int64, name, avatar string) 
 		Name:   name,
 		Avatar: avatar,
 	}
-	// 创建账户
-	if err := dao.Group.DB.CreateAccount(c, arg); err != nil {
+	// 创建账户以及和自己的关系g
+	if err := dao.Group.DB.CreateAccountTx(c, arg); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return nil, errcode.ErrServer
 	}
@@ -111,7 +111,7 @@ func (account) DeleteAccount(c *gin.Context, userID, accountID int64) errcode.Er
 	if accountInfo.UserID != userID {
 		return myerr.AuthPermissionsInsufficient
 	}
-	if err := dao.Group.DB.DeleteAccount(c, accountID); err != nil {
+	if err := dao.Group.DB.DeleteAccountWithTx(c, accountID); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}

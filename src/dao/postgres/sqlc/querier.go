@@ -12,12 +12,15 @@ type Querier interface {
 	CountAccountByUserID(ctx context.Context, userID int64) (int32, error)
 	CreateAccount(ctx context.Context, arg *CreateAccountParams) error
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
-	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) error
+	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
+	DeleteAccountsByUserID(ctx context.Context, userID int64) ([]int64, error)
 	DeleteApplication(ctx context.Context, arg *DeleteApplicationParams) error
+	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error
+	DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
@@ -26,6 +29,8 @@ type Querier interface {
 	ExistsAccountByNameAndUserID(ctx context.Context, arg *ExistsAccountByNameAndUserIDParams) (bool, error)
 	ExistsApplicationByID(ctx context.Context, arg *ExistsApplicationByIDParams) (bool, error)
 	ExistsApplicationByIDWithLock(ctx context.Context, arg *ExistsApplicationByIDWithLockParams) (bool, error)
+	ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRelationParams) (bool, error)
+	ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, id int64) (*Account, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
@@ -33,6 +38,9 @@ type Querier interface {
 	GetAllEmails(ctx context.Context) ([]string, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
+	GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error)
+	GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*SettingFriendInfo, error)
+	GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*SettingFriendInfo, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
 	GetSettingByID(ctx context.Context, arg *GetSettingByIDParams) (*Setting, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)

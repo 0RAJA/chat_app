@@ -10,9 +10,10 @@ import (
 	"database/sql"
 )
 
-const createFriendRelation = `-- name: CreateFriendRelation :exec
+const createFriendRelation = `-- name: CreateFriendRelation :one
 insert into relation (relation_type, friend_type)
 values ('friend', ROW ($1::bigint, $2::bigint))
+returning id
 `
 
 type CreateFriendRelationParams struct {
@@ -20,9 +21,11 @@ type CreateFriendRelationParams struct {
 	Account2ID int64 `json:"account2_id"`
 }
 
-func (q *Queries) CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) error {
-	_, err := q.db.Exec(ctx, createFriendRelation, arg.Account1ID, arg.Account2ID)
-	return err
+func (q *Queries) CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createFriendRelation, arg.Account1ID, arg.Account2ID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createGroupRelation = `-- name: CreateGroupRelation :exec
@@ -41,6 +44,31 @@ func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelat
 	return err
 }
 
+const deleteFriendRelationsByAccountID = `-- name: DeleteFriendRelationsByAccountID :exec
+delete
+from relation
+where relation_type = 'friend'
+  and ((friend_type).account1_id = $1::bigint or (friend_type).account2_id = $1::bigint)
+`
+
+func (q *Queries) DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error {
+	_, err := q.db.Exec(ctx, deleteFriendRelationsByAccountID, accountID)
+	return err
+}
+
+const deleteFriendRelationsByAccountIDs = `-- name: DeleteFriendRelationsByAccountIDs :exec
+delete
+from relation
+where relation_type = 'friend'
+  and ((friend_type).account1_id = ANY ($1::bigint[])
+    or (friend_type).account2_id = ANY ($1::bigint[]))
+`
+
+func (q *Queries) DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error {
+	_, err := q.db.Exec(ctx, deleteFriendRelationsByAccountIDs, accountIds)
+	return err
+}
+
 const deleteRelation = `-- name: DeleteRelation :exec
 delete
 from relation
@@ -52,12 +80,32 @@ func (q *Queries) DeleteRelation(ctx context.Context, id int64) error {
 	return err
 }
 
+const existsFriendRelation = `-- name: ExistsFriendRelation :one
+select exists(select 1
+              from relation
+              where relation_type = 'friend'
+                and (friend_type).account1_id = $1::bigint
+                and (friend_type).account2_id = $2::bigint)
+`
+
+type ExistsFriendRelationParams struct {
+	Account1ID int64 `json:"account1_id"`
+	Account2ID int64 `json:"account2_id"`
+}
+
+func (q *Queries) ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRelationParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsFriendRelation, arg.Account1ID, arg.Account2ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getGroupRelationByID = `-- name: GetGroupRelationByID :one
 select id,
        relation_type,
-       (group_type).name        as name,
-       (group_type).description as description,
-       (group_type).avatar      as avatar,
+       (group_type).name::varchar        as name,
+       (group_type).description::varchar as description,
+       (group_type).avatar::varchar      as avatar,
        create_at
 from relation
 where relation_type = 'group'
@@ -67,9 +115,9 @@ where relation_type = 'group'
 type GetGroupRelationByIDRow struct {
 	ID           int64        `json:"id"`
 	RelationType Relationtype `json:"relation_type"`
-	Name         interface{}  `json:"name"`
-	Description  interface{}  `json:"description"`
-	Avatar       interface{}  `json:"avatar"`
+	Name         string       `json:"name"`
+	Description  string       `json:"description"`
+	Avatar       string       `json:"avatar"`
 	CreateAt     sql.NullTime `json:"create_at"`
 }
 
