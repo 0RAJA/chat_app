@@ -7,6 +7,8 @@ postgres_zr_init: # 初始化postgres数据库
 	docker run --name chat_postgres_zr --network chat_net -v chat_postgres_zr_data:/var/lib/postgresql/data -v 项目路径/config/postgres/my_postgres.conf:/etc/postgresql/postgresql.conf -p 5432:5432 -e ALLOW_IP_RANGE=0.0.0.0/0 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=123456 -e POSTGRES_DB=chat -d chenxinaz/zhparser -c 'config_file=/etc/postgresql/postgresql.conf'
 redis_init: # redis初始化
 	docker run --name chat_redis_62 --network chat_net --privileged=true -p 7963:7963 -v chat_redis_data:/redis/data -v 项目路径/config/redis:/etc/redis -d redis:6.2 redis-server /etc/redis/redis.conf
+sqlc_install:
+	go install github.com/kyleconroy/sqlc/cmd/sqlc@v1.13.0
 migrate_install: # 安装migrate
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.1
 migrate_init_db: # 初始化数据库

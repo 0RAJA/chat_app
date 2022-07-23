@@ -75,7 +75,8 @@ create table setting
     pin_time       timestamptz  not null default now(),                                                -- 置顶时间
     is_show        boolean      not null default true,                                                 -- 是否显示
     last_show      timestamptz  not null default now(),                                                -- 最后一次显示时间
-    is_leader      boolean      not null default false                                                 -- 是否群主 仅仅对群组有效
+    is_leader      boolean      not null default false,                                                -- 是否群主 仅仅对群组有效
+    is_self        boolean      not null default false                                                 -- 是否是自己对自己的关系 仅仅对好友有效
 );
 -- 昵称索引
 create index relation_setting_nickname on setting (nick_name);

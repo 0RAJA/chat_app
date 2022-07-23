@@ -208,21 +208,7 @@ type Setting struct {
 	IsShow       bool      `json:"is_show"`
 	LastShow     time.Time `json:"last_show"`
 	IsLeader     bool      `json:"is_leader"`
-}
-
-type SettingFriendInfo struct {
-	AccountID      int64     `json:"account_id"`
-	RelationID     int64     `json:"relation_id"`
-	NickName       string    `json:"nick_name"`
-	IsNotDisturb   bool      `json:"is_not_disturb"`
-	IsPin          bool      `json:"is_pin"`
-	PinTime        time.Time `json:"pin_time"`
-	IsShow         bool      `json:"is_show"`
-	LastShow       time.Time `json:"last_show"`
-	Account1ID     int64     `json:"account1_id"`
-	Account1Avatar string    `json:"account1_avatar"`
-	Account2ID     int64     `json:"account2_id"`
-	Account2Avatar string    `json:"account2_avatar"`
+	IsSelf       bool      `json:"is_self"`
 }
 
 type User struct {
