@@ -1,6 +1,6 @@
 -- 表
-drop table if exists relation_setting cascade;
-drop table if exists friend_application cascade;
+drop table if exists setting cascade;
+drop table if exists application cascade;
 drop table if exists message cascade;
 drop table if exists group_notify cascade;
 drop table if exists file cascade;

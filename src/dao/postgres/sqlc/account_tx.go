@@ -21,7 +21,7 @@ func (store *SqlStore) CreateAccountTx(c context.Context, arg *CreateAccountPara
 				AccountID:  arg.ID,
 				RelationID: relationID,
 				NickName:   arg.Name,
-				IsLeader:   false,
+				IsSelf:     true,
 			})
 		})
 		return err

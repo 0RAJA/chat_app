@@ -1,6 +1,6 @@
 -- name: CreateSetting :exec
-insert into setting (account_id, relation_id, nick_name, is_leader)
-values ($1, $2, $3, $4);
+insert into setting (account_id, relation_id, nick_name, is_leader, is_self)
+values ($1, $2, $3, $4, $5);
 
 -- name: DeleteSetting :exec
 delete
@@ -39,30 +39,56 @@ where account_id = $1
   and relation_id = $2;
 
 -- name: GetFriendPinSettingsOrderByPinTime :many
-select relation_id,
-       account1_id,
-       account1_avatar,
-       account2_id,
-       account2_avatar,
-       nick_name,
-       pin_time
-from setting_friend_info s
-where account_id = $1
-  and is_pin = true
-order by pin_time;
+select s.*,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select setting.relation_id, setting.nick_name, setting.pin_time
+      from setting
+      where setting.account_id = $1
+        and setting.is_pin = true) as s,
+     account a
+where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+order by s.pin_time;
 
 -- name: GetFriendShowSettingsOrderByShowTime :many
-select s.*
-from setting_friend_info s
-where account_id = $1
-  and is_show = true
-order by last_show desc;
+select s.*,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting
+      where setting.account_id = $1
+        and setting.is_show = true) as s,
+     account a
+where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+order by s.pin_time;
 
 -- name: GetFriendSettingsOrderByName :many
-select s.*
-from setting_friend_info s
-where account_id = $1
-order by nick_name;
+select s.*,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting
+      where setting.account_id = $1) as s,
+     account a
+where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+order by s.pin_time;
 
 -- name: ExistsFriendSetting :one
 select exists(

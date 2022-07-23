@@ -11,8 +11,8 @@ import (
 )
 
 const createSetting = `-- name: CreateSetting :exec
-insert into setting (account_id, relation_id, nick_name, is_leader)
-values ($1, $2, $3, $4)
+insert into setting (account_id, relation_id, nick_name, is_leader, is_self)
+values ($1, $2, $3, $4, $5)
 `
 
 type CreateSettingParams struct {
@@ -20,6 +20,7 @@ type CreateSettingParams struct {
 	RelationID int64  `json:"relation_id"`
 	NickName   string `json:"nick_name"`
 	IsLeader   bool   `json:"is_leader"`
+	IsSelf     bool   `json:"is_self"`
 }
 
 func (q *Queries) CreateSetting(ctx context.Context, arg *CreateSettingParams) error {
@@ -28,6 +29,7 @@ func (q *Queries) CreateSetting(ctx context.Context, arg *CreateSettingParams) e
 		arg.RelationID,
 		arg.NickName,
 		arg.IsLeader,
+		arg.IsSelf,
 	)
 	return err
 }
@@ -74,27 +76,26 @@ func (q *Queries) ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSett
 }
 
 const getFriendPinSettingsOrderByPinTime = `-- name: GetFriendPinSettingsOrderByPinTime :many
-select relation_id,
-       account1_id,
-       account1_avatar,
-       account2_id,
-       account2_avatar,
-       nick_name,
-       pin_time
-from setting_friend_info s
-where account_id = $1
-  and is_pin = true
-order by pin_time
+select s.relation_id, s.nick_name, s.pin_time,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select setting.relation_id, setting.nick_name, setting.pin_time
+      from setting
+      where setting.account_id = $1
+        and setting.is_pin = true) as s,
+     account a
+where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+order by s.pin_time
 `
 
 type GetFriendPinSettingsOrderByPinTimeRow struct {
-	RelationID     int64     `json:"relation_id"`
-	Account1ID     int64     `json:"account1_id"`
-	Account1Avatar string    `json:"account1_avatar"`
-	Account2ID     int64     `json:"account2_id"`
-	Account2Avatar string    `json:"account2_avatar"`
-	NickName       string    `json:"nick_name"`
-	PinTime        time.Time `json:"pin_time"`
+	RelationID    int64     `json:"relation_id"`
+	NickName      string    `json:"nick_name"`
+	PinTime       time.Time `json:"pin_time"`
+	AccountID     int64     `json:"account_id"`
+	AccountName   string    `json:"account_name"`
+	AccountAvatar string    `json:"account_avatar"`
 }
 
 func (q *Queries) GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error) {
@@ -108,12 +109,11 @@ func (q *Queries) GetFriendPinSettingsOrderByPinTime(ctx context.Context, accoun
 		var i GetFriendPinSettingsOrderByPinTimeRow
 		if err := rows.Scan(
 			&i.RelationID,
-			&i.Account1ID,
-			&i.Account1Avatar,
-			&i.Account2ID,
-			&i.Account2Avatar,
 			&i.NickName,
 			&i.PinTime,
+			&i.AccountID,
+			&i.AccountName,
+			&i.AccountAvatar,
 		); err != nil {
 			return nil, err
 		}
@@ -126,23 +126,49 @@ func (q *Queries) GetFriendPinSettingsOrderByPinTime(ctx context.Context, accoun
 }
 
 const getFriendSettingsOrderByName = `-- name: GetFriendSettingsOrderByName :many
-select s.account_id, s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.account1_id, s.account1_avatar, s.account2_id, s.account2_avatar
-from setting_friend_info s
-where account_id = $1
-order by nick_name
+select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting
+      where setting.account_id = $1) as s,
+     account a
+where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+order by s.pin_time
 `
 
-func (q *Queries) GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*SettingFriendInfo, error) {
+type GetFriendSettingsOrderByNameRow struct {
+	RelationID    int64     `json:"relation_id"`
+	NickName      string    `json:"nick_name"`
+	IsNotDisturb  bool      `json:"is_not_disturb"`
+	IsPin         bool      `json:"is_pin"`
+	PinTime       time.Time `json:"pin_time"`
+	IsShow        bool      `json:"is_show"`
+	LastShow      time.Time `json:"last_show"`
+	IsSelf        bool      `json:"is_self"`
+	AccountID     int64     `json:"account_id"`
+	AccountName   string    `json:"account_name"`
+	AccountAvatar string    `json:"account_avatar"`
+}
+
+func (q *Queries) GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*GetFriendSettingsOrderByNameRow, error) {
 	rows, err := q.db.Query(ctx, getFriendSettingsOrderByName, accountID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []*SettingFriendInfo{}
+	items := []*GetFriendSettingsOrderByNameRow{}
 	for rows.Next() {
-		var i SettingFriendInfo
+		var i GetFriendSettingsOrderByNameRow
 		if err := rows.Scan(
-			&i.AccountID,
 			&i.RelationID,
 			&i.NickName,
 			&i.IsNotDisturb,
@@ -150,10 +176,10 @@ func (q *Queries) GetFriendSettingsOrderByName(ctx context.Context, accountID in
 			&i.PinTime,
 			&i.IsShow,
 			&i.LastShow,
-			&i.Account1ID,
-			&i.Account1Avatar,
-			&i.Account2ID,
-			&i.Account2Avatar,
+			&i.IsSelf,
+			&i.AccountID,
+			&i.AccountName,
+			&i.AccountAvatar,
 		); err != nil {
 			return nil, err
 		}
@@ -166,24 +192,50 @@ func (q *Queries) GetFriendSettingsOrderByName(ctx context.Context, accountID in
 }
 
 const getFriendShowSettingsOrderByShowTime = `-- name: GetFriendShowSettingsOrderByShowTime :many
-select s.account_id, s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.account1_id, s.account1_avatar, s.account2_id, s.account2_avatar
-from setting_friend_info s
-where account_id = $1
-  and is_show = true
-order by last_show desc
+select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting
+      where setting.account_id = $1
+        and setting.is_show = true) as s,
+     account a
+where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+order by s.pin_time
 `
 
-func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*SettingFriendInfo, error) {
+type GetFriendShowSettingsOrderByShowTimeRow struct {
+	RelationID    int64     `json:"relation_id"`
+	NickName      string    `json:"nick_name"`
+	IsNotDisturb  bool      `json:"is_not_disturb"`
+	IsPin         bool      `json:"is_pin"`
+	PinTime       time.Time `json:"pin_time"`
+	IsShow        bool      `json:"is_show"`
+	LastShow      time.Time `json:"last_show"`
+	IsSelf        bool      `json:"is_self"`
+	AccountID     int64     `json:"account_id"`
+	AccountName   string    `json:"account_name"`
+	AccountAvatar string    `json:"account_avatar"`
+}
+
+func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetFriendShowSettingsOrderByShowTimeRow, error) {
 	rows, err := q.db.Query(ctx, getFriendShowSettingsOrderByShowTime, accountID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []*SettingFriendInfo{}
+	items := []*GetFriendShowSettingsOrderByShowTimeRow{}
 	for rows.Next() {
-		var i SettingFriendInfo
+		var i GetFriendShowSettingsOrderByShowTimeRow
 		if err := rows.Scan(
-			&i.AccountID,
 			&i.RelationID,
 			&i.NickName,
 			&i.IsNotDisturb,
@@ -191,10 +243,10 @@ func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, acco
 			&i.PinTime,
 			&i.IsShow,
 			&i.LastShow,
-			&i.Account1ID,
-			&i.Account1Avatar,
-			&i.Account2ID,
-			&i.Account2Avatar,
+			&i.IsSelf,
+			&i.AccountID,
+			&i.AccountName,
+			&i.AccountAvatar,
 		); err != nil {
 			return nil, err
 		}
@@ -207,7 +259,7 @@ func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, acco
 }
 
 const getSettingByID = `-- name: GetSettingByID :one
-select account_id, relation_id, nick_name, is_not_disturb, is_pin, pin_time, is_show, last_show, is_leader
+select account_id, relation_id, nick_name, is_not_disturb, is_pin, pin_time, is_show, last_show, is_leader, is_self
 from setting
 where account_id = $1
   and relation_id = $2
@@ -231,6 +283,7 @@ func (q *Queries) GetSettingByID(ctx context.Context, arg *GetSettingByIDParams)
 		&i.IsShow,
 		&i.LastShow,
 		&i.IsLeader,
+		&i.IsSelf,
 	)
 	return &i, err
 }
