@@ -20,7 +20,6 @@ func (store *SqlStore) CreateAccountTx(c context.Context, arg *CreateAccountPara
 			return queries.CreateSetting(c, &CreateSettingParams{
 				AccountID:  arg.ID,
 				RelationID: relationID,
-				NickName:   arg.Name,
 				IsSelf:     true,
 			})
 		})

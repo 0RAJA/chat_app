@@ -57,7 +57,7 @@ select a.*, r.id as relation_id, count(*) over () as total
 from (select id, name, avatar from account where name like (@name::varchar || '%')) as a
          left join relation r on (r.relation_type = 'friend' and
                                   (((r.friend_type).account1_id = a.id and
-                                    (r.friend_type).account2_id =@ account_id::bigint) or
+                                    (r.friend_type).account2_id = @account_id::bigint) or
                                    (r.friend_type).account2_id = a.id and
                                    (r.friend_type).account1_id = @account_id::bigint))
 limit $1 offset $2;

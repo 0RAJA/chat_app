@@ -52,6 +52,9 @@ create table account
     constraint account_unique_name unique (user_id, name)                                       -- 一个用户的不同账号名不能重复
 );
 
+-- 账户名和头像索引
+create index account_index_name_avatar on account (name, avatar);
+
 -- 群组或好友
 create table relation
 (
@@ -80,6 +83,7 @@ create table setting
 );
 -- 昵称索引
 create index relation_setting_nickname on setting (nick_name);
+create index setting_idx_account_id_relation_id on setting (account_id, relation_id);
 
 -- 好友申请
 create table application
@@ -175,14 +179,14 @@ $$ language plpgsql;
 
 -- 更新关系设置pin时间戳触发器
 create trigger pin_timestamp_trigger
-    after update of is_pin
+    before update of is_pin
     on setting
     for each row
 execute procedure pin_timestamp();
 
 -- 更新消息pin时间戳触发器
 create trigger pin_timestamp_trigger
-    after update of is_pin
+    before update of is_pin
     on message
     for each row
 execute procedure pin_timestamp();
@@ -214,7 +218,7 @@ $$ language plpgsql;
 
 -- 更新关系设置show时间戳触发器
 create trigger show_timestamp_trigger
-    after update of is_show
+    before update of is_show
     on setting
     for each row
 execute procedure show_timestamp();

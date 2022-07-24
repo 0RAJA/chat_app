@@ -12,22 +12,20 @@ import (
 
 const createSetting = `-- name: CreateSetting :exec
 insert into setting (account_id, relation_id, nick_name, is_leader, is_self)
-values ($1, $2, $3, $4, $5)
+values ($1, $2, '', $3, $4)
 `
 
 type CreateSettingParams struct {
-	AccountID  int64  `json:"account_id"`
-	RelationID int64  `json:"relation_id"`
-	NickName   string `json:"nick_name"`
-	IsLeader   bool   `json:"is_leader"`
-	IsSelf     bool   `json:"is_self"`
+	AccountID  int64 `json:"account_id"`
+	RelationID int64 `json:"relation_id"`
+	IsLeader   bool  `json:"is_leader"`
+	IsSelf     bool  `json:"is_self"`
 }
 
 func (q *Queries) CreateSetting(ctx context.Context, arg *CreateSettingParams) error {
 	_, err := q.db.Exec(ctx, createSetting,
 		arg.AccountID,
 		arg.RelationID,
-		arg.NickName,
 		arg.IsLeader,
 		arg.IsSelf,
 	)
@@ -88,7 +86,7 @@ from (select setting.relation_id, setting.nick_name, setting.pin_time
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time
 `
 
@@ -148,7 +146,7 @@ from (select relation_id,
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id
+where a.id = (select account_id
               from setting
               where relation_id = s.relation_id
                 and (account_id != $1 or is_self = true))
@@ -236,7 +234,7 @@ from (select relation_id,
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time
 `
 
@@ -306,7 +304,7 @@ from (select relation_id,
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time
 `
 
