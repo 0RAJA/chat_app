@@ -13,7 +13,6 @@ func (account) Init(router *gin.RouterGroup) {
 	ag := router.Group("account")
 	{
 		ag.GET("info", v1.Group.Account.GetAccountByID)
-		ag.GET("infos/name", v1.Group.Account.GetAccountsByName)
 		userGroup := ag.Group("").Use(mid.MustUser())
 		{
 			userGroup.POST("create", v1.Group.Account.CreateAccount)
@@ -24,6 +23,7 @@ func (account) Init(router *gin.RouterGroup) {
 		accountGroup := ag.Group("").Use(mid.MustAccount())
 		{
 			accountGroup.PUT("update", v1.Group.Account.UpdateAccount)
+			accountGroup.GET("infos/name", v1.Group.Account.GetAccountsByName)
 		}
 	}
 }

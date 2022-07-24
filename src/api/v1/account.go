@@ -155,11 +155,12 @@ func (account) GetAccountsByUserID(c *gin.Context) {
 
 // GetAccountsByName
 // @Tags     account
-// @Summary  通过昵称查找账户
+// @Summary  通过昵称模糊查找账户
 // @accept   application/json
 // @Produce  application/json
-// @Param    data  query     request.GetAccountsByName                   true  "账号信息"
-// @Success  200   {object}  common.State{data=reply.GetAccountsByName}  "1001:参数有误 1003:系统错误"
+// @Param    Authorization  header    string                                      true  "Bearer 账户令牌"
+// @Param    data           query     request.GetAccountsByName                   true  "账号信息"
+// @Success  200            {object}  common.State{data=reply.GetAccountsByName}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在"
 // @Router   /api/account/infos/name [get]
 func (account) GetAccountsByName(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -168,7 +169,12 @@ func (account) GetAccountsByName(c *gin.Context) {
 		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
 	limit, offset := global.Page.GetPageSizeAndOffset(c.Request)
-	result, err := logic.Group.Account.GetAccountsByName(c, params.Name, limit, offset)
+	result, err := logic.Group.Account.GetAccountsByName(c, content.ID, params.Name, limit, offset)
 	rly.ReplyList(err, result.Total, result.List)
 }

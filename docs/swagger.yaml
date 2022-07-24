@@ -20,6 +20,119 @@ definitions:
         description: token
         type: string
     type: object
+  model.Setting:
+    properties:
+      friend_info:
+        $ref: '#/definitions/model.SettingFriendInfo'
+        description: 好友信息
+      group_info:
+        $ref: '#/definitions/model.SettingGroupInfo'
+        description: 群组信息
+      is_not_disturb:
+        description: 是否免打扰
+        type: boolean
+      is_pin:
+        description: 是否pin
+        type: boolean
+      is_show:
+        description: 是否显示
+        type: boolean
+      last_show:
+        description: 最后显示时间
+        type: string
+      nick_name:
+        description: 昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      relation_id:
+        description: 关系ID
+        type: integer
+      relation_type:
+        description: 关系类型['group','friend']
+        type: string
+    type: object
+  model.SettingFriend:
+    properties:
+      friend_info:
+        $ref: '#/definitions/model.SettingFriendInfo'
+        description: 好友信息
+      is_not_disturb:
+        description: 是否免打扰
+        type: boolean
+      is_pin:
+        description: 是否pin
+        type: boolean
+      is_show:
+        description: 是否显示
+        type: boolean
+      last_show:
+        description: 最后显示时间
+        type: string
+      nick_name:
+        description: 昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      relation_id:
+        description: 关系ID
+        type: integer
+      relation_type:
+        description: 关系类型['group','friend']
+        type: string
+    type: object
+  model.SettingFriendInfo:
+    properties:
+      account_id:
+        description: 好友ID
+        type: integer
+      avatar:
+        description: 好友头像
+        type: string
+      name:
+        description: 好友姓名
+        type: string
+    type: object
+  model.SettingGroupInfo:
+    type: object
+  model.SettingPin:
+    properties:
+      friend_info:
+        $ref: '#/definitions/model.SettingFriendInfo'
+        description: 好友信息
+      group_info:
+        $ref: '#/definitions/model.SettingGroupInfo'
+        description: 群组信息
+      nick_name:
+        description: 昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      relation_id:
+        description: 关系ID
+        type: integer
+      relation_type:
+        description: 关系类型['group','friend']
+        type: string
+    type: object
+  reply.AccountFriendInfo:
+    properties:
+      account_id:
+        description: 账号ID
+        type: integer
+      avatar:
+        description: 头像
+        type: string
+      name:
+        description: 名称
+        type: string
+      relationID:
+        description: 好友关系ID，0表示没有好友关系
+        type: integer
+    type: object
   reply.AccountInfo:
     properties:
       account_id:
@@ -34,29 +147,23 @@ definitions:
     type: object
   reply.ApplicationInfo:
     properties:
-      account1_avatar:
-        description: 申请者头像
-        type: string
       account1_id:
         description: 申请者账号ID
         type: integer
-      account1_name:
-        description: 申请者名称
-        type: string
-      account2_avatar:
-        description: 目标账号头像
-        type: string
       account2_id:
         description: 目标账号ID
         type: integer
-      account2_name:
-        description: 目标账号名称
-        type: string
       apply_msg:
         description: 申请信息
         type: string
+      avatar:
+        description: 对方头像
+        type: string
       create_at:
         description: 创建时间
+        type: string
+      name:
+        description: 对方账号名称
         type: string
       refuse_msg:
         description: 拒绝信息
@@ -121,7 +228,7 @@ definitions:
       list:
         description: 账号列表
         items:
-          $ref: '#/definitions/reply.AccountInfo'
+          $ref: '#/definitions/reply.AccountFriendInfo'
         type: array
       total:
         description: 总数
@@ -136,6 +243,42 @@ definitions:
         type: array
       total:
         description: 总数
+        type: integer
+    type: object
+  reply.GetFriends:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.SettingFriend'
+        type: array
+      total:
+        type: integer
+    type: object
+  reply.GetFriendsByName:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.SettingFriend'
+        type: array
+      total:
+        type: integer
+    type: object
+  reply.GetPins:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.SettingPin'
+        type: array
+      total:
+        type: integer
+    type: object
+  reply.GetShows:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.Setting'
+        type: array
+      total:
         type: integer
     type: object
   reply.ListApplications:
@@ -234,6 +377,15 @@ definitions:
     required:
     - account_id
     type: object
+  request.DeleteFriend:
+    properties:
+      relation_id:
+        description: 关系ID
+        minimum: 1
+        type: integer
+    required:
+    - relation_id
+    type: object
   request.Login:
     properties:
       email:
@@ -308,6 +460,47 @@ definitions:
     - gender
     - name
     - signature
+    type: object
+  request.UpdateNickName:
+    properties:
+      nick_name:
+        description: 昵称
+        maxLength: 20
+        minLength: 1
+        type: string
+      relation_id:
+        description: 关系ID
+        minimum: 1
+        type: integer
+    required:
+    - nick_name
+    - relation_id
+    type: object
+  request.UpdateSettingDisturb:
+    properties:
+      is_not_disturb:
+        description: 是否免打扰
+        type: boolean
+      relation_id:
+        description: 关系ID
+        minimum: 1
+        type: integer
+    required:
+    - is_not_disturb
+    - relation_id
+    type: object
+  request.UpdateSettingPin:
+    properties:
+      is_pin:
+        description: 是否pin
+        type: boolean
+      relation_id:
+        description: 关系ID
+        minimum: 1
+        type: integer
+    required:
+    - is_pin
+    - relation_id
     type: object
   request.UpdateUserEmail:
     properties:
@@ -438,6 +631,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 搜索名称
         in: query
         maxLength: 20
@@ -457,7 +655,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -465,7 +663,7 @@ paths:
                 data:
                   $ref: '#/definitions/reply.GetAccountsByName'
               type: object
-      summary: 通过昵称查找账户
+      summary: 通过昵称模糊查找账户
       tags:
       - account
   /api/account/infos/user:
@@ -570,7 +768,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3002:申请不存在
+            3004:重复操作申请
           schema:
             $ref: '#/definitions/common.State'
       summary: 被申请者同意好友申请
@@ -596,14 +795,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3001:申请已经存在
+            3003:申请不合法 4001:关系已经存在
           schema:
             $ref: '#/definitions/common.State'
       summary: 创建好友申请
       tags:
       - application
   /api/application/delete:
-    post:
+    delete:
       consumes:
       - application/json
       parameters:
@@ -622,8 +822,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 3002:申请不存在
-            3003:申请不合法
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足
+            3002:申请不存在 3003:申请不合法
           schema:
             $ref: '#/definitions/common.State'
       summary: 申请者删除好友申请
@@ -651,7 +851,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1003:系统错误 2007:身份不存在 2008:身份验证失败
+          description: 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -682,7 +882,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3002:申请不存在
+            3004:重复操作申请
           schema:
             $ref: '#/definitions/common.State'
       summary: 被申请者拒绝好友申请
@@ -735,6 +936,228 @@ paths:
       summary: 发送邮件
       tags:
       - email
+  /api/setting/friend/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 关系ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteFriend'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+            4002:关系不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 删除好友关系(双向删除)
+      tags:
+      - setting
+  /api/setting/friend/list:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetFriends'
+              type: object
+      summary: 获取当前账户的好友列表
+      tags:
+      - setting
+  /api/setting/friend/name:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 查询名称
+        in: query
+        maxLength: 20
+        minLength: 1
+        name: name
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetFriendsByName'
+              type: object
+      summary: 通过姓名模糊查询好友或群组
+      tags:
+      - setting
+  /api/setting/pins:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足
+            3002:申请不存在 3003:申请不合法
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetPins'
+              type: object
+      summary: '获取当前账户pin的好友和群组列表(TODO: 待完善)'
+      tags:
+      - setting
+  /api/setting/shows:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足
+            3002:申请不存在 3003:申请不合法
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetShows'
+              type: object
+      summary: '获取当前账户首页显示的好友和群组列表(TODO: 待完善)'
+      tags:
+      - setting
+  /api/setting/update/disturb:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 关系ID，免打扰状态
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateSettingDisturb'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 更改好友或群组免打扰选项
+      tags:
+      - setting
+  /api/setting/update/nick_name:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 关系ID，备注或群昵称
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateNickName'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 更新好友备注或群昵称
+      tags:
+      - setting
+  /api/setting/update/pin:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 关系ID，pin状态
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateSettingPin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 更新好友或群组pin选项
+      tags:
+      - setting
   /api/user/delete:
     delete:
       consumes:

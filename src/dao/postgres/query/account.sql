@@ -26,12 +26,6 @@ select id, name, avatar
 from account
 where user_id = $1;
 
--- name: GetAccountsByName :many
-select id, name, avatar, count(*) over () as total
-from account
-where name = $1
-limit $2 offset $3;
-
 -- name: ExistsAccountByID :one
 select exists(
                select 1
@@ -57,3 +51,13 @@ delete
 from account
 where user_id = $1
 returning id;
+
+-- name: GetAccountsByName :many
+select a.*, r.id as relation_id, count(*) over () as total
+from (select id, name, avatar from account where name like (@name::varchar || '%')) as a
+         left join relation r on (r.relation_type = 'friend' and
+                                  (((r.friend_type).account1_id = a.id and
+                                    (r.friend_type).account2_id = @account_id::bigint) or
+                                   (r.friend_type).account2_id = a.id and
+                                   (r.friend_type).account1_id = @account_id::bigint))
+limit $1 offset $2;

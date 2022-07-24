@@ -30,7 +30,6 @@ func (store *SqlStore) AcceptApplicationTx(c context.Context, account1, account2
 			return queries.CreateSetting(c, &CreateSettingParams{
 				AccountID:  account1.ID,
 				RelationID: relationID,
-				NickName:   account2.Name,
 				IsLeader:   false,
 			})
 		})
@@ -38,7 +37,6 @@ func (store *SqlStore) AcceptApplicationTx(c context.Context, account1, account2
 			return queries.CreateSetting(c, &CreateSettingParams{
 				AccountID:  account2.ID,
 				RelationID: relationID,
-				NickName:   account1.Name,
 				IsLeader:   false,
 			})
 		})

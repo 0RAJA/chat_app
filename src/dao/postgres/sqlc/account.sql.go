@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const countAccountByUserID = `-- name: CountAccountByUserID :one
@@ -141,27 +142,38 @@ func (q *Queries) GetAccountByID(ctx context.Context, id int64) (*Account, error
 }
 
 const getAccountsByName = `-- name: GetAccountsByName :many
-select id, name, avatar, count(*) over () as total
-from account
-where name = $1
-limit $2 offset $3
+select a.id, a.name, a.avatar, r.id as relation_id, count(*) over () as total
+from (select id, name, avatar from account where name like ($3::varchar || '%')) as a
+         left join relation r on (r.relation_type = 'friend' and
+                                  (((r.friend_type).account1_id = a.id and
+                                    (r.friend_type).account2_id = $4::bigint) or
+                                   (r.friend_type).account2_id = a.id and
+                                   (r.friend_type).account1_id = $4::bigint))
+limit $1 offset $2
 `
 
 type GetAccountsByNameParams struct {
-	Name   string `json:"name"`
-	Limit  int32  `json:"limit"`
-	Offset int32  `json:"offset"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
+	Name      string `json:"name"`
+	AccountID int64  `json:"account_id"`
 }
 
 type GetAccountsByNameRow struct {
-	ID     int64  `json:"id"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
-	Total  int64  `json:"total"`
+	ID         int64         `json:"id"`
+	Name       string        `json:"name"`
+	Avatar     string        `json:"avatar"`
+	RelationID sql.NullInt64 `json:"relation_id"`
+	Total      int64         `json:"total"`
 }
 
 func (q *Queries) GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error) {
-	rows, err := q.db.Query(ctx, getAccountsByName, arg.Name, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, getAccountsByName,
+		arg.Limit,
+		arg.Offset,
+		arg.Name,
+		arg.AccountID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -173,6 +185,7 @@ func (q *Queries) GetAccountsByName(ctx context.Context, arg *GetAccountsByNameP
 			&i.ID,
 			&i.Name,
 			&i.Avatar,
+			&i.RelationID,
 			&i.Total,
 		); err != nil {
 			return nil, err
