@@ -19,7 +19,7 @@ type GetShows struct {
 	Total int64            `json:"total"`
 }
 
-type GetFriendSettingsByName struct {
+type GetFriendsByName struct {
 	List  []*model.SettingFriend `json:"list"`
 	Total int64                  `json:"total"`
 }

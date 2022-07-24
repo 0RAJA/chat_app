@@ -1,6 +1,6 @@
 -- name: CreateSetting :exec
 insert into setting (account_id, relation_id, nick_name, is_leader, is_self)
-values ($1, $2, $3, $4, $5);
+values ($1, $2, '', $3, $4);
 
 -- name: DeleteSetting :exec
 delete
@@ -51,7 +51,7 @@ from (select setting.relation_id, setting.nick_name, setting.pin_time
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time;
 
 -- name: GetFriendShowSettingsOrderByShowTime :many
@@ -74,7 +74,7 @@ from (select relation_id,
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time;
 
 -- name: GetFriendSettingsOrderByName :many
@@ -96,7 +96,7 @@ from (select relation_id,
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
+where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time;
 
 -- name: ExistsFriendSetting :one
@@ -130,7 +130,7 @@ from (select relation_id,
         and setting.relation_id = relation.id
         and relation.relation_type = 'friend') as s,
      account a
-where a.id = (select id
+where a.id = (select account_id
               from setting
               where relation_id = s.relation_id
                 and (account_id != $1 or is_self = true))

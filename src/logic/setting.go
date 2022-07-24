@@ -51,13 +51,13 @@ func (setting) GetFriends(c *gin.Context, accountID int64) (reply.GetFriends, er
 func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.Err) {
 	// friendData, err := dao.Group.DB.GetFriendPinSettingsOrderByPinTime(c, accountID)
 	// TODO:获取群组的pin，然后合并
-	return reply.GetPins{}, nil
+	return reply.GetPins{List: []*model.SettingPin{}}, nil
 }
 
 func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcode.Err) {
 	// data, err := dao.Group.DB.GetFriendShowSettingsOrderByShowTime(c, accountID)
 	// TODO:获取群组的show，然后合并
-	return reply.GetShows{}, nil
+	return reply.GetShows{List: []*model.Setting{}}, nil
 }
 
 func getFriendRelationByID(c *gin.Context, relationID int64) (*db.GetFriendRelationByIDRow, errcode.Err) {
@@ -72,7 +72,7 @@ func getFriendRelationByID(c *gin.Context, relationID int64) (*db.GetFriendRelat
 	return relationInfo, nil
 }
 
-func (setting) Delete(c *gin.Context, accountID, relationID int64) errcode.Err {
+func (setting) DeleteFriend(c *gin.Context, accountID, relationID int64) errcode.Err {
 	relationInfo, merr := getFriendRelationByID(c, relationID)
 	if merr != nil {
 		return merr
@@ -168,7 +168,7 @@ func (setting) UpdateSettingDisturb(c *gin.Context, accountID, relationID int64,
 	}
 }
 
-func (setting) GetFriendsByName(c *gin.Context, accountID int64, name string, limit, offset int32) (reply.GetFriendSettingsByName, errcode.Err) {
+func (setting) GetFriendsByName(c *gin.Context, accountID int64, name string, limit, offset int32) (reply.GetFriendsByName, errcode.Err) {
 	data, err := dao.Group.DB.GetFriendSettingsByName(c, &db.GetFriendSettingsByNameParams{
 		AccountID: accountID,
 		Limit:     limit,
@@ -177,10 +177,10 @@ func (setting) GetFriendsByName(c *gin.Context, accountID int64, name string, li
 	})
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
-		return reply.GetFriendSettingsByName{}, errcode.ErrServer
+		return reply.GetFriendsByName{}, errcode.ErrServer
 	}
 	if len(data) == 0 {
-		return reply.GetFriendSettingsByName{}, nil
+		return reply.GetFriendsByName{List: []*model.SettingFriend{}}, nil
 	}
 	list := make([]*model.SettingFriend, 0, len(data))
 	for _, v := range data {
@@ -202,7 +202,7 @@ func (setting) GetFriendsByName(c *gin.Context, accountID int64, name string, li
 			},
 		})
 	}
-	return reply.GetFriendSettingsByName{
+	return reply.GetFriendsByName{
 		List:  list,
 		Total: data[0].Total,
 	}, nil

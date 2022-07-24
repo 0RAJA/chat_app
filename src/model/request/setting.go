@@ -4,7 +4,7 @@ import (
 	"github.com/0RAJA/chat_app/src/model/common"
 )
 
-type Delete struct {
+type DeleteFriend struct {
 	RelationID int64 `json:"relation_id" binding:"required,gte=1"` // 关系ID
 }
 
@@ -23,7 +23,7 @@ type UpdateSettingDisturb struct {
 	IsNotDisturb *bool `json:"is_not_disturb" binding:"required"`    // 是否免打扰
 }
 
-type GetFriendSettingsByName struct {
+type GetFriendsByName struct {
 	Name string `form:"name" binding:"required,gte=1,lte=20"` // 查询名称
 	common.Pager
 }

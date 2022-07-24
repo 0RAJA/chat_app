@@ -166,11 +166,11 @@ const docTemplate = `{
                 "tags": [
                     "account"
                 ],
-                "summary": "通过昵称查找账户",
+                "summary": "通过昵称模糊查找账户",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Bearer 用户令牌",
+                        "description": "Bearer 账户令牌",
                         "name": "Authorization",
                         "in": "header",
                         "required": true
@@ -199,7 +199,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在",
                         "schema": {
                             "allOf": [
                                 {
@@ -425,7 +425,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法 4001:关系已经存在",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3001:申请已经存在 3003:申请不合法 4001:关系已经存在",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -465,7 +465,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 3002:申请不存在 3003:申请不合法",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足 3002:申请不存在 3003:申请不合法",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -508,7 +508,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1003:系统错误 2007:身份不存在 2008:身份验证失败",
+                        "description": "1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在",
                         "schema": {
                             "allOf": [
                                 {
@@ -560,7 +560,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3002:申请不存在 3004:重复操作申请",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -638,6 +638,359 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "1001:参数有误 1003:系统错误 2006:邮箱已经注册 2003:邮件发送频繁，请稍后再试",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/friend/delete": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "删除好友关系(双向删除)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "关系ID",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DeleteFriend"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在 4002:关系不存在",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/friend/list": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "获取当前账户的好友列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetFriends"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/friend/name": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "通过姓名模糊查询好友或群组",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 20,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "查询名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "第几页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetFriendsByName"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/pins": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "获取当前账户pin的好友和群组列表(TODO: 待完善)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足 3002:申请不存在 3003:申请不合法",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetPins"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/shows": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "获取当前账户首页显示的好友和群组列表(TODO: 待完善)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足 3002:申请不存在 3003:申请不合法",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetShows"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/update/disturb": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "更改好友或群组免打扰选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "关系ID，免打扰状态",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateSettingDisturb"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/update/nick_name": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "更新好友备注或群昵称",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "关系ID，备注或群昵称",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateNickName"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/setting/update/pin": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "更新好友或群组pin选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "关系ID，pin状态",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateSettingPin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -892,6 +1245,141 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Setting": {
+            "type": "object",
+            "properties": {
+                "friend_info": {
+                    "description": "好友信息",
+                    "$ref": "#/definitions/model.SettingFriendInfo"
+                },
+                "group_info": {
+                    "description": "群组信息",
+                    "$ref": "#/definitions/model.SettingGroupInfo"
+                },
+                "is_not_disturb": {
+                    "description": "是否免打扰",
+                    "type": "boolean"
+                },
+                "is_pin": {
+                    "description": "是否pin",
+                    "type": "boolean"
+                },
+                "is_show": {
+                    "description": "是否显示",
+                    "type": "boolean"
+                },
+                "last_show": {
+                    "description": "最后显示时间",
+                    "type": "string"
+                },
+                "nick_name": {
+                    "description": "昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)",
+                    "type": "string"
+                },
+                "pin_time": {
+                    "description": "pin时间",
+                    "type": "string"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer"
+                },
+                "relation_type": {
+                    "description": "关系类型['group','friend']",
+                    "type": "string"
+                }
+            }
+        },
+        "model.SettingFriend": {
+            "type": "object",
+            "properties": {
+                "friend_info": {
+                    "description": "好友信息",
+                    "$ref": "#/definitions/model.SettingFriendInfo"
+                },
+                "is_not_disturb": {
+                    "description": "是否免打扰",
+                    "type": "boolean"
+                },
+                "is_pin": {
+                    "description": "是否pin",
+                    "type": "boolean"
+                },
+                "is_show": {
+                    "description": "是否显示",
+                    "type": "boolean"
+                },
+                "last_show": {
+                    "description": "最后显示时间",
+                    "type": "string"
+                },
+                "nick_name": {
+                    "description": "昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)",
+                    "type": "string"
+                },
+                "pin_time": {
+                    "description": "pin时间",
+                    "type": "string"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer"
+                },
+                "relation_type": {
+                    "description": "关系类型['group','friend']",
+                    "type": "string"
+                }
+            }
+        },
+        "model.SettingFriendInfo": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "description": "好友ID",
+                    "type": "integer"
+                },
+                "avatar": {
+                    "description": "好友头像",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "好友姓名",
+                    "type": "string"
+                }
+            }
+        },
+        "model.SettingGroupInfo": {
+            "type": "object"
+        },
+        "model.SettingPin": {
+            "type": "object",
+            "properties": {
+                "friend_info": {
+                    "description": "好友信息",
+                    "$ref": "#/definitions/model.SettingFriendInfo"
+                },
+                "group_info": {
+                    "description": "群组信息",
+                    "$ref": "#/definitions/model.SettingGroupInfo"
+                },
+                "nick_name": {
+                    "description": "昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)",
+                    "type": "string"
+                },
+                "pin_time": {
+                    "description": "pin时间",
+                    "type": "string"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer"
+                },
+                "relation_type": {
+                    "description": "关系类型['group','friend']",
+                    "type": "string"
+                }
+            }
+        },
         "reply.AccountFriendInfo": {
             "type": "object",
             "properties": {
@@ -933,36 +1421,28 @@ const docTemplate = `{
         "reply.ApplicationInfo": {
             "type": "object",
             "properties": {
-                "account1_avatar": {
-                    "description": "申请者头像",
-                    "type": "string"
-                },
                 "account1_id": {
                     "description": "申请者账号ID",
                     "type": "integer"
-                },
-                "account1_name": {
-                    "description": "申请者名称",
-                    "type": "string"
-                },
-                "account2_avatar": {
-                    "description": "目标账号头像",
-                    "type": "string"
                 },
                 "account2_id": {
                     "description": "目标账号ID",
                     "type": "integer"
                 },
-                "account2_name": {
-                    "description": "目标账号名称",
-                    "type": "string"
-                },
                 "apply_msg": {
                     "description": "申请信息",
                     "type": "string"
                 },
+                "avatar": {
+                    "description": "对方头像",
+                    "type": "string"
+                },
                 "create_at": {
                     "description": "创建时间",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "对方账号名称",
                     "type": "string"
                 },
                 "refuse_msg": {
@@ -1075,6 +1555,62 @@ const docTemplate = `{
                 },
                 "total": {
                     "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.GetFriends": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SettingFriend"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.GetFriendsByName": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SettingFriend"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.GetPins": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SettingPin"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.GetShows": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Setting"
+                    }
+                },
+                "total": {
                     "type": "integer"
                 }
             }
@@ -1215,6 +1751,19 @@ const docTemplate = `{
                 }
             }
         },
+        "request.DeleteFriend": {
+            "type": "object",
+            "required": [
+                "relation_id"
+            ],
+            "properties": {
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "request.Login": {
             "type": "object",
             "required": [
@@ -1310,6 +1859,62 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 200,
                     "minLength": 1
+                }
+            }
+        },
+        "request.UpdateNickName": {
+            "type": "object",
+            "required": [
+                "nick_name",
+                "relation_id"
+            ],
+            "properties": {
+                "nick_name": {
+                    "description": "昵称",
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "request.UpdateSettingDisturb": {
+            "type": "object",
+            "required": [
+                "is_not_disturb",
+                "relation_id"
+            ],
+            "properties": {
+                "is_not_disturb": {
+                    "description": "是否免打扰",
+                    "type": "boolean"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "request.UpdateSettingPin": {
+            "type": "object",
+            "required": [
+                "is_pin",
+                "relation_id"
+            ],
+            "properties": {
+                "is_pin": {
+                    "description": "是否pin",
+                    "type": "boolean"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

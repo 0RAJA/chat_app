@@ -22,7 +22,7 @@ type application struct {
 // @Produce  application/json
 // @Param    Authorization  header    string                     true  "Bearer 账户令牌"
 // @Param    data           body      request.CreateApplication  true  "申请信息"
-// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法 4001:关系已经存在"
+// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3001:申请已经存在 3003:申请不合法 4001:关系已经存在"
 // @Router   /api/application/create [post]
 func (application) Create(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -47,7 +47,7 @@ func (application) Create(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                     true  "Bearer 账户令牌"
 // @Param    data           body      request.DeleteApplication  true  "需要删除的申请"
-// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 3002:申请不存在 3003:申请不合法"
+// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 2009:权限不足 3002:申请不存在 3003:申请不合法"
 // @Router   /api/application/delete [delete]
 func (application) Delete(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -97,7 +97,7 @@ func (application) Accept(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                     true  "Bearer 账户令牌"
 // @Param    data           body      request.AcceptApplication  true  "需要拒绝的申请"
-// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请"
+// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3002:申请不存在 3004:重复操作申请"
 // @Router   /api/application/refuse [put]
 func (application) Refuse(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -122,7 +122,7 @@ func (application) Refuse(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                                     true  "Bearer 账户令牌"
 // @Param    data           query     request.ListApplications                   true  "分页参数"
-// @Success  200            {object}  common.State{data=reply.ListApplications}  "1003:系统错误 2007:身份不存在 2008:身份验证失败"
+// @Success  200            {object}  common.State{data=reply.ListApplications}  "1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在"
 // @Router   /api/application/list [get]
 func (application) List(c *gin.Context) {
 	rly := app.NewResponse(c)

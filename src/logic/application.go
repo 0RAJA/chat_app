@@ -122,7 +122,7 @@ func (application) List(c *gin.Context, accountID int64, limit, offset int32) (r
 		return reply.ListApplications{}, errcode.ErrServer
 	}
 	if len(aplys) == 0 {
-		return reply.ListApplications{}, nil
+		return reply.ListApplications{List: []*reply.ApplicationInfo{}}, nil
 	}
 	result := make([]*reply.ApplicationInfo, 0, len(aplys))
 	for _, aply := range aplys {
