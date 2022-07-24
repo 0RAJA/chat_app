@@ -4,7 +4,7 @@ type group struct {
 	User  user
 	Email email
 	File file
-	Account     account
+	Account account
 	Application application
 	Notify notify
 }

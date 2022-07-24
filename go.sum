@@ -47,6 +47,10 @@ cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/0RAJA/Rutils v1.3.2 h1:RFDY9NCyt5PNv/lyjpMRXFCHrzELqBCSv7qHlOOJkUU=
 github.com/0RAJA/Rutils v1.3.2/go.mod h1:ZrizhHhs43CoBQcJK3L6m9kqY7OHWhtcLZkqnrpeLNo=
+github.com/0RAJA/Rutils v1.3.2 h1:RFDY9NCyt5PNv/lyjpMRXFCHrzELqBCSv7qHlOOJkUU=
+github.com/0RAJA/Rutils v1.3.2/go.mod h1:ZrizhHhs43CoBQcJK3L6m9kqY7OHWhtcLZkqnrpeLNo=
+github.com/0RAJA/Rutils v1.3.8 h1:p7mGao71P3Vb9/4ySrT4nccnSXGBS1Dlo7cGm58OYUY=
+github.com/0RAJA/Rutils v1.3.8/go.mod h1:ZrizhHhs43CoBQcJK3L6m9kqY7OHWhtcLZkqnrpeLNo=
 github.com/0RAJA/Rutils v1.3.9 h1:onIzLXFKVP5r2tCbcJR3siwm2lC0zGWDzmkeKfln5r4=
 github.com/0RAJA/Rutils v1.3.9/go.mod h1:ZrizhHhs43CoBQcJK3L6m9kqY7OHWhtcLZkqnrpeLNo=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
