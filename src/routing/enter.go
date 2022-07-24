@@ -6,6 +6,7 @@ type group struct {
 	File   file
 	Account     account
 	Application application
+	Notify notify
 	Setting     setting
 	Message     message
 	Notify notify
