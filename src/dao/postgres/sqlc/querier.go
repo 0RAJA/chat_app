@@ -19,7 +19,6 @@ type Querier interface {
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
-	CreateRelationSetting(ctx context.Context, arg *CreateRelationSettingParams) (*RelationSetting, error)
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
 	DeleteAccountsByUserID(ctx context.Context, userID int64) ([]int64, error)
@@ -30,7 +29,6 @@ type Querier interface {
 	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
-	DeleteRelationSetting(ctx context.Context, arg *DeleteRelationSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
