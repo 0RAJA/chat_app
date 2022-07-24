@@ -100,6 +100,28 @@ func (q *Queries) ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRel
 	return exists, err
 }
 
+const getFriendRelationByID = `-- name: GetFriendRelationByID :one
+select (friend_type).account1_id as account1_id,
+       (friend_type).account2_id as account2_id,
+       create_at
+from relation
+where relation_type = 'friend'
+  and id = $1
+`
+
+type GetFriendRelationByIDRow struct {
+	Account1ID interface{}  `json:"account1_id"`
+	Account2ID interface{}  `json:"account2_id"`
+	CreateAt   sql.NullTime `json:"create_at"`
+}
+
+func (q *Queries) GetFriendRelationByID(ctx context.Context, id int64) (*GetFriendRelationByIDRow, error) {
+	row := q.db.QueryRow(ctx, getFriendRelationByID, id)
+	var i GetFriendRelationByIDRow
+	err := row.Scan(&i.Account1ID, &i.Account2ID, &i.CreateAt)
+	return &i, err
+}
+
 const getGroupRelationByID = `-- name: GetGroupRelationByID :one
 select id,
        relation_type,

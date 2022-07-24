@@ -37,7 +37,12 @@ type GetAccountsByUserID struct {
 	Total int64          `json:"total"` // 总数
 }
 
+type AccountFriendInfo struct {
+	AccountInfo
+	RelationID int64 // 好友关系ID，0表示没有好友关系
+}
+
 type GetAccountsByName struct {
-	List  []*AccountInfo `json:"list"`  // 账号列表
-	Total int64          `json:"total"` // 总数
+	List  []*AccountFriendInfo `json:"list"`  // 账号列表
+	Total int64                `json:"total"` // 总数
 }

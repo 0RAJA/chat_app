@@ -48,3 +48,11 @@ from relation
 where relation_type = 'friend'
   and ((friend_type).account1_id = ANY (@account_ids::bigint[])
     or (friend_type).account2_id = ANY (@account_ids::bigint[]));
+
+-- name: GetFriendRelationByID :one
+select (friend_type).account1_id as account1_id,
+       (friend_type).account2_id as account2_id,
+       create_at
+from relation
+where relation_type = 'friend'
+  and id = $1;

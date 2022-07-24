@@ -37,8 +37,13 @@ type SettingPin struct {
 	FriendInfo *SettingFriendInfo `json:"friend_info"` // 好友信息
 }
 
-type setting struct {
+type Setting struct {
 	SettingInfo
 	GroupInfo  *SettingGroupInfo  `json:"group_info"`  // 群组信息
+	FriendInfo *SettingFriendInfo `json:"friend_info"` // 好友信息
+}
+
+type SettingFriend struct {
+	SettingInfo
 	FriendInfo *SettingFriendInfo `json:"friend_info"` // 好友信息
 }

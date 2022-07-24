@@ -168,26 +168,26 @@ func (account) GetAccountsByUserID(c *gin.Context, userID int64) (reply.GetAccou
 	}, nil
 }
 
-func (account) GetAccountsByName(c *gin.Context, name string, limit, offset int32) (reply.GetAccountsByName, errcode.Err) {
-	accounts, err := dao.Group.DB.GetAccountsByName(c, &db.GetAccountsByNameParams{Name: name, Limit: limit, Offset: offset})
+func (account) GetAccountsByName(c *gin.Context, accountID int64, name string, limit, offset int32) (reply.GetAccountsByName, errcode.Err) {
+	accounts, err := dao.Group.DB.GetAccountsByName(c, &db.GetAccountsByNameParams{AccountID: accountID, Name: name, Limit: limit, Offset: offset})
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return reply.GetAccountsByName{}, errcode.ErrServer
 	}
-	var total int64
-	result := make([]*reply.AccountInfo, 0, len(accounts))
-	for _, v := range accounts {
-		result = append(result, &reply.AccountInfo{
-			ID:     v.ID,
-			Name:   v.Name,
-			Avatar: v.Avatar,
-		})
+	if len(accounts) == 0 {
+		return reply.GetAccountsByName{}, nil
 	}
-	if len(accounts) > 0 {
-		total = accounts[0].Total
+	result := make([]*reply.AccountFriendInfo, 0, len(accounts))
+	for _, v := range accounts {
+		result = append(result, &reply.AccountFriendInfo{
+			AccountInfo: reply.AccountInfo{ID: v.ID,
+				Name:   v.Name,
+				Avatar: v.Avatar},
+			RelationID: v.RelationID.Int64,
+		})
 	}
 	return reply.GetAccountsByName{
 		List:  result,
-		Total: total,
+		Total: accounts[0].Total,
 	}, nil
 }

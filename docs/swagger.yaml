@@ -20,6 +20,21 @@ definitions:
         description: token
         type: string
     type: object
+  reply.AccountFriendInfo:
+    properties:
+      account_id:
+        description: 账号ID
+        type: integer
+      avatar:
+        description: 头像
+        type: string
+      name:
+        description: 名称
+        type: string
+      relationID:
+        description: 好友关系ID，0表示没有好友关系
+        type: integer
+    type: object
   reply.AccountInfo:
     properties:
       account_id:
@@ -121,7 +136,7 @@ definitions:
       list:
         description: 账号列表
         items:
-          $ref: '#/definitions/reply.AccountInfo'
+          $ref: '#/definitions/reply.AccountFriendInfo'
         type: array
       total:
         description: 总数
@@ -438,6 +453,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 搜索名称
         in: query
         maxLength: 20
