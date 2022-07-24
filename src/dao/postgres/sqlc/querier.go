@@ -43,6 +43,7 @@ type Querier interface {
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
+	GetFileKeyByID(ctx context.Context, arg *GetFileKeyByIDParams) (interface{}, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
 	GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error)

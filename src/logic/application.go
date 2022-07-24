@@ -134,14 +134,11 @@ func (application) List(c *gin.Context, accountID int64, limit, offset int32) (r
 			Status:         string(aply.Status),
 			CreateAt:       aply.CreateAt,
 			UpdateAt:       aply.UpdateAt,
-			Account1Avatar: aply.Account2Avatar,
-			Account1Name:   aply.Account1Name,
-			Account2Avatar: aply.Account2Avatar,
-			Account2Name:   aply.Account2Name,
+
 		})
 	}
 	return reply.ListApplications{
 		List:  result,
-		Total: aplys[0].Total,
+		Total: aplys[0].Account1ID,
 	}, nil
 }

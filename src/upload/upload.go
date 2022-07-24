@@ -10,7 +10,3 @@ type OSS interface {
 	DeleteFile(key string) error
 }
 
-// NewOSS OSS的实例化方法
-func NewOSS() OSS {
-	return &AliyunOSS{}
-}

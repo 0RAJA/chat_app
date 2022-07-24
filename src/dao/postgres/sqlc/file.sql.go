@@ -13,18 +13,17 @@ import (
 const createFile = `-- name: CreateFile :one
 insert into file
     (file_name, file_type, file_size, key, url, relation_id, account_id)
-values (?, ?, ?, ?, ?, ?, ?)
-returning id, file_name, file_type, file_size, key, url, relation_id, account_id, create_at
+values ($1, $2, $3, $4, $5, $6, $7) returning id, file_name, file_type, file_size, key, url, relation_id, account_id, create_at
 `
 
 type CreateFileParams struct {
-	FileName   string `json:"file_name"`
-	FileType   string `json:"file_type"`
-	FileSize   int64  `json:"file_size"`
-	Key        string `json:"key"`
-	Url        string `json:"url"`
-	RelationID string `json:"relation_id"`
-	AccountID  string `json:"account_id"`
+	FileName   string        `json:"file_name"`
+	FileType   Filetype      `json:"file_type"`
+	FileSize   int64         `json:"file_size"`
+	Key        string        `json:"key"`
+	Url        string        `json:"url"`
+	RelationID sql.NullInt64 `json:"relation_id"`
+	AccountID  sql.NullInt64 `json:"account_id"`
 }
 
 func (q *Queries) CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error) {
@@ -55,41 +54,22 @@ func (q *Queries) CreateFile(ctx context.Context, arg *CreateFileParams) (*File,
 const deleteFileByID = `-- name: DeleteFileByID :exec
 delete
 from file
-where id=?
+where id = $1
 `
 
-func (q *Queries) DeleteFileByID(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteFileByID, id)
-	return err
+type DeleteFileByIDParams struct {
+	FileID int64 `json:"file_id"`
 }
 
-const getFileByID = `-- name: GetFileByID :one
-select id, file_name, file_type, file_size, key, url, relation_id, account_id, create_at
-from file
-where id=?
-`
-
-func (q *Queries) GetFileByID(ctx context.Context, id int64) (*File, error) {
-	row := q.db.QueryRow(ctx, getFileByID, id)
-	var i File
-	err := row.Scan(
-		&i.ID,
-		&i.FileName,
-		&i.FileType,
-		&i.FileSize,
-		&i.Key,
-		&i.Url,
-		&i.RelationID,
-		&i.AccountID,
-		&i.CreateAt,
-	)
-	return &i, err
+func (q *Queries) DeleteFileByID(ctx context.Context, arg *DeleteFileByIDParams) error {
+	_, err := q.db.Exec(ctx, deleteFileByID, arg.FileID)
+	return err
 }
 
 const getFileByRelationID = `-- name: GetFileByRelationID :many
 select id, file_name, file_type, file_size, key, url, relation_id, account_id, create_at
 from file
-where relation_id=?
+where relation_id = $1
 `
 
 func (q *Queries) GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error) {
@@ -120,4 +100,21 @@ func (q *Queries) GetFileByRelationID(ctx context.Context, relationID sql.NullIn
 		return nil, err
 	}
 	return items, nil
+}
+
+const getFileKeyByID = `-- name: GetFileKeyByID :one
+select key
+from file
+where id = $1
+`
+
+type GetFileKeyByIDParams struct {
+	FileID int64 `json:"file_id"`
+}
+
+func (q *Queries) GetFileKeyByID(ctx context.Context, arg *GetFileKeyByIDParams) (interface{}, error) {
+	row := q.db.QueryRow(ctx, getFileKeyByID, arg.FileID)
+	var column_1 interface{}
+	err := row.Scan(&column_1)
+	return column_1, err
 }

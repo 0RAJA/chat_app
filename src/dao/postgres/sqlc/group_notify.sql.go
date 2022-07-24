@@ -15,29 +15,25 @@ import (
 
 const createGroupNotify = `-- name: CreateGroupNotify :one
 insert into group_notify
-(id, relation_id, msg_content, msg_expand, account_id, create_at, read_ids)
-values (?, ?, ?, ?, ?, ?, ?)
+(relation_id, msg_content, msg_expand, account_id, read_ids)
+values ($1, $2, $3, $4, $5)
 returning id, relation_id, msg_content, msg_expand, account_id, create_at, read_ids, msg_content_tsv
 `
 
 type CreateGroupNotifyParams struct {
-	ID         int64         `json:"id"`
 	RelationID sql.NullInt64 `json:"relation_id"`
 	MsgContent string        `json:"msg_content"`
 	MsgExpand  pgtype.JSON   `json:"msg_expand"`
 	AccountID  sql.NullInt64 `json:"account_id"`
-	CreateAt   time.Time     `json:"create_at"`
 	ReadIds    []int64       `json:"read_ids"`
 }
 
 func (q *Queries) CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error) {
 	row := q.db.QueryRow(ctx, createGroupNotify,
-		arg.ID,
 		arg.RelationID,
 		arg.MsgContent,
 		arg.MsgExpand,
 		arg.AccountID,
-		arg.CreateAt,
 		arg.ReadIds,
 	)
 	var i GroupNotify
@@ -57,7 +53,7 @@ func (q *Queries) CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyP
 const deleteGroupNotify = `-- name: DeleteGroupNotify :exec
 delete
 from group_notify
-where id = ?
+where id = $1
 `
 
 func (q *Queries) DeleteGroupNotify(ctx context.Context, id int64) error {
@@ -68,12 +64,12 @@ func (q *Queries) DeleteGroupNotify(ctx context.Context, id int64) error {
 const getGroupNotifyByID = `-- name: GetGroupNotifyByID :one
 select id, relation_id, msg_content, msg_expand, account_id, create_at, read_ids, msg_content_tsv
 from group_notify
-where id = ?
+where relation_id = $1
 limit 1
 `
 
-func (q *Queries) GetGroupNotifyByID(ctx context.Context, id int64) (*GroupNotify, error) {
-	row := q.db.QueryRow(ctx, getGroupNotifyByID, id)
+func (q *Queries) GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) (*GroupNotify, error) {
+	row := q.db.QueryRow(ctx, getGroupNotifyByID, relationID)
 	var i GroupNotify
 	err := row.Scan(
 		&i.ID,
@@ -90,38 +86,33 @@ func (q *Queries) GetGroupNotifyByID(ctx context.Context, id int64) (*GroupNotif
 
 const updateGroupNotify = `-- name: UpdateGroupNotify :one
 update group_notify
-set id         = ?,
-    relation_id= ?,
-    msg_content= ?,
-    msg_expand = ?,
-    account_id = ?,
-    create_at  = ?,
-    read_ids   = ?
-where id=?
-returning id, relation_id, msg_content, msg_expand, account_id, create_at, read_ids, msg_content_tsv
+set relation_id= $1,
+    msg_content= $2,
+    msg_expand = $3,
+    account_id = $4,
+    create_at  = $5,
+    read_ids   = $6
+where id=$7
+    returning id, relation_id, msg_content, msg_expand, account_id, create_at, read_ids, msg_content_tsv
 `
 
 type UpdateGroupNotifyParams struct {
-	ID         int64         `json:"id"`
 	RelationID sql.NullInt64 `json:"relation_id"`
 	MsgContent string        `json:"msg_content"`
 	MsgExpand  pgtype.JSON   `json:"msg_expand"`
 	AccountID  sql.NullInt64 `json:"account_id"`
 	CreateAt   time.Time     `json:"create_at"`
 	ReadIds    []int64       `json:"read_ids"`
-	ID_2       int64         `json:"id_2"`
 }
 
 func (q *Queries) UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*GroupNotify, error) {
 	row := q.db.QueryRow(ctx, updateGroupNotify,
-		arg.ID,
 		arg.RelationID,
 		arg.MsgContent,
 		arg.MsgExpand,
 		arg.AccountID,
 		arg.CreateAt,
 		arg.ReadIds,
-		arg.ID_2,
 	)
 	var i GroupNotify
 	err := row.Scan(

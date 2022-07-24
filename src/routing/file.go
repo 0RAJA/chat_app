@@ -9,7 +9,9 @@ type file struct {}
 func (file)Init(router *gin.RouterGroup)  {
 	fg := router.Group("file")
 	{
-		fg.POST("Publish",v1.Group.File.Publish)
+		fg.POST("publish",v1.Group.File.Publish)
+		fg.POST("delete",v1.Group.File.DeleteFile)
+		fg.POST("getall",v1.Group.File. GetRelationFile)
 	}
 
 }

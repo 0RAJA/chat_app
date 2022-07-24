@@ -570,7 +570,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3002:申请不存在
+            3004:重复操作申请
           schema:
             $ref: '#/definitions/common.State'
       summary: 被申请者同意好友申请
@@ -597,13 +598,14 @@ paths:
       responses:
         "200":
           description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法
+            4001:关系已经存在
           schema:
             $ref: '#/definitions/common.State'
       summary: 创建好友申请
       tags:
       - application
   /api/application/delete:
-    post:
+    delete:
       consumes:
       - application/json
       parameters:
