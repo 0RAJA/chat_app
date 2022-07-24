@@ -81,9 +81,12 @@ select s.relation_id, s.nick_name, s.pin_time,
        a.name   as account_name,
        a.avatar as account_avatar
 from (select setting.relation_id, setting.nick_name, setting.pin_time
-      from setting
+      from setting,
+           relation
       where setting.account_id = $1
-        and setting.is_pin = true) as s,
+        and setting.is_pin = true
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'friend') as s,
      account a
 where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time
@@ -125,6 +128,95 @@ func (q *Queries) GetFriendPinSettingsOrderByPinTime(ctx context.Context, accoun
 	return items, nil
 }
 
+const getFriendSettingsByName = `-- name: GetFriendSettingsByName :many
+select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
+       a.id             as account_id,
+       a.name           as account_name,
+       a.avatar         as account_avatar,
+       count(*) over () as total
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'friend') as s,
+     account a
+where a.id = (select id
+              from setting
+              where relation_id = s.relation_id
+                and (account_id != $1 or is_self = true))
+  and ((a.name like ($4::varchar || '%')) or (nick_name like ($4::varchar || '%')))
+order by s.pin_time
+limit $2 offset $3
+`
+
+type GetFriendSettingsByNameParams struct {
+	AccountID int64  `json:"account_id"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
+	Name      string `json:"name"`
+}
+
+type GetFriendSettingsByNameRow struct {
+	RelationID    int64     `json:"relation_id"`
+	NickName      string    `json:"nick_name"`
+	IsNotDisturb  bool      `json:"is_not_disturb"`
+	IsPin         bool      `json:"is_pin"`
+	PinTime       time.Time `json:"pin_time"`
+	IsShow        bool      `json:"is_show"`
+	LastShow      time.Time `json:"last_show"`
+	IsSelf        bool      `json:"is_self"`
+	AccountID     int64     `json:"account_id"`
+	AccountName   string    `json:"account_name"`
+	AccountAvatar string    `json:"account_avatar"`
+	Total         int64     `json:"total"`
+}
+
+func (q *Queries) GetFriendSettingsByName(ctx context.Context, arg *GetFriendSettingsByNameParams) ([]*GetFriendSettingsByNameRow, error) {
+	rows, err := q.db.Query(ctx, getFriendSettingsByName,
+		arg.AccountID,
+		arg.Limit,
+		arg.Offset,
+		arg.Name,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetFriendSettingsByNameRow{}
+	for rows.Next() {
+		var i GetFriendSettingsByNameRow
+		if err := rows.Scan(
+			&i.RelationID,
+			&i.NickName,
+			&i.IsNotDisturb,
+			&i.IsPin,
+			&i.PinTime,
+			&i.IsShow,
+			&i.LastShow,
+			&i.IsSelf,
+			&i.AccountID,
+			&i.AccountName,
+			&i.AccountAvatar,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFriendSettingsOrderByName = `-- name: GetFriendSettingsOrderByName :many
 select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
        a.id     as account_id,
@@ -138,8 +230,11 @@ from (select relation_id,
              is_show,
              last_show,
              is_self
-      from setting
-      where setting.account_id = $1) as s,
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'friend') as s,
      account a
 where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time
@@ -204,9 +299,12 @@ from (select relation_id,
              is_show,
              last_show,
              is_self
-      from setting
+      from setting,
+           relation
       where setting.account_id = $1
-        and setting.is_show = true) as s,
+        and setting.is_show = true
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'friend') as s,
      account a
 where a.id = (select id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time

@@ -169,6 +169,13 @@ const docTemplate = `{
                 "summary": "通过昵称查找账户",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "maxLength": 20,
                         "minLength": 1,
                         "type": "string",
@@ -378,7 +385,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3002:申请不存在 3004:重复操作申请",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 3002:申请不存在 3004:重复操作申请",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -418,7 +425,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 3001:申请已经存在 3003:申请不合法 4001:关系已经存在",
                         "schema": {
                             "$ref": "#/definitions/common.State"
                         }
@@ -427,7 +434,7 @@ const docTemplate = `{
             }
         },
         "/api/application/delete": {
-            "post": {
+            "delete": {
                 "consumes": [
                     "application/json"
                 ],
@@ -885,6 +892,27 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.AccountFriendInfo": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "description": "账号ID",
+                    "type": "integer"
+                },
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string"
+                },
+                "relationID": {
+                    "description": "好友关系ID，0表示没有好友关系",
+                    "type": "integer"
+                }
+            }
+        },
         "reply.AccountInfo": {
             "type": "object",
             "properties": {
@@ -1026,7 +1054,7 @@ const docTemplate = `{
                     "description": "账号列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/reply.AccountInfo"
+                        "$ref": "#/definitions/reply.AccountFriendInfo"
                     }
                 },
                 "total": {
