@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
@@ -13,16 +14,22 @@ type Querier interface {
 	CreateAccount(ctx context.Context, arg *CreateAccountParams) error
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
+	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
+	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
+	CreateRelationSetting(ctx context.Context, arg *CreateRelationSettingParams) (*RelationSetting, error)
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
 	DeleteAccountsByUserID(ctx context.Context, userID int64) ([]int64, error)
 	DeleteApplication(ctx context.Context, arg *DeleteApplicationParams) error
 	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error
 	DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error
+	DeleteFileByID(ctx context.Context, id int64) error
+	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
+	DeleteRelationSetting(ctx context.Context, arg *DeleteRelationSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
@@ -41,13 +48,20 @@ type Querier interface {
 	GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error)
 	GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*GetFriendSettingsOrderByNameRow, error)
 	GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetFriendShowSettingsOrderByShowTimeRow, error)
+
+	GetFileByID(ctx context.Context, id int64) (*File, error)
+	GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error)
+	GetGroupNotifyByID(ctx context.Context, id int64) (*GroupNotify, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
 	GetSettingByID(ctx context.Context, arg *GetSettingByIDParams) (*Setting, error)
+	GetRelationSetting(ctx context.Context, arg *GetRelationSettingParams) (*RelationSetting, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
+	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*GroupNotify, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
+	UpdateRelationSetting(ctx context.Context, arg *UpdateRelationSettingParams) (*RelationSetting, error)
 	UpdateSettingDisturb(ctx context.Context, arg *UpdateSettingDisturbParams) error
 	UpdateSettingLeader(ctx context.Context, arg *UpdateSettingLeaderParams) error
 	UpdateSettingNickName(ctx context.Context, arg *UpdateSettingNickNameParams) error
