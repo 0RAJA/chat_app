@@ -14,6 +14,7 @@ type Querier interface {
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
+	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
@@ -32,7 +33,7 @@ type Querier interface {
 	ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRelationParams) (bool, error)
 	ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
-	GetAccountByID(ctx context.Context, id int64) (*Account, error)
+	GetAccountByID(ctx context.Context, arg *GetAccountByIDParams) (*GetAccountByIDRow, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
@@ -44,12 +45,23 @@ type Querier interface {
 	GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*GetFriendSettingsOrderByNameRow, error)
 	GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetFriendShowSettingsOrderByShowTimeRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
+	GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsByRelationIDAndTimeParams) ([]*GetMsgsByRelationIDAndTimeRow, error)
+	GetPinMsgsByRelationID(ctx context.Context, arg *GetPinMsgsByRelationIDParams) ([]*GetPinMsgsByRelationIDRow, error)
+	GetRlyMsgsInfoByMsgID(ctx context.Context, arg *GetRlyMsgsInfoByMsgIDParams) ([]*GetRlyMsgsInfoByMsgIDRow, error)
 	GetSettingByID(ctx context.Context, arg *GetSettingByIDParams) (*Setting, error)
+	GetTopMsgByRelationID(ctx context.Context, relationID int64) (*GetTopMsgByRelationIDRow, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
+	HasReadMsg(ctx context.Context, arg *HasReadMsgParams) (bool, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
+	UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) error
+	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error
+	UpdateMsgRevoke(ctx context.Context, arg *UpdateMsgRevokeParams) error
+	UpdateMsgTop(ctx context.Context, arg *UpdateMsgTopParams) error
+	UpdateMsgTopFalseByRelationID(ctx context.Context, relationID int64) error
+	UpdateMsgTopTrueByMsgID(ctx context.Context, id int64) error
 	UpdateSettingDisturb(ctx context.Context, arg *UpdateSettingDisturbParams) error
 	UpdateSettingLeader(ctx context.Context, arg *UpdateSettingLeaderParams) error
 	UpdateSettingNickName(ctx context.Context, arg *UpdateSettingNickNameParams) error

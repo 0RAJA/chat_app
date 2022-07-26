@@ -125,6 +125,13 @@ const docTemplate = `{
                 "summary": "获取账户信息",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "minimum": 1,
                         "type": "integer",
                         "description": "账号ID",
@@ -135,7 +142,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2009:权限不足 2010:账号不存在",
+                        "description": "1001:参数有误 1003:系统错误 2009:权限不足 2007:身份不存在 2008:身份验证失败 2010:账号不存在",
                         "schema": {
                             "allOf": [
                                 {
@@ -1511,6 +1518,10 @@ const docTemplate = `{
                 "name": {
                     "description": "名称",
                     "type": "string"
+                },
+                "relation_id": {
+                    "description": "关系ID，如果不存在则为0",
+                    "type": "integer"
                 },
                 "signature": {
                     "description": "个性签名",
