@@ -213,6 +213,9 @@ definitions:
       name:
         description: 名称
         type: string
+      relation_id:
+        description: 关系ID，如果不存在则为0
+        type: integer
       signature:
         description: 个性签名
         type: string
@@ -605,6 +608,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 账号ID
         in: query
         minimum: 1
@@ -615,7 +623,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2009:权限不足 2010:账号不存在
+          description: 1001:参数有误 1003:系统错误 2009:权限不足 2007:身份不存在 2008:身份验证失败 2010:账号不存在
           schema:
             allOf:
             - $ref: '#/definitions/common.State'

@@ -95,7 +95,7 @@ func (account) DeleteAccount(c *gin.Context) {
 // @Summary  更新账户信息
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                 true  "Bearer 账户令牌"
+// @Param    Authorization  header    string                                   true  "Bearer 账户令牌"
 // @Param    data           body      request.UpdateAccount  true  "账号信息"
 // @Success  200            {object}  common.State{}         "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败"
 // @Router   /api/account/update [put]
@@ -120,8 +120,9 @@ func (account) UpdateAccount(c *gin.Context) {
 // @Summary  获取账户信息
 // @accept   application/json
 // @Produce  application/json
-// @Param    data  query     request.GetAccountByID                   true  "账号信息"
-// @Success  200   {object}  common.State{data=reply.GetAccountByID}  "1001:参数有误 1003:系统错误 2009:权限不足 2010:账号不存在"
+// @Param    Authorization  header    string                 true  "Bearer 账户令牌"
+// @Param    data           query     request.GetAccountByID                   true  "账号信息"
+// @Success  200            {object}  common.State{data=reply.GetAccountByID}  "1001:参数有误 1003:系统错误 2009:权限不足 2007:身份不存在 2008:身份验证失败 2010:账号不存在"
 // @Router   /api/account/info [get]
 func (account) GetAccountByID(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -130,7 +131,12 @@ func (account) GetAccountByID(c *gin.Context) {
 		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	result, err := logic.Group.Account.GetAccountByID(c, params.AccountID)
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	result, err := logic.Group.Account.GetAccountByID(c, params.AccountID, content.ID)
 	rly.Reply(err, result)
 }
 

@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const countAccountByUserID = `-- name: CountAccountByUserID :one
@@ -120,15 +121,34 @@ func (q *Queries) ExistsAccountByNameAndUserID(ctx context.Context, arg *ExistsA
 }
 
 const getAccountByID = `-- name: GetAccountByID :one
-select id, user_id, name, avatar, gender, signature, create_at
-from account
-where id = $1
+select a.id, a.user_id, a.name, a.avatar, a.gender, a.signature, a.create_at, r.id as relation_id
+from (select id, user_id, name, avatar, gender, signature, create_at from account where account.id = $1) a
+         left join relation r on
+                r.relation_type = 'friend' and
+                ((r.friend_type).account1_id = a.id and (r.friend_type).account2_id = $2::bigint) or
+                (r.friend_type).account1_id = $2::bigint and (r.friend_type).account2_id = a.id
 limit 1
 `
 
-func (q *Queries) GetAccountByID(ctx context.Context, id int64) (*Account, error) {
-	row := q.db.QueryRow(ctx, getAccountByID, id)
-	var i Account
+type GetAccountByIDParams struct {
+	TargetID int64 `json:"target_id"`
+	SelfID   int64 `json:"self_id"`
+}
+
+type GetAccountByIDRow struct {
+	ID         int64         `json:"id"`
+	UserID     int64         `json:"user_id"`
+	Name       string        `json:"name"`
+	Avatar     string        `json:"avatar"`
+	Gender     Gender        `json:"gender"`
+	Signature  string        `json:"signature"`
+	CreateAt   time.Time     `json:"create_at"`
+	RelationID sql.NullInt64 `json:"relation_id"`
+}
+
+func (q *Queries) GetAccountByID(ctx context.Context, arg *GetAccountByIDParams) (*GetAccountByIDRow, error) {
+	row := q.db.QueryRow(ctx, getAccountByID, arg.TargetID, arg.SelfID)
+	var i GetAccountByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -137,6 +157,7 @@ func (q *Queries) GetAccountByID(ctx context.Context, id int64) (*Account, error
 		&i.Gender,
 		&i.Signature,
 		&i.CreateAt,
+		&i.RelationID,
 	)
 	return &i, err
 }

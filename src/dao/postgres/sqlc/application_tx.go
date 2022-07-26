@@ -7,7 +7,7 @@ import (
 )
 
 // AcceptApplicationTx 接受申请并建立好友关系和双方关系设置
-func (store *SqlStore) AcceptApplicationTx(c context.Context, account1, account2 *Account) error {
+func (store *SqlStore) AcceptApplicationTx(c context.Context, account1, account2 *GetAccountByIDRow) error {
 	return store.execTx(c, func(queries *Queries) error {
 		var err error
 		err = setting.DoThat(err, func() error {

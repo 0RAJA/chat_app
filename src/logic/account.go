@@ -70,8 +70,11 @@ func (account) CreateAccount(c *gin.Context, userID int64, name, avatar string) 
 }
 
 // 通过账户ID获取账户信息
-func getAccountInfoByID(c *gin.Context, accountID int64) (*db.Account, errcode.Err) {
-	accountInfo, err := dao.Group.DB.GetAccountByID(c, accountID)
+func getAccountInfoByID(c *gin.Context, accountID, selfID int64) (*db.GetAccountByIDRow, errcode.Err) {
+	accountInfo, err := dao.Group.DB.GetAccountByID(c, &db.GetAccountByIDParams{
+		TargetID: accountID,
+		SelfID:   selfID,
+	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, myerr.AccountNotFound
@@ -83,7 +86,7 @@ func getAccountInfoByID(c *gin.Context, accountID int64) (*db.Account, errcode.E
 }
 
 func (account) GetAccountToken(c *gin.Context, userID, accountID int64) (*reply.GetAccountToken, errcode.Err) {
-	accountInfo, merr := getAccountInfoByID(c, accountID)
+	accountInfo, merr := getAccountInfoByID(c, accountID, accountID)
 	if merr != nil {
 		return nil, merr
 	}
@@ -104,7 +107,7 @@ func (account) GetAccountToken(c *gin.Context, userID, accountID int64) (*reply.
 }
 
 func (account) DeleteAccount(c *gin.Context, userID, accountID int64) errcode.Err {
-	accountInfo, merr := getAccountInfoByID(c, accountID)
+	accountInfo, merr := getAccountInfoByID(c, accountID, accountID)
 	if merr != nil {
 		return merr
 	}
@@ -133,18 +136,19 @@ func (account) UpdateAccount(c *gin.Context, accountID int64, name, avatar, gend
 	return nil
 }
 
-func (account) GetAccountByID(c *gin.Context, accountID int64) (*reply.GetAccountByID, errcode.Err) {
-	accountInfo, merr := getAccountInfoByID(c, accountID)
+func (account) GetAccountByID(c *gin.Context, accountID, selfID int64) (*reply.GetAccountByID, errcode.Err) {
+	accountInfo, merr := getAccountInfoByID(c, accountID, selfID)
 	if merr != nil {
 		return nil, merr
 	}
 	return &reply.GetAccountByID{
-		ID:        accountInfo.ID,
-		Name:      accountInfo.Name,
-		Avatar:    accountInfo.Avatar,
-		Gender:    string(accountInfo.Gender),
-		Signature: accountInfo.Signature,
-		CreateAt:  accountInfo.CreateAt,
+		ID:         accountInfo.ID,
+		Name:       accountInfo.Name,
+		Avatar:     accountInfo.Avatar,
+		Gender:     string(accountInfo.Gender),
+		Signature:  accountInfo.Signature,
+		CreateAt:   accountInfo.CreateAt,
+		RelationID: accountInfo.RelationID.Int64,
 	}, nil
 }
 
