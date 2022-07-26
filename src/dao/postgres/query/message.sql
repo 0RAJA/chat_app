@@ -43,7 +43,6 @@ select m1.id,
        m1.pin_time,
        m1.read_ids,
        (select count(id) from message where rly_msg_id = m1.id) as reply_count,
-       m2.id                                                    as rly_msg_id,
        m2.msg_type                                              as rly_msg_type,
        m2.msg_content                                           as rly_msg_content,
        m2.msg_expand                                            as rly_msg_expand
@@ -70,8 +69,9 @@ select m1.id,
        m1.read_ids
 from message m1
 where m1.rly_msg_id = $1
+  and m1.relation_id = $2
 order by m1.create_at
-limit $2 offset $3;
+limit $3 offset $4;
 
 -- name: GetPinMsgsByRelationID :many
 select m1.id,

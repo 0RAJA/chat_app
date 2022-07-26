@@ -80,7 +80,6 @@ select m1.id,
        m1.pin_time,
        m1.read_ids,
        (select count(id) from message where rly_msg_id = m1.id) as reply_count,
-       m2.id                                                    as rly_msg_id,
        m2.msg_type                                              as rly_msg_type,
        m2.msg_content                                           as rly_msg_content,
        m2.msg_expand                                            as rly_msg_expand
@@ -114,7 +113,6 @@ type GetMsgsByRelationIDAndTimeRow struct {
 	PinTime       time.Time      `json:"pin_time"`
 	ReadIds       []int64        `json:"read_ids"`
 	ReplyCount    int64          `json:"reply_count"`
-	RlyMsgID_2    sql.NullInt64  `json:"rly_msg_id_2"`
 	RlyMsgType    Msgtype        `json:"rly_msg_type"`
 	RlyMsgContent sql.NullString `json:"rly_msg_content"`
 	RlyMsgExpand  pgtype.JSON    `json:"rly_msg_expand"`
@@ -151,7 +149,6 @@ func (q *Queries) GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsBy
 			&i.PinTime,
 			&i.ReadIds,
 			&i.ReplyCount,
-			&i.RlyMsgID_2,
 			&i.RlyMsgType,
 			&i.RlyMsgContent,
 			&i.RlyMsgExpand,
@@ -267,14 +264,16 @@ select m1.id,
        m1.read_ids
 from message m1
 where m1.rly_msg_id = $1
+  and m1.relation_id = $2
 order by m1.create_at
-limit $2 offset $3
+limit $3 offset $4
 `
 
 type GetRlyMsgsInfoByMsgIDParams struct {
-	RlyMsgID sql.NullInt64 `json:"rly_msg_id"`
-	Limit    int32         `json:"limit"`
-	Offset   int32         `json:"offset"`
+	RlyMsgID   sql.NullInt64 `json:"rly_msg_id"`
+	RelationID int64         `json:"relation_id"`
+	Limit      int32         `json:"limit"`
+	Offset     int32         `json:"offset"`
 }
 
 type GetRlyMsgsInfoByMsgIDRow struct {
@@ -296,7 +295,12 @@ type GetRlyMsgsInfoByMsgIDRow struct {
 }
 
 func (q *Queries) GetRlyMsgsInfoByMsgID(ctx context.Context, arg *GetRlyMsgsInfoByMsgIDParams) ([]*GetRlyMsgsInfoByMsgIDRow, error) {
-	rows, err := q.db.Query(ctx, getRlyMsgsInfoByMsgID, arg.RlyMsgID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, getRlyMsgsInfoByMsgID,
+		arg.RlyMsgID,
+		arg.RelationID,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}

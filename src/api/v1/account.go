@@ -36,7 +36,7 @@ func (account) CreateAccount(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, err := logic.Group.Account.CreateAccount(c, content.ID, params.Name, params.Avatar)
+	result, err := logic.Group.Account.CreateAccount(c, content.ID, params.Name, global.PbSettings.Rule.DefaultAvatarURL, params.Gender, params.Signature)
 	rly.Reply(err, result)
 }
 
