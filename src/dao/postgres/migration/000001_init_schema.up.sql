@@ -123,7 +123,7 @@ create table message
     msg_expand      json,                                                                                -- 消息扩展信息
     file_id         bigint references file (id) on delete cascade on update cascade,                     -- 文件id 如果不是文件类型则为null
     account_id      bigint references account (id) on delete set null on update cascade,                 -- 发送账号id
-    rly_msg_id      bigint references message (id) on delete cascade on update cascade,                  -- 回复消息id
+    rly_msg_id      bigint references message (id) on delete cascade on update cascade,                  -- 回复消息id，没有则为null
     relation_id     bigint        not null references relation (id) on delete cascade on update cascade, -- 关系id
     create_at       timestamptz   not null default now(),                                                -- 创建时间
     is_revoke       boolean       not null default false,                                                -- 是否撤回

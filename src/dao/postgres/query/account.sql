@@ -16,9 +16,12 @@ set name      = $1,
 where id = $5;
 
 -- name: GetAccountByID :one
-select *
-from account
-where id = $1
+select a.*, r.id as relation_id
+from (select * from account where account.id = @target_id) a
+         left join relation r on
+                r.relation_type = 'friend' and
+                ((r.friend_type).account1_id = a.id and (r.friend_type).account2_id = @self_id::bigint) or
+                (r.friend_type).account1_id = @self_id::bigint and (r.friend_type).account2_id = a.id
 limit 1;
 
 -- name: GetAccountsByUserID :many

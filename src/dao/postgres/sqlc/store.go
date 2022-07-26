@@ -17,7 +17,7 @@ type TXer interface {
 	// CreateApplicationTx 先判断是否存在申请，不存在则创建申请
 	CreateApplicationTx(c context.Context, arg *CreateApplicationParams) error
 	// AcceptApplicationTx account1接受account2申请并建立好友关系和双方的关系设置
-	AcceptApplicationTx(c context.Context, account1, account2 *Account) error
+	AcceptApplicationTx(c context.Context, account1, account2 *GetAccountByIDRow) error
 	// CreateAccountTx 创建账户并建立和自己的关系
 	CreateAccountTx(c context.Context, arg *CreateAccountParams) error
 	// DeleteAccountWithTx 删除账户并删除与之相关的好友关系

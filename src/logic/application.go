@@ -80,11 +80,11 @@ func (application) Accept(c *gin.Context, account1ID, account2ID int64) errcode.
 	if aply.Status == db.ApplicationstatusValue1 {
 		return myerr.ApplicationRepeatOpt
 	}
-	account1Info, merr := getAccountInfoByID(c, account1ID)
+	account1Info, merr := getAccountInfoByID(c, account1ID, account1ID)
 	if merr != nil {
 		return merr
 	}
-	account2Info, merr := getAccountInfoByID(c, account2ID)
+	account2Info, merr := getAccountInfoByID(c, account2ID, account1ID)
 	if merr != nil {
 		return merr
 	}
