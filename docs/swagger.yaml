@@ -334,19 +334,27 @@ definitions:
     type: object
   request.CreateAccount:
     properties:
-      avatar:
-        description: 头像
-        maxLength: 100
-        minLength: 1
+      gender:
+        description: 性别
+        enum:
+        - 男
+        - 女
+        - 未知
         type: string
       name:
         description: 名称
         maxLength: 20
         minLength: 1
         type: string
+      signature:
+        description: 签名
+        maxLength: 100
+        minLength: 0
+        type: string
     required:
-    - avatar
+    - gender
     - name
+    - signature
     type: object
   request.CreateApplication:
     properties:

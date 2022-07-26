@@ -1692,21 +1692,31 @@
         "request.CreateAccount": {
             "type": "object",
             "required": [
-                "avatar",
-                "name"
+                "gender",
+                "name",
+                "signature"
             ],
             "properties": {
-                "avatar": {
-                    "description": "头像",
+                "gender": {
+                    "description": "性别",
                     "type": "string",
-                    "maxLength": 100,
-                    "minLength": 1
+                    "enum": [
+                        "男",
+                        "女",
+                        "未知"
+                    ]
                 },
                 "name": {
                     "description": "名称",
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 1
+                },
+                "signature": {
+                    "description": "签名",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 0
                 }
             }
         },
