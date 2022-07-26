@@ -25,15 +25,17 @@ func (q *Queries) CountAccountByUserID(ctx context.Context, userID int64) (int32
 }
 
 const createAccount = `-- name: CreateAccount :exec
-insert into account (id, user_id, name, avatar)
-values ($1, $2, $3, $4)
+insert into account (id, user_id, name, avatar, gender, signature)
+values ($1, $2, $3, $4, $5, $6)
 `
 
 type CreateAccountParams struct {
-	ID     int64  `json:"id"`
-	UserID int64  `json:"user_id"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	Name      string `json:"name"`
+	Avatar    string `json:"avatar"`
+	Gender    Gender `json:"gender"`
+	Signature string `json:"signature"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg *CreateAccountParams) error {
@@ -42,6 +44,8 @@ func (q *Queries) CreateAccount(ctx context.Context, arg *CreateAccountParams) e
 		arg.UserID,
 		arg.Name,
 		arg.Avatar,
+		arg.Gender,
+		arg.Signature,
 	)
 	return err
 }

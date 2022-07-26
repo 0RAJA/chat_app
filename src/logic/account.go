@@ -19,7 +19,7 @@ import (
 type account struct {
 }
 
-func (account) CreateAccount(c *gin.Context, userID int64, name, avatar string) (*reply.CreateAccount, errcode.Err) {
+func (account) CreateAccount(c *gin.Context, userID int64, name, avatar, gender, signature string) (*reply.CreateAccount, errcode.Err) {
 	// 判断账户数量
 	accountNum, err := dao.Group.DB.CountAccountByUserID(c, userID)
 	if err != nil {
@@ -42,10 +42,12 @@ func (account) CreateAccount(c *gin.Context, userID int64, name, avatar string) 
 		return nil, myerr.AccountNameExists
 	}
 	arg := &db.CreateAccountParams{
-		ID:     global.GenID.GetID(),
-		UserID: userID,
-		Name:   name,
-		Avatar: avatar,
+		ID:        global.GenID.GetID(),
+		UserID:    userID,
+		Name:      name,
+		Avatar:    avatar,
+		Gender:    db.Gender(gender),
+		Signature: signature,
 	}
 	// 创建账户以及和自己的关系g
 	if err := dao.Group.DB.CreateAccountTx(c, arg); err != nil {
