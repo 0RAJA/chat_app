@@ -24,6 +24,22 @@ func LoadAllEmailsToRedis() error {
 	return nil
 }
 
+// LoadAllGroupRelationToRedis 加载所有群组关系名单到redis
+// :nolint
+func LoadAllGroupRelationToRedis() error {
+	// 群ID和成员IDs
+	var relations map[int64][]int64
+	// TODO: 加载所有群ID和成员IDs到redis
+	// relations, err := dao.Group.DB.GetAllGroupRelation(context.Background())
+	// if err != nil {
+	// 	return err
+	// }
+	if err := dao.Group.Redis.ReloadGroupRelationIDs(context.Background(), relations); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (load) Init() {
 	var err error
 	// 加载所有邮件到redis
