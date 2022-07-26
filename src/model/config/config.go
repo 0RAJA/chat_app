@@ -80,6 +80,7 @@ type Rule struct {
 	CodeMarkDuration time.Duration `yaml:"CodeMarkDuration"`
 	CodeLength       int           `yaml:"CodeLength"`
 	AccountNumMax    int32         `yaml:"AccountNumMax"`
+	DefaultAvatarURL string        `yaml:"DefaultAvatarURL"`
 }
 
 type Server struct {

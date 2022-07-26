@@ -1,6 +1,6 @@
 -- name: CreateAccount :exec
-insert into account (id, user_id, name, avatar)
-values ($1, $2, $3, $4);
+insert into account (id, user_id, name, avatar, gender, signature)
+values ($1, $2, $3, $4, $5, $6);
 
 -- name: DeleteAccount :exec
 delete
