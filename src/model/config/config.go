@@ -50,6 +50,7 @@ type AliyunOSS struct {
 	AccessKeyId     string `yaml:"AccessKeyID"`
 	AccessKeySecret string `yaml:"AccessKeySecret"`
 	BucketName      string `yaml:"BucketName"`
+	GroupAvatarUrl  string `yaml:"GroupAvatarUrl"`
 }
 
 type Redis struct {

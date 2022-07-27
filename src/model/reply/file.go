@@ -26,3 +26,7 @@ type File struct {
 type GetRelationFile struct {
 	FileList []*File `json:"file_list"`
 }
+
+type UploadAvatar struct {
+
+}

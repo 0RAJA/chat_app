@@ -13,9 +13,10 @@ type Querier interface {
 	CountAccountByUserID(ctx context.Context, userID int64) (int32, error)
 	CreateAccount(ctx context.Context, arg *CreateAccountParams) error
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
-	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
+	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error)
+	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64,error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
@@ -23,9 +24,9 @@ type Querier interface {
 	DeleteAccount(ctx context.Context, id int64) error
 	DeleteAccountsByUserID(ctx context.Context, userID int64) ([]int64, error)
 	DeleteApplication(ctx context.Context, arg *DeleteApplicationParams) error
+	DeleteFileByID(ctx context.Context, id int64) error
 	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error
 	DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error
-	DeleteFileByID(ctx context.Context, arg *DeleteFileByIDParams) error
 	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
@@ -43,15 +44,17 @@ type Querier interface {
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
-	GetFileKeyByID(ctx context.Context, arg *GetFileKeyByIDParams) (interface{}, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
+	GetAvatar(ctx context.Context, accountID sql.NullInt64) (*GetAvatarRow, error)
+	GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error)
+	GetFileKeyByID(ctx context.Context, id int64) (string, error)
 	GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error)
 	GetFriendRelationByID(ctx context.Context, id int64) (*GetFriendRelationByIDRow, error)
 	GetFriendSettingsByName(ctx context.Context, arg *GetFriendSettingsByNameParams) ([]*GetFriendSettingsByNameRow, error)
 	GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*GetFriendSettingsOrderByNameRow, error)
 	GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetFriendShowSettingsOrderByShowTimeRow, error)
-	GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error)
+	GetGroupAvatar(ctx context.Context, relationID sql.NullInt64) (*File, error)
 	GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) (*GroupNotify, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
 	GetMsgByID(ctx context.Context, id int64) (*Message, error)
@@ -66,6 +69,7 @@ type Querier interface {
 	HasReadMsg(ctx context.Context, arg *HasReadMsgParams) (bool, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
+	UpdateGroupAvatar(ctx context.Context, arg *UpdateGroupAvatarParams) error
 	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*GroupNotify, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
 	UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) error

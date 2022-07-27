@@ -68,3 +68,15 @@ func (file) GetRelationFile(c *gin.Context) {
 
 	rly.ReplyList(mErr,int64(len(result)),result)
 }
+
+func (file)UploadAvatar(c *gin.Context)  {
+	rly := app.NewResponse(c)
+	params := request.UploadAvatar{}
+	if err := c.ShouldBind(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	result,mErr := logic.Group.File.UploadAccountAvatar(c,params.AccountID,params.File)
+
+	rly.Reply(mErr,result)
+}

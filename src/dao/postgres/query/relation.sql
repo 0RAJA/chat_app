@@ -1,6 +1,7 @@
 -- name: CreateGroupRelation :exec
 insert into relation (relation_type, group_type)
-values ('group', ROW (@name::varchar(50), @description::varchar(255), @avatar::varchar(255)));
+values ('group', ROW (@name::varchar(50), @description::varchar(255), @avatar::varchar(255)))
+returning id;
 
 -- name: UpdateGroupRelation :exec
 update relation

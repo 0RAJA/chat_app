@@ -14,6 +14,7 @@ import (
 	"github.com/0RAJA/chat_app/src/upload/oss"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
+	"strconv"
 )
 
 type file struct {
@@ -66,15 +67,13 @@ func (file) PublishFile(c *gin.Context, params request.PublishFile, filetype str
 }
 
 func (file) DeleteFile(c *gin.Context, fileID int64) (result reply.DeleteFile, mErr errcode.Err) {
-	k, err := dao.Group.DB.GetFileKeyByID(c, &db.GetFileKeyByIDParams{FileID: fileID})
+	key, err := dao.Group.DB.GetFileKeyByID(c, fileID)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			return result, myerr.FileNotExist
 		}
 		return result, errcode.ErrServer
 	}
-	fmt.Println(k)
-	key := k.(string)
 	var con = oss.Config{
 		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
 		BasePath:        global.PvSettings.AliyunOSS.BasePath,
@@ -89,9 +88,7 @@ func (file) DeleteFile(c *gin.Context, fileID int64) (result reply.DeleteFile, m
 	if err != nil {
 		return result, myerr.FileDeleteFailed
 	}
-	err = dao.Group.DB.DeleteFileByID(c, &db.DeleteFileByIDParams{
-		FileID: fileID,
-	})
+	err = dao.Group.DB.DeleteFileByID(c, fileID)
 	if err != nil {
 		return result, errcode.ErrServer
 	}
@@ -122,4 +119,98 @@ func (file) GetRelationFile(c *gin.Context, relationID int64) ([]reply.File, err
 		result = append(result, r)
 	}
 	return result, nil
+}
+
+func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart.FileHeader) (reply.UploadAvatar, errcode.Err) {
+	var con = oss.Config{
+		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
+		BasePath:        global.PvSettings.AliyunOSS.BasePath,
+		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
+		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
+		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
+		BucketName:      global.PvSettings.AliyunOSS.BucketName,
+	}
+
+	o := oss.Init(con)
+	url, key, err := o.UploadFile(file)
+	result := reply.UploadAvatar{}
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return result, myerr.FiledStore
+	}
+	avatar, err := dao.Group.DB.GetAvatar(c, sql.NullInt64{
+		Int64: accountId,
+		Valid: true,
+	})
+	var t int64
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			t = 1
+		} else {
+			global.Logger.Error(err.Error(),mid.ErrLogMsg(c)...)
+			return result, errcode.ErrServer
+		}
+	} else {
+		t, err = strconv.ParseInt(avatar.FileName, 0, 0)
+		if err != nil {
+			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			return result, errcode.ErrServer
+		}
+		t += 1
+	}
+	_, err = dao.Group.DB.CreateFile(c, &db.CreateFileParams{
+		FileName:   strconv.FormatInt(t, 10),
+		FileType:   "img",
+		FileSize:   file.Size,
+		Key:        key,
+		Url:        url,
+		RelationID: sql.NullInt64{},
+		AccountID: sql.NullInt64{
+			Int64: accountId,
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return result, errcode.ErrServer
+	}
+	result = reply.UploadAvatar{
+	}
+	return result, nil
+}
+func (file)UploadGroupAvatar(c *gin.Context,file *multipart.FileHeader,relationID int64) (errcode.Err,string) {
+	var url,key string
+	var err error
+	if file != nil{
+		var con = oss.Config{
+			BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
+			BasePath:        global.PvSettings.AliyunOSS.BasePath,
+			Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
+			AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
+			AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
+			BucketName:      global.PvSettings.AliyunOSS.BucketName,
+		}
+
+		o := oss.Init(con)
+		url, key, err = o.UploadFile(file)
+		if err != nil {
+			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			return myerr.FiledStore,""
+		}
+	}
+	err = dao.Group.DB.UploadGroupAvatar(c,db.CreateFileParams{
+		FileName:   "groupAvatar",
+		FileType:   "",
+		FileSize:   0,
+		Key:        key,
+		Url:        url,
+		RelationID: sql.NullInt64{Int64: relationID, Valid: true},
+		AccountID:  sql.NullInt64{},
+	})
+	if err != nil {
+		return errcode.ErrServer,""
+	}
+	if file == nil {
+		return nil,global.PvSettings.AliyunOSS.GroupAvatarUrl
+	}
+	return nil,url
 }

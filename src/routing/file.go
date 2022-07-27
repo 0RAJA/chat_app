@@ -5,13 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type file struct {}
-func (file)Init(router *gin.RouterGroup)  {
+type file struct{}
+
+func (file) Init(router *gin.RouterGroup) {
 	fg := router.Group("file")
 	{
-		fg.POST("publish",v1.Group.File.Publish)
-		fg.POST("delete",v1.Group.File.DeleteFile)
-		fg.POST("getall",v1.Group.File. GetRelationFile)
+		fg.POST("publish", v1.Group.File.Publish)
+		fg.POST("getall", v1.Group.File.GetRelationFile)
+		fg.POST("avatar", v1.Group.File.UploadAvatar)
 	}
-
 }
