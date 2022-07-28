@@ -17,7 +17,6 @@ type Querier interface {
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64,error)
-	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
@@ -63,7 +62,6 @@ type Querier interface {
 	GetPinMsgsByRelationID(ctx context.Context, arg *GetPinMsgsByRelationIDParams) ([]*GetPinMsgsByRelationIDRow, error)
 	GetRlyMsgsInfoByMsgID(ctx context.Context, arg *GetRlyMsgsInfoByMsgIDParams) ([]*GetRlyMsgsInfoByMsgIDRow, error)
 	GetSettingByID(ctx context.Context, arg *GetSettingByIDParams) (*Setting, error)
-	GetRelationSetting(ctx context.Context, arg *GetRelationSettingParams) (*RelationSetting, error)
 	GetTopMsgByRelationID(ctx context.Context, relationID int64) (*GetTopMsgByRelationIDRow, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
@@ -81,7 +79,6 @@ type Querier interface {
 	UpdateMsgTopFalseByMsgID(ctx context.Context, id int64) error
 	UpdateMsgTopFalseByRelationID(ctx context.Context, relationID int64) error
 	UpdateMsgTopTrueByMsgID(ctx context.Context, id int64) error
-	UpdateRelationSetting(ctx context.Context, arg *UpdateRelationSettingParams) (*RelationSetting, error)
 	UpdateSettingDisturb(ctx context.Context, arg *UpdateSettingDisturbParams) error
 	UpdateSettingLeader(ctx context.Context, arg *UpdateSettingLeaderParams) error
 	UpdateSettingNickName(ctx context.Context, arg *UpdateSettingNickNameParams) error

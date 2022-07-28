@@ -10,7 +10,6 @@ type group struct {
 	Setting     setting
 	MGroup      mGroup
 	Message     message
-	Notify notify
 }
 
 var Group = new(group)

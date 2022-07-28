@@ -31,6 +31,7 @@ func NewRouter() *gin.Engine {
 		rg.Notify.Init(root)
 		rg.Setting.Init(root)
 		rg.Message.Init(root)
+		rg.MGroup.Init(root)
 	}
 	return r
 }

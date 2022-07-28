@@ -1,15 +1,15 @@
 package routing
 
 type group struct {
-	User  user
-	Email email
-	File   file
+	User        user
+	Email       email
+	File        file
 	Account     account
 	Application application
-	Notify notify
+	Notify      notify
 	Setting     setting
+	MGroup     mGroup
 	Message     message
-	Notify notify
 }
 
 var Group = new(group)
