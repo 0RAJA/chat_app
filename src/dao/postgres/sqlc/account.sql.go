@@ -258,15 +258,13 @@ func (q *Queries) GetAccountsByUserID(ctx context.Context, userID int64) ([]*Get
 const updateAccount = `-- name: UpdateAccount :exec
 update account
 set name      = $1,
-    avatar    = $2,
-    gender    = $3,
-    signature = $4
-where id = $5
+    gender    = $2,
+    signature = $3
+where id = $4
 `
 
 type UpdateAccountParams struct {
 	Name      string `json:"name"`
-	Avatar    string `json:"avatar"`
 	Gender    Gender `json:"gender"`
 	Signature string `json:"signature"`
 	ID        int64  `json:"id"`
@@ -275,7 +273,6 @@ type UpdateAccountParams struct {
 func (q *Queries) UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error {
 	_, err := q.db.Exec(ctx, updateAccount,
 		arg.Name,
-		arg.Avatar,
 		arg.Gender,
 		arg.Signature,
 		arg.ID,

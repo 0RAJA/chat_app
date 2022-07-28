@@ -23,4 +23,6 @@ var (
 	ApplicationRepeatOpt        = errcode.NewErr(3004, "重复操作申请")
 	RelationExists              = errcode.NewErr(4001, "关系已经存在")
 	RelationNotExists           = errcode.NewErr(4002, "关系不存在")
+	MsgNotExists                = errcode.NewErr(5001, "消息不存在")
+	MsgAlreadyRevoke            = errcode.NewErr(5002, "消息已经撤销")
 )

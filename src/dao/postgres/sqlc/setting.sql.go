@@ -73,6 +73,27 @@ func (q *Queries) ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSett
 	return exists, err
 }
 
+const existsSetting = `-- name: ExistsSetting :one
+select exists(
+               select 1
+               from setting
+               where account_id = $1
+                 and relation_id = $2
+           )
+`
+
+type ExistsSettingParams struct {
+	AccountID  int64 `json:"account_id"`
+	RelationID int64 `json:"relation_id"`
+}
+
+func (q *Queries) ExistsSetting(ctx context.Context, arg *ExistsSettingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsSetting, arg.AccountID, arg.RelationID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getFriendPinSettingsOrderByPinTime = `-- name: GetFriendPinSettingsOrderByPinTime :many
 select s.relation_id, s.nick_name, s.pin_time,
        a.id     as account_id,

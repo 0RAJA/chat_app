@@ -6,6 +6,7 @@ type group struct {
 	Account     account
 	Application application
 	Setting     setting
+	Message     message
 }
 
 var Group = new(group)

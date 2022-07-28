@@ -10,10 +10,9 @@ where id = $1;
 -- name: UpdateAccount :exec
 update account
 set name      = $1,
-    avatar    = $2,
-    gender    = $3,
-    signature = $4
-where id = $5;
+    gender    = $2,
+    signature = $3
+where id = $4;
 
 -- name: GetAccountByID :one
 select a.*, r.id as relation_id

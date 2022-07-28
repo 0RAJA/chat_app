@@ -176,7 +176,7 @@ type Message struct {
 	NotifyType    Msgnotifytype `json:"notify_type"`
 	MsgType       Msgtype       `json:"msg_type"`
 	MsgContent    string        `json:"msg_content"`
-	MsgExpand     pgtype.JSON   `json:"msg_expand"`
+	MsgExtend     pgtype.JSON   `json:"msg_extend"`
 	FileID        sql.NullInt64 `json:"file_id"`
 	AccountID     sql.NullInt64 `json:"account_id"`
 	RlyMsgID      sql.NullInt64 `json:"rly_msg_id"`
