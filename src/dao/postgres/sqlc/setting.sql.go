@@ -32,6 +32,16 @@ func (q *Queries) CreateSetting(ctx context.Context, arg *CreateSettingParams) e
 	return err
 }
 
+const deleteGroup = `-- name: DeleteGroup :exec
+delete from setting
+where relation_id = $1
+`
+
+func (q *Queries) DeleteGroup(ctx context.Context, relationID int64) error {
+	_, err := q.db.Exec(ctx, deleteGroup, relationID)
+	return err
+}
+
 const deleteSetting = `-- name: DeleteSetting :exec
 delete
 from setting
@@ -403,6 +413,36 @@ func (q *Queries) GetSettingByID(ctx context.Context, arg *GetSettingByIDParams)
 		&i.IsSelf,
 	)
 	return &i, err
+}
+
+const transferIsSelfFalse = `-- name: TransferIsSelfFalse :exec
+update setting
+set is_leader = false where relation_id =$1 and account_id = $2
+`
+
+type TransferIsSelfFalseParams struct {
+	RelationID int64 `json:"relation_id"`
+	AccountID  int64 `json:"account_id"`
+}
+
+func (q *Queries) TransferIsSelfFalse(ctx context.Context, arg *TransferIsSelfFalseParams) error {
+	_, err := q.db.Exec(ctx, transferIsSelfFalse, arg.RelationID, arg.AccountID)
+	return err
+}
+
+const transferIsSelfTrue = `-- name: TransferIsSelfTrue :exec
+update setting
+set is_leader = true where relation_id =$1 and account_id = $2
+`
+
+type TransferIsSelfTrueParams struct {
+	RelationID int64 `json:"relation_id"`
+	AccountID  int64 `json:"account_id"`
+}
+
+func (q *Queries) TransferIsSelfTrue(ctx context.Context, arg *TransferIsSelfTrueParams) error {
+	_, err := q.db.Exec(ctx, transferIsSelfTrue, arg.RelationID, arg.AccountID)
+	return err
 }
 
 const updateSettingDisturb = `-- name: UpdateSettingDisturb :exec

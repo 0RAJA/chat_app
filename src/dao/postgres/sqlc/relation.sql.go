@@ -40,7 +40,7 @@ type CreateGroupRelationParams struct {
 	Avatar      string `json:"avatar"`
 }
 
-func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams)(int64 ,error) {
+func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams)(int64, error) {
 	row := q.db.QueryRow(ctx, createGroupRelation, arg.Name, arg.Description, arg.Avatar)
 	var id int64
 	err := row.Scan(&id)
@@ -162,24 +162,18 @@ func (q *Queries) GetGroupRelationByID(ctx context.Context, id int64) (*GetGroup
 
 const updateGroupRelation = `-- name: UpdateGroupRelation :exec
 update relation
-set (group_type) = (ROW ($1::varchar(50), $2::varchar(255), $3::varchar(255)))
+set (group_type) = (ROW ($1::varchar(50), $2::varchar(255)))
 where relation_type = 'group'
-  and id = $4
+  and id = $3
 `
 
 type UpdateGroupRelationParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Avatar      string `json:"avatar"`
 	ID          int64  `json:"id"`
 }
 
 func (q *Queries) UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error {
-	_, err := q.db.Exec(ctx, updateGroupRelation,
-		arg.Name,
-		arg.Description,
-		arg.Avatar,
-		arg.ID,
-	)
+	_, err := q.db.Exec(ctx, updateGroupRelation, arg.Name, arg.Description, arg.ID)
 	return err
 }

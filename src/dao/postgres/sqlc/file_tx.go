@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 )
-
+// UploadGroupAvatar 创建群组头像文件
 func (store *SqlStore)UploadGroupAvatar(c context.Context,arg CreateFileParams) error {
 	return store.execTx(c, func(queries *Queries) error {
 		var err error

@@ -25,3 +25,14 @@ func (store *SqlStore) CreateApplicationTx(c context.Context, arg *CreateApplica
 		return queries.CreateApplication(c, arg)
 	})
 }
+
+// DissolveGroup 删除群关系并删除所有群员
+func (store *SqlStore)DissolveGroup(c context.Context ,relationID int64) error {
+	return store.execTx(c, func(queries *Queries) error {
+		err := queries.DeleteGroup(c,relationID)
+		if err != nil {
+			return err
+		}
+		return queries.DeleteRelation(c,relationID)
+	})
+}

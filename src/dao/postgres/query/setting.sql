@@ -138,6 +138,17 @@ where a.id = (select account_id
 order by s.pin_time
 limit $2 offset $3;
 
+-- name: TransferIsSelfTrue :exec
+update setting
+set is_leader = true where relation_id =$1 and account_id = $2;
+
+-- name: TransferIsSelfFalse :exec
+update setting
+set is_leader = false where relation_id =$1 and account_id = $2;
+
+-- name: DeleteGroup :exec
+delete from setting
+where relation_id = $1;
 -- name: ExistsSetting :one
 select exists(
                select 1

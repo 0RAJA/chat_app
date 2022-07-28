@@ -28,6 +28,7 @@ type Querier interface {
 	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error
 	DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error
 	DeleteGroupNotify(ctx context.Context, id int64) error
+	DeleteGroup(ctx context.Context, relationID int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
@@ -66,6 +67,8 @@ type Querier interface {
 	GetTopMsgByRelationID(ctx context.Context, relationID int64) (*GetTopMsgByRelationIDRow, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
+	TransferIsSelfFalse(ctx context.Context, arg *TransferIsSelfFalseParams) error
+	TransferIsSelfTrue(ctx context.Context, arg *TransferIsSelfTrueParams) error
 	HasReadMsg(ctx context.Context, arg *HasReadMsgParams) (bool, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error

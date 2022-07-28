@@ -34,3 +34,37 @@ func (mGroup) CreateGroup(c *gin.Context) {
 		Avatar:      url,
 	})
 }
+
+func (mGroup)TransferGroup(c *gin.Context)  {
+	rly := app.NewResponse(c)
+	params := request.TransferGroup{}
+	if err := c.ShouldBindQuery(params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	result,mErr := logic.Group.MGroup.TransferGroup(c,params.RelationID,params.FromAccountID,params.ToAccountID)
+	rly.Reply(mErr,result)
+}
+
+func (mGroup)DissolveGroup(c *gin.Context)  {
+	rly := app.NewResponse(c)
+	params := request.DissolveGroup{}
+	if err := c.ShouldBindQuery(params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	result,mErr := logic.Group.MGroup.DissolveGroup(c,params.RelationID)
+	rly.Reply(mErr,result)
+}
+
+func (mGroup)UpdateGroup(c *gin.Context)  {
+	rly := app.NewResponse(c)
+	params := request.UpdateGroup{}
+	if err := c.ShouldBindQuery(params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	result,mErr := logic.Group.MGroup.UpdateGroup(c,params)
+	rly.Reply(mErr,result)
+}
+
