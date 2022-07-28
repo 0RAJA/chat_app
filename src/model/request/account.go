@@ -18,11 +18,8 @@ type DeleteAccount struct {
 	AccountID int64 `json:"account_id" binding:"required,gte=1"` // 账号ID
 }
 
-// UpdateAccount
-// TODO: 修改文件上传
 type UpdateAccount struct {
 	Name      string `json:"name" binding:"required,gte=1,lte=20"`       // 名称
-	Avatar    string `json:"avatar" binding:"required,gte=1,lte=100"`    // 头像
 	Gender    string `json:"gender" binding:"required,oneof=男 女 未知"`     // 性别
 	Signature string `json:"signature" binding:"required,gte=1,lte=200"` // 个性签名
 }

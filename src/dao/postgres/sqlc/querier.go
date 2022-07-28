@@ -32,6 +32,7 @@ type Querier interface {
 	ExistsApplicationByIDWithLock(ctx context.Context, arg *ExistsApplicationByIDWithLockParams) (bool, error)
 	ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRelationParams) (bool, error)
 	ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error)
+	ExistsSetting(ctx context.Context, arg *ExistsSettingParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, arg *GetAccountByIDParams) (*GetAccountByIDRow, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
@@ -45,6 +46,7 @@ type Querier interface {
 	GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*GetFriendSettingsOrderByNameRow, error)
 	GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetFriendShowSettingsOrderByShowTimeRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
+	GetMsgByID(ctx context.Context, id int64) (*Message, error)
 	GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsByRelationIDAndTimeParams) ([]*GetMsgsByRelationIDAndTimeRow, error)
 	GetPinMsgsByRelationID(ctx context.Context, arg *GetPinMsgsByRelationIDParams) ([]*GetPinMsgsByRelationIDRow, error)
 	GetRlyMsgsInfoByMsgID(ctx context.Context, arg *GetRlyMsgsInfoByMsgIDParams) ([]*GetRlyMsgsInfoByMsgIDRow, error)
@@ -59,7 +61,7 @@ type Querier interface {
 	UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) error
 	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error
 	UpdateMsgRevoke(ctx context.Context, arg *UpdateMsgRevokeParams) error
-	UpdateMsgTop(ctx context.Context, arg *UpdateMsgTopParams) error
+	UpdateMsgTopFalseByMsgID(ctx context.Context, id int64) error
 	UpdateMsgTopFalseByRelationID(ctx context.Context, relationID int64) error
 	UpdateMsgTopTrueByMsgID(ctx context.Context, id int64) error
 	UpdateSettingDisturb(ctx context.Context, arg *UpdateSettingDisturbParams) error

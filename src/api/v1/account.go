@@ -111,7 +111,7 @@ func (account) UpdateAccount(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	err := logic.Group.Account.UpdateAccount(c, content.ID, params.Name, params.Avatar, params.Gender, params.Signature)
+	err := logic.Group.Account.UpdateAccount(c, content.ID, params.Name, params.Gender, params.Signature)
 	rly.Reply(err)
 }
 

@@ -123,10 +123,9 @@ func (account) DeleteAccount(c *gin.Context, userID, accountID int64) errcode.Er
 	return nil
 }
 
-func (account) UpdateAccount(c *gin.Context, accountID int64, name, avatar, gender, signature string) errcode.Err {
+func (account) UpdateAccount(c *gin.Context, accountID int64, name, gender, signature string) errcode.Err {
 	err := dao.Group.DB.UpdateAccount(c, &db.UpdateAccountParams{
 		Name:      name,
-		Avatar:    avatar,
 		Gender:    db.Gender(gender),
 		Signature: signature,
 		ID:        accountID,

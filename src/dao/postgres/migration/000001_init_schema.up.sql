@@ -120,7 +120,7 @@ create table message
     notify_type     MsgNotifyType not null,                                                              -- 消息通知类型 system:系统消息,common:普通消息
     msg_type        MsgType       not null,                                                              -- 消息类型 text:文本消息,file:文件消息
     msg_content     text          not null,                                                              -- 消息内容
-    msg_expand      json,                                                                                -- 消息扩展信息
+    msg_extend      json,                                                                                -- 消息扩展信息
     file_id         bigint references file (id) on delete cascade on update cascade,                     -- 文件id 如果不是文件类型则为null
     account_id      bigint references account (id) on delete set null on update cascade,                 -- 发送账号id
     rly_msg_id      bigint references message (id) on delete cascade on update cascade,                  -- 回复消息id，没有则为null

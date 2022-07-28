@@ -24,6 +24,8 @@ type TXer interface {
 	DeleteAccountWithTx(c context.Context, accountID int64) error
 	// DeleteUserTx 删除用户和他的所有账户并删除与之相关的好友关系
 	DeleteUserTx(c context.Context, userID int64) error
+	// UpdateMsgTopTrueByMsgIDWithTx 更新此消息置顶(会删除其他置顶)
+	UpdateMsgTopTrueByMsgIDWithTx(c context.Context, relationID, msgID int64) error
 }
 
 type SqlStore struct {

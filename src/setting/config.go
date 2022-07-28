@@ -6,7 +6,7 @@ import (
 
 	"github.com/0RAJA/Rutils/pkg/setting"
 	"github.com/0RAJA/chat_app/src/global"
-	setting2 "github.com/0RAJA/chat_app/src/pkg/setting"
+	"github.com/0RAJA/chat_app/src/pkg/tool"
 )
 
 // 配置文件绑定到全局结构体上(默认加载)
@@ -39,13 +39,13 @@ func (config) Init() {
 		privateSetting *setting.Setting
 	)
 	// 在调用其他组件的Init时，这个init会首先执行并且把配置文件绑定到全局的结构体上
-	err = setting2.DoThat(err, func() error {
+	err = tool.DoThat(err, func() error {
 		publicSetting, err = setting.NewSetting(publicConfigName, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
-		return setting2.DoThat(err, func() error { return publicSetting.BindAll(&global.PbSettings) })
+		return tool.DoThat(err, func() error { return publicSetting.BindAll(&global.PbSettings) })
 	})
-	err = setting2.DoThat(err, func() error {
+	err = tool.DoThat(err, func() error {
 		privateSetting, err = setting.NewSetting(privateConfigName, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
-		return setting2.DoThat(err, func() error { return privateSetting.BindAll(&global.PvSettings) })
+		return tool.DoThat(err, func() error { return privateSetting.BindAll(&global.PvSettings) })
 	})
 	if err != nil {
 		panic("初始化配置文件有误:" + err.Error())

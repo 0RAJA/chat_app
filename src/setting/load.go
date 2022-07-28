@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/0RAJA/chat_app/src/dao"
-	"github.com/0RAJA/chat_app/src/pkg/setting"
+	"github.com/0RAJA/chat_app/src/pkg/tool"
 )
 
 // 所有需要在启动时初始化的配置
@@ -25,7 +25,7 @@ func LoadAllEmailsToRedis() error {
 }
 
 // LoadAllGroupRelationToRedis 加载所有群组关系名单到redis
-// :nolint
+// nolint
 func LoadAllGroupRelationToRedis() error {
 	// 群ID和成员IDs
 	var relations map[int64][]int64
@@ -43,7 +43,7 @@ func LoadAllGroupRelationToRedis() error {
 func (load) Init() {
 	var err error
 	// 加载所有邮件到redis
-	err = setting.DoThat(err, LoadAllEmailsToRedis)
+	err = tool.DoThat(err, LoadAllEmailsToRedis)
 	if err != nil {
 		panic(err)
 	}

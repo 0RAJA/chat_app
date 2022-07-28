@@ -10,7 +10,7 @@ type CreateAccount struct {
 	ID           int64        `json:"id"`            // 账号ID
 	Name         string       `json:"name"`          // 名称
 	Avatar       string       `json:"avatar"`        // 头像
-	AccountToken common.Token `json:"account_Token"` // 账号Token
+	AccountToken common.Token `json:"account_token"` // 账号Token
 }
 
 type GetAccountToken struct {
