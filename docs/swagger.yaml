@@ -20,6 +20,28 @@ definitions:
         description: token
         type: string
     type: object
+  model.MsgExtend:
+    properties:
+      remind:
+        description: '@的描述信息'
+        items:
+          $ref: '#/definitions/model.Remind'
+        type: array
+    type: object
+  model.Remind:
+    properties:
+      account_id:
+        description: 被@的账号ID
+        minimum: 1
+        type: integer
+      idx:
+        description: 第几个@
+        minimum: 1
+        type: integer
+    required:
+    - account_id
+    - idx
+    type: object
   model.Setting:
     properties:
       friend_info:
@@ -177,7 +199,7 @@ definitions:
     type: object
   reply.CreateAccount:
     properties:
-      account_Token:
+      account_token:
         $ref: '#/definitions/common.Token'
         description: 账号Token
       avatar:
@@ -266,11 +288,38 @@ definitions:
       total:
         type: integer
     type: object
+  reply.GetMsgsByRelationIDAndTime:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/reply.MsgInfoWithRly'
+        type: array
+      total:
+        type: integer
+    type: object
+  reply.GetPinMsgsByRelationID:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/reply.MsgInfo'
+        type: array
+      total:
+        type: integer
+    type: object
   reply.GetPins:
     properties:
       list:
         items:
           $ref: '#/definitions/model.SettingPin'
+        type: array
+      total:
+        type: integer
+    type: object
+  reply.GetRlyMsgsInfoByMsgID:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/reply.MsgInfo'
         type: array
       total:
         type: integer
@@ -283,6 +332,12 @@ definitions:
         type: array
       total:
         type: integer
+    type: object
+  reply.GetTopMsgByRelationID:
+    properties:
+      msg_info:
+        $ref: '#/definitions/reply.MsgInfo'
+        description: 置顶消息详情
     type: object
   reply.ListApplications:
     properties:
@@ -302,6 +357,109 @@ definitions:
         $ref: '#/definitions/common.Token'
         description: 用户令牌
     type: object
+  reply.MsgInfo:
+    properties:
+      account_id:
+        description: 账号ID 发送者ID
+        type: integer
+      create_at:
+        description: 创建时间
+        type: string
+      file_id:
+        description: 文件ID 当消息类型为file时>0
+        type: integer
+      id:
+        description: 消息ID
+        type: integer
+      is_pin:
+        description: 是否pin
+        type: boolean
+      is_revoke:
+        description: 是否撤回
+        type: boolean
+      is_top:
+        description: 是否置顶
+        type: boolean
+      msg_content:
+        description: 消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充
+        type: string
+      msg_extend:
+        $ref: '#/definitions/model.MsgExtend'
+        description: 消息扩展信息 可能为null
+      msg_type:
+        description: 消息类型 [text,file]
+        type: string
+      notify_type:
+        description: 通知类型 [system,common]
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      read_ids:
+        description: 已读的账号ID 当请求者不为发送者时为空
+        items:
+          type: integer
+        type: array
+      relation_id:
+        description: 关系ID
+        type: integer
+      reply_count:
+        description: 回复数
+        type: integer
+    type: object
+  reply.MsgInfoWithRly:
+    properties:
+      account_id:
+        description: 账号ID 发送者ID
+        type: integer
+      create_at:
+        description: 创建时间
+        type: string
+      file_id:
+        description: 文件ID 当消息类型为file时>0
+        type: integer
+      id:
+        description: 消息ID
+        type: integer
+      is_pin:
+        description: 是否pin
+        type: boolean
+      is_revoke:
+        description: 是否撤回
+        type: boolean
+      is_top:
+        description: 是否置顶
+        type: boolean
+      msg_content:
+        description: 消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充
+        type: string
+      msg_extend:
+        $ref: '#/definitions/model.MsgExtend'
+        description: 消息扩展信息 可能为null
+      msg_type:
+        description: 消息类型 [text,file]
+        type: string
+      notify_type:
+        description: 通知类型 [system,common]
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      read_ids:
+        description: 已读的账号ID 当请求者不为发送者时为空
+        items:
+          type: integer
+        type: array
+      relation_id:
+        description: 关系ID
+        type: integer
+      reply_count:
+        description: 回复数
+        type: integer
+      rly_msg:
+        $ref: '#/definitions/reply.RlyMsg'
+        description: 回复消息详情 可能为null
+    type: object
   reply.Register:
     properties:
       user_info:
@@ -310,6 +468,24 @@ definitions:
       user_token:
         $ref: '#/definitions/common.Token'
         description: 用户令牌
+    type: object
+  reply.RlyMsg:
+    properties:
+      is_revoke:
+        description: 是否撤回
+        type: boolean
+      msg_content:
+        description: 消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充
+        type: string
+      msg_extend:
+        $ref: '#/definitions/model.MsgExtend'
+        description: 消息扩展信息 可能为null
+      msg_id:
+        description: 回复消息ID
+        type: integer
+      msg_type:
+        description: 消息类型 [text,file]
+        type: string
     type: object
   reply.UserInfo:
     properties:
@@ -433,6 +609,12 @@ definitions:
     - email
     - password
     type: object
+  request.RevokeMsg:
+    properties:
+      id:
+        description: 消息ID
+        type: integer
+    type: object
   request.SendEmail:
     properties:
       email:
@@ -444,11 +626,6 @@ definitions:
     type: object
   request.UpdateAccount:
     properties:
-      avatar:
-        description: 头像
-        maxLength: 100
-        minLength: 1
-        type: string
       gender:
         description: 性别
         enum:
@@ -467,10 +644,33 @@ definitions:
         minLength: 1
         type: string
     required:
-    - avatar
     - gender
     - name
     - signature
+    type: object
+  request.UpdateMsgPin:
+    properties:
+      id:
+        description: 消息ID
+        type: integer
+      is_pin:
+        description: 是否pin
+        type: boolean
+      relation_id:
+        description: 关系ID
+        type: integer
+    type: object
+  request.UpdateMsgTop:
+    properties:
+      id:
+        description: 消息ID
+        type: integer
+      is_top:
+        description: 是否置顶
+        type: boolean
+      relation_id:
+        description: 关系ID
+        type: integer
     type: object
   request.UpdateNickName:
     properties:
@@ -952,6 +1152,235 @@ paths:
       summary: 发送邮件
       tags:
       - email
+  /api/msg/info/top:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 关系ID
+        in: query
+        name: relationID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetTopMsgByRelationID'
+              type: object
+      summary: 获取指定关系的置顶消息，如果不存在则为null
+      tags:
+      - message
+  /api/msg/list/pin:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      - description: 关系ID
+        in: query
+        name: relationID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetPinMsgsByRelationID'
+              type: object
+      summary: 获取指定关系的pin消息，按照时间pin时间倒序排序
+      tags:
+      - message
+  /api/msg/list/rly:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      - description: 关系ID
+        in: query
+        name: relationID
+        type: integer
+      - description: 回复消息ID
+        in: query
+        name: rlyMsgID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetRlyMsgsInfoByMsgID'
+              type: object
+      summary: 获取指定关系的所有回复消息，按照时间回复时间先后排序
+      tags:
+      - message
+  /api/msg/list/time:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 拉取消息的最晚时间(精确到秒)
+        in: query
+        name: lastTime
+        type: integer
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      - description: 关系ID
+        in: query
+        name: relationID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetMsgsByRelationIDAndTime'
+              type: object
+      summary: 通过最晚时间戳获取指定关系的信息，获取的消息按照发布时间先后排序
+      tags:
+      - message
+  /api/msg/update/pin:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 设置信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateMsgPin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+            5001:消息不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 设置消息的pin状态
+      tags:
+      - message
+  /api/msg/update/revoke:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 信息id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.RevokeMsg'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+            5001:消息不存在 5002:消息已经撤销
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 撤回消息
+      tags:
+      - message
+  /api/msg/update/top:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 设置信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateMsgTop'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+            5001:消息不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 设置消息的置顶状态
+      tags:
+      - message
   /api/setting/friend/delete:
     delete:
       consumes:

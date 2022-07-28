@@ -26,4 +26,7 @@ var (
 	FileNotExist                = errcode.NewErr(5002, "文件不存在")
 	FileDeleteFailed            = errcode.NewErr(5003, "文件删除失败")
 	NotifyNotExist              = errcode.NewErr(6001, "文件不存在")
+	RelationNotExists           = errcode.NewErr(4002, "关系不存在")
+	MsgNotExists                = errcode.NewErr(5001, "消息不存在")
+	MsgAlreadyRevoke            = errcode.NewErr(5002, "消息已经撤销")
 )

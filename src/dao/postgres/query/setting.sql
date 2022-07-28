@@ -137,3 +137,11 @@ where a.id = (select account_id
   and ((a.name like (@name::varchar || '%')) or (nick_name like (@name::varchar || '%')))
 order by s.pin_time
 limit $2 offset $3;
+
+-- name: ExistsSetting :one
+select exists(
+               select 1
+               from setting
+               where account_id = $1
+                 and relation_id = $2
+           );

@@ -7,6 +7,8 @@ type group struct {
 	Account account
 	Application application
 	Notify notify
+	Setting     setting
+	Message     message
 }
 
 var Group = new(group)
