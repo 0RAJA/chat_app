@@ -16,6 +16,7 @@ func (mGroup) Init(router *gin.RouterGroup) {
 		gg.POST("transfer", v1.Group.MGroup.TransferGroup)
 		gg.POST("dissolve", v1.Group.MGroup.DissolveGroup)
 		gg.POST("update", v1.Group.MGroup.UpdateGroup)
+		gg.POST("invite", v1.Group.MGroup.InviteAccount)
 	}
 
 }

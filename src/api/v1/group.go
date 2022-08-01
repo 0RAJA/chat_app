@@ -68,3 +68,13 @@ func (mGroup)UpdateGroup(c *gin.Context)  {
 	rly.Reply(mErr,result)
 }
 
+func (mGroup)InviteAccount(c *gin.Context)  {
+	rly := app.NewResponse(c)
+	params := request.InviteAccount{}
+	if err := c.ShouldBindQuery(params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	result,mErr := logic.Group.MGroup.InviteAccount(c,params.AccountID,params.RelationID)
+	rly.Reply(mErr,result)
+}

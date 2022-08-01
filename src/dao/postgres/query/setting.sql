@@ -54,6 +54,22 @@ from (select setting.relation_id, setting.nick_name, setting.pin_time
 where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
 order by s.pin_time;
 
+-- name: GetGroupPinSettingsOrderByPinTime :many
+select s.*,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select setting.relation_id, setting.nick_name, setting.pin_time
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.is_pin = true
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     account a
+where a.id = (select account_id from setting where relation_id = s.relation_id)
+order by s.pin_time;
+
 -- name: GetFriendShowSettingsOrderByShowTime :many
 select s.*,
        a.id     as account_id,

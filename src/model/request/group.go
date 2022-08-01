@@ -20,3 +20,8 @@ type UpdateGroup struct {
 	Name        string `json:"name" form:"name" binding:"required"`
 	Description string `json:"description" form:"description" binding:"required"`
 }
+
+type InviteAccount struct {
+	AccountID  int64 `json:"account_id,omitempty" form:"account_id" binding:"required"`
+	RelationID int64 `json:"relation_id,omitempty" form:"relation_id" binding:"required"`
+}

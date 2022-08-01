@@ -15,7 +15,7 @@ type Querier interface {
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
-	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) error
+	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64,error)
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
@@ -68,7 +68,6 @@ type Querier interface {
 	HasReadMsg(ctx context.Context, arg *HasReadMsgParams) (bool, error)
 	TransferIsSelfFalse(ctx context.Context, arg *TransferIsSelfFalseParams) error
 	TransferIsSelfTrue(ctx context.Context, arg *TransferIsSelfTrueParams) error
-	HasReadMsg(ctx context.Context, arg *HasReadMsgParams) (bool, error)
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupAvatar(ctx context.Context, arg *UpdateGroupAvatarParams) error

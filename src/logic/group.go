@@ -72,3 +72,16 @@ func (mGroup)UpdateGroup(c *gin.Context,params request.UpdateGroup) (result repl
 	}
 	return result,nil
 }
+
+func (mGroup)InviteAccount(c *gin.Context,relationID int64,accountID int64) (result reply.InviteAccount,mErr errcode.Err) {
+	err := dao.Group.DB.CreateSetting(c,&db.CreateSettingParams{
+		AccountID:  accountID,
+		RelationID: relationID,
+		IsLeader:   false,
+		IsSelf:     false,
+	})
+	if err != nil {
+		return result,errcode.ErrServer
+	}
+	return result,nil
+}

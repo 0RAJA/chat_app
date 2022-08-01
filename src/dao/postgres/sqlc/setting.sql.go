@@ -385,6 +385,59 @@ func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, acco
 	return items, nil
 }
 
+const getGroupPinSettingsOrderByPinTime = `-- name: GetGroupPinSettingsOrderByPinTime :many
+select s.relation_id, s.nick_name, s.pin_time,
+       a.id     as account_id,
+       a.name   as account_name,
+       a.avatar as account_avatar
+from (select setting.relation_id, setting.nick_name, setting.pin_time
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.is_pin = true
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     account a
+where a.id = (select account_id from setting where relation_id = s.relation_id)
+order by s.pin_time
+`
+
+type GetGroupPinSettingsOrderByPinTimeRow struct {
+	RelationID    int64     `json:"relation_id"`
+	NickName      string    `json:"nick_name"`
+	PinTime       time.Time `json:"pin_time"`
+	AccountID     int64     `json:"account_id"`
+	AccountName   string    `json:"account_name"`
+	AccountAvatar string    `json:"account_avatar"`
+}
+
+func (q *Queries) GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error) {
+	rows, err := q.db.Query(ctx, getGroupPinSettingsOrderByPinTime, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetGroupPinSettingsOrderByPinTimeRow{}
+	for rows.Next() {
+		var i GetGroupPinSettingsOrderByPinTimeRow
+		if err := rows.Scan(
+			&i.RelationID,
+			&i.NickName,
+			&i.PinTime,
+			&i.AccountID,
+			&i.AccountName,
+			&i.AccountAvatar,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSettingByID = `-- name: GetSettingByID :one
 select account_id, relation_id, nick_name, is_not_disturb, is_pin, pin_time, is_show, last_show, is_leader, is_self
 from setting
