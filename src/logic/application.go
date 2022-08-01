@@ -126,19 +126,24 @@ func (application) List(c *gin.Context, accountID int64, limit, offset int32) (r
 	}
 	result := make([]*reply.ApplicationInfo, 0, len(aplys))
 	for _, aply := range aplys {
+		name, avatar := aply.Account1Name, aply.Account1Avatar
+		if aply.Account1ID == accountID {
+			name, avatar = aply.Account2Name, aply.Account2Avatar
+		}
 		result = append(result, &reply.ApplicationInfo{
-			Account1ID:     aply.Account1ID,
-			Account2ID:     aply.Account2ID,
-			ApplyMsg:       aply.ApplyMsg,
-			RefuseMsg:      aply.RefuseMsg,
-			Status:         string(aply.Status),
-			CreateAt:       aply.CreateAt,
-			UpdateAt:       aply.UpdateAt,
-
+			Account1ID: aply.Account1ID,
+			Account2ID: aply.Account2ID,
+			ApplyMsg:   aply.ApplyMsg,
+			RefuseMsg:  aply.RefuseMsg,
+			Status:     string(aply.Status),
+			CreateAt:   aply.CreateAt,
+			UpdateAt:   aply.UpdateAt,
+			Name:       name,
+			Avatar:     avatar,
 		})
 	}
 	return reply.ListApplications{
 		List:  result,
-		Total: aplys[0].Account1ID,
+		Total: aplys[0].Total,
 	}, nil
 }
