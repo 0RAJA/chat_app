@@ -781,51 +781,6 @@
                 }
             }
         },
-        "/api/file/publish": {
-            "post": {
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "tags": [
-                    "file"
-                ],
-                "summary": "上传文件(测试用)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "accountID",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "relationID",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "1001:参数有误 1003:系统错误 8001:存储失败",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/common.State"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/reply.PublishFile"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/api/group/create": {
             "post": {
                 "consumes": [

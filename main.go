@@ -49,29 +49,28 @@ func main() {
 	}
 	global.Logger.Info("Server started!")
 	fmt.Println("AppName:", global.PbSettings.App.Name, "Version:", global.PbSettings.App.Version, "Address:", global.PbSettings.Server.Address, "RunMode:", global.PbSettings.Server.RunMode)
+	errChan := make(chan error, 1)
 	go func() {
+		defer close(errChan)
 		err := s.ListenAndServe()
 		if err != nil {
-			global.Logger.Info(err.Error())
+			errChan <- err
 		}
 	}()
-
-	gracefulExit(s) // 优雅退出
-	global.Logger.Info("Server exited!")
-}
-
-// 优雅退出
-func gracefulExit(s *http.Server) {
-	// 退出通知
+	// 优雅退出
 	quit := make(chan os.Signal, 1)
-	// 等待退出通知
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	global.Logger.Info("ShutDown Server...")
-	// 给几秒完成剩余任务
-	ctx, cancel := context.WithTimeout(context.Background(), global.PbSettings.Server.DefaultContextTimeout)
-	defer cancel()
-	if err := s.Shutdown(ctx); err != nil { // 优雅退出
-		global.Logger.Info("Server forced to ShutDown,Err:" + err.Error())
+	select {
+	case err := <-errChan:
+		global.Logger.Error(err.Error())
+	case <-quit:
+		global.Logger.Info("ShutDown Server...")
+		// 给几秒完成剩余任务
+		ctx, cancel := context.WithTimeout(context.Background(), global.PbSettings.Server.DefaultContextTimeout)
+		defer cancel()
+		if err := s.Shutdown(ctx); err != nil { // 优雅退出
+			global.Logger.Info("Server forced to ShutDown,Err:" + err.Error())
+		}
 	}
+	global.Logger.Info("Server exited!")
 }
