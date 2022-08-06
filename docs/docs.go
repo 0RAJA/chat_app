@@ -660,7 +660,7 @@ const docTemplate = `{
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -668,7 +668,7 @@ const docTemplate = `{
                 "tags": [
                     "upload"
                 ],
-                "summary": "message",
+                "summary": "发布文件消息",
                 "parameters": [
                     {
                         "type": "string",
