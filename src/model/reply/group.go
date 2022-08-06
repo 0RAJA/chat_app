@@ -16,8 +16,6 @@ type UpdateGroup struct {
 	Description string `json:"description" form:"description" binding:"required"`
 }
 type InviteAccount struct {
-
 }
 type QuitGroup struct {
-
 }

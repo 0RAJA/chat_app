@@ -2,10 +2,11 @@ package upload
 
 import (
 	"errors"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"mime/multipart"
 	"path"
 	"time"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 type Config struct {

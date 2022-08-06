@@ -40,12 +40,13 @@ type CreateGroupRelationParams struct {
 	Avatar      string `json:"avatar"`
 }
 
-func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams)(int64, error) {
+func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64, error) {
 	row := q.db.QueryRow(ctx, createGroupRelation, arg.Name, arg.Description, arg.Avatar)
 	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
+
 const deleteFriendRelationsByAccountID = `-- name: DeleteFriendRelationsByAccountID :exec
 delete
 from relation

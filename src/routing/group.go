@@ -7,7 +7,6 @@ import (
 )
 
 type mGroup struct {
-
 }
 
 func (mGroup) Init(router *gin.RouterGroup) {

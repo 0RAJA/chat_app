@@ -3,10 +3,11 @@ package oss
 import (
 	"errors"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"mime/multipart"
 	"path"
 	"time"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 type Config struct {
@@ -18,12 +19,9 @@ type Config struct {
 	BucketName      string
 }
 
-
-
 type OSS struct {
 	config Config
 }
-
 
 func Init(config Config) *OSS {
 	return &OSS{config: config}
