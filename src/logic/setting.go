@@ -11,6 +11,7 @@ import (
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
+	"strings"
 )
 
 type setting struct {
@@ -49,15 +50,109 @@ func (setting) GetFriends(c *gin.Context, accountID int64) (reply.GetFriends, er
 }
 
 func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.Err) {
-	// friendData, err := dao.Group.DB.GetFriendPinSettingsOrderByPinTime(c, accountID)
-	// TODO:获取群组的pin，然后合并
-	return reply.GetPins{List: []*model.SettingPin{}}, nil
+	result := make([]*model.SettingPin,0,20)
+	friendData, err := dao.Group.DB.GetFriendPinSettingsOrderByPinTime(c, accountID)
+	if  err!= nil {
+		return reply.GetPins{List: []*model.SettingPin{}},errcode.ErrServer
+	}
+	for _,v := range friendData {
+		friendInfo := &model.SettingFriendInfo{
+			AccountID: v.AccountID,
+			Name:      v.NickName,
+			Avatar:    v.AccountAvatar,
+		}
+		result = append(result,&model.SettingPin{
+			SettingPinInfo: model.SettingPinInfo{
+				RelationID:   v.RelationID,
+				RelationType: "friend",
+				NickName:     v.NickName,
+				PinTime:      v.PinTime,
+			},
+			GroupInfo:      nil,
+			FriendInfo:     friendInfo,
+		})
+	}
+	groupData,err := dao.Group.DB.GetGroupPinSettingsOrderByPinTime(c,accountID)
+	if  err!= nil {
+		return reply.GetPins{List: []*model.SettingPin{}},errcode.ErrServer
+	}
+	for _,v := range groupData{
+		groupType := strings.Split(v.GroupType.String,",")
+		groupInfo := &model.SettingGroupInfo{
+			RelationID:  v.RelationID,
+			Name:        groupType[0][1:],
+			Description: groupType[1],
+			Avatar:      groupType[2][:len(groupType[2])-1],
+		}
+		result = append(result,&model.SettingPin{
+			SettingPinInfo: model.SettingPinInfo{
+				RelationID:   v.RelationID,
+				RelationType: "group",
+				NickName:     v.NickName,
+				PinTime:      v.PinTime,
+			},
+			GroupInfo:      groupInfo,
+			FriendInfo:     nil,
+		})
+	}
+	return reply.GetPins{List: result}, nil
 }
 
 func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcode.Err) {
-	// data, err := dao.Group.DB.GetFriendShowSettingsOrderByShowTime(c, accountID)
-	// TODO:获取群组的show，然后合并
-	return reply.GetShows{List: []*model.Setting{}}, nil
+	result := make([]*model.Setting,0,20)
+	data, err := dao.Group.DB.GetFriendShowSettingsOrderByShowTime(c, accountID)
+	if  err!= nil {
+		return reply.GetShows{List: []*model.Setting{}},errcode.ErrServer
+	}
+	for _,v := range data {
+		friendInfo := &model.SettingFriendInfo{
+			AccountID: v.AccountID,
+			Name:      v.NickName,
+			Avatar:    v.AccountAvatar,
+		}
+		result = append(result,&model.Setting{
+			SettingInfo: model.SettingInfo{
+				RelationID:   v.RelationID,
+				RelationType: "friend",
+				NickName:     v.NickName,
+				IsNotDisturb: v.IsNotDisturb,
+				IsPin:        v.IsPin,
+				PinTime:      v.PinTime,
+				IsShow:       v.IsShow,
+				LastShow:     v.LastShow,
+			},
+			GroupInfo:      nil,
+			FriendInfo:     friendInfo,
+		})
+	}
+	groupData,err := dao.Group.DB.GetGroupShowSettingsOrderByShowTime(c,accountID)
+	if  err!= nil {
+		return reply.GetShows{List: []*model.Setting{}},errcode.ErrServer
+	}
+	for _,v := range groupData{
+		groupType := strings.Split(v.GroupType.String,",")
+		groupInfo := &model.SettingGroupInfo{
+			RelationID:  v.RelationID,
+			Name:        groupType[0][1:],
+			Description: groupType[1],
+			Avatar:      groupType[2][:len(groupType[2])-1],
+		}
+		result = append(result,&model.Setting{
+			SettingInfo: model.SettingInfo{
+				RelationID:   v.RelationID,
+				RelationType: "group",
+				NickName:     v.NickName,
+				IsNotDisturb: v.IsNotDisturb,
+				IsPin:        v.IsPin,
+				PinTime:      v.PinTime,
+				IsShow:       v.IsShow,
+				LastShow:     v.LastShow,
+			},
+			GroupInfo:      groupInfo,
+			FriendInfo:     nil,
+		})
+	}
+	return reply.GetShows{List: result}, nil
 }
 
 func getFriendRelationByID(c *gin.Context, relationID int64) (*db.GetFriendRelationByIDRow, errcode.Err) {

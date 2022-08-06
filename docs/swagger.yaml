@@ -118,6 +118,15 @@ definitions:
         type: string
     type: object
   model.SettingGroupInfo:
+    properties:
+      avatar:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      relation_id:
+        type: integer
     type: object
   model.SettingPin:
     properties:
@@ -218,11 +227,45 @@ definitions:
         description: 名称
         type: string
     type: object
+  reply.CreateGroup:
+    properties:
+      account_id:
+        type: integer
+      avatar:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      relation_id:
+        type: integer
+    type: object
+  reply.DeleteFile:
+    type: object
+  reply.DissolveGroup:
+    type: object
   reply.ExistEmail:
     properties:
       exist:
         description: 是否已经存在
         type: boolean
+    type: object
+  reply.File:
+    properties:
+      account_id:
+        type: integer
+      create_at:
+        type: string
+      file_id:
+        type: integer
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      file_type:
+        type: string
+      url:
+        type: string
     type: object
   reply.GetAccountByID:
     properties:
@@ -303,6 +346,23 @@ definitions:
       total:
         type: integer
     type: object
+  reply.GetNotify:
+    properties:
+      account_id:
+        type: integer
+      create_at:
+        type: string
+      id:
+        type: integer
+      msg_content:
+        type: string
+      read_ids:
+        items:
+          type: integer
+        type: array
+      relation_id:
+        type: integer
+    type: object
   reply.GetPinMsgsByRelationID:
     properties:
       list:
@@ -344,6 +404,25 @@ definitions:
       msg_info:
         $ref: '#/definitions/reply.MsgInfo'
         description: 置顶消息详情
+    type: object
+  reply.GroupNotify:
+    properties:
+      account_id:
+        type: integer
+      create_at:
+        type: string
+      id:
+        type: integer
+      msg_content:
+        type: string
+      read_ids:
+        items:
+          type: integer
+        type: array
+      relation_id:
+        type: integer
+    type: object
+  reply.InviteAccount:
     type: object
   reply.ListApplications:
     properties:
@@ -466,6 +545,21 @@ definitions:
         $ref: '#/definitions/reply.RlyMsg'
         description: 回复消息详情 可能为null
     type: object
+  reply.PublishFile:
+    properties:
+      create_at:
+        type: string
+      file_size:
+        type: integer
+      file_type:
+        type: string
+      id:
+        type: integer
+      url:
+        type: string
+    type: object
+  reply.QuitGroup:
+    type: object
   reply.Register:
     properties:
       user_info:
@@ -492,6 +586,20 @@ definitions:
       msg_type:
         description: 消息类型 [text,file]
         type: string
+    type: object
+  reply.TransferGroup:
+    type: object
+  reply.UpdateGroup:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  reply.UpdateNotify:
     type: object
   reply.UserInfo:
     properties:
@@ -570,11 +678,25 @@ definitions:
     required:
     - account_id
     type: object
+  request.DeleteFile:
+    properties:
+      file_id:
+        type: integer
+    required:
+    - file_id
+    type: object
   request.DeleteFriend:
     properties:
       relation_id:
         description: 关系ID
         minimum: 1
+        type: integer
+    required:
+    - relation_id
+    type: object
+  request.GetRelationFile:
+    properties:
+      relation_id:
         type: integer
     required:
     - relation_id
@@ -763,6 +885,16 @@ definitions:
     required:
     - code
     - new_password
+    type: object
+  request.UploadAvatar:
+    properties:
+      accountID:
+        type: integer
+      relationID:
+        type: integer
+    required:
+    - accountID
+    - relationID
     type: object
 host: chat.humraja.xyz
 info:
@@ -1172,6 +1304,293 @@ paths:
       summary: 发送邮件
       tags:
       - email
+  /api/file/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 文件及账号信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UploadAvatar'
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 8001:存储失败
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.PublishFile'
+              type: object
+      summary: 更新群头像活用户头像
+      tags:
+      - file
+  /api/file/getall:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关系ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.GetRelationFile'
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 8001:存储失败
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/reply.File'
+                  type: array
+              type: object
+      summary: 获取关系文件列表
+      tags:
+      - file
+  /api/file/publish:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 文件ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteFile'
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.DeleteFile'
+              type: object
+      summary: 删除文件(测试用)
+      tags:
+      - file
+  /api/group/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: description
+        required: true
+        type: string
+      - in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.CreateGroup'
+              type: object
+      summary: 创建群
+      tags:
+      - group
+  /api/group/dissolve:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.DissolveGroup'
+              type: object
+      summary: 解散群
+      tags:
+      - group
+  /api/group/getnotify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主
+            7003:非群员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.QuitGroup'
+              type: object
+      summary: 邀请人进群
+      tags:
+      - group
+  /api/group/invite:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.InviteAccount'
+              type: object
+      summary: 邀请人进群
+      tags:
+      - group
+  /api/group/transfer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: from_account_id
+        required: true
+        type: integer
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      - in: query
+        name: to_account_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主
+            7003:非群成员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.TransferGroup'
+              type: object
+      summary: 转让群
+      tags:
+      - group
+  /api/group/update:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: description
+        required: true
+        type: string
+      - in: query
+        name: name
+        required: true
+        type: string
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.UpdateGroup'
+              type: object
+      summary: 更新群信息
+      tags:
+      - group
   /api/msg/file:
     post:
       consumes:
@@ -1451,6 +1870,122 @@ paths:
       summary: 设置消息的置顶状态
       tags:
       - message
+  /api/notify/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: relation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/reply.GetNotify'
+                  type: array
+              type: object
+      summary: 更新群通知
+      tags:
+      - notify
+  /api/notify/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: msg_content
+        required: true
+        type: string
+      - in: query
+        name: msg_expand
+        required: true
+        type: string
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GroupNotify'
+              type: object
+      summary: 创建群通知
+      tags:
+      - notify
+  /api/notify/update:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: id
+        required: true
+        type: integer
+      - in: query
+        name: msg_content
+        required: true
+        type: string
+      - in: query
+        name: msg_expand
+        required: true
+        type: string
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.UpdateNotify'
+              type: object
+      summary: 更新群通知
+      tags:
+      - notify
   /api/setting/friend/delete:
     delete:
       consumes:
@@ -1566,7 +2101,7 @@ paths:
                 data:
                   $ref: '#/definitions/reply.GetPins'
               type: object
-      summary: '获取当前账户pin的好友和群组列表(TODO: 待完善)'
+      summary: 获取当前账户pin的好友和群组列表
       tags:
       - setting
   /api/setting/shows:

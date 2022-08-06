@@ -34,10 +34,12 @@ Rule: # 规则配置
   CodeMarkDuration: 1h # 验证码有效时间
   AccountNumMax: 5 # 用户账号最大数量
   DefaultAvatarURL: "https://avatars.githubusercontent.com/u/76676061?v=4" # 默认头像
+  BiggestFileSize: 1024000
 Auto: # 自动任务配置
   Retry:
     Duration: 5s # 重试间隔时间
     MaxTimes: 3 # 最大重试次数
+  DeleteExpiredFileDuration: 12h
 Worker: # 工作池配置
   TaskChanCapacity: 50 # 任务队列容量
   WorkerChanCapacity: 50 # 工作队列容量

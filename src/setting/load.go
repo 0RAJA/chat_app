@@ -29,11 +29,17 @@ func LoadAllEmailsToRedis() error {
 func LoadAllGroupRelationToRedis() error {
 	// 群ID和成员IDs
 	var relations map[int64][]int64
-	// TODO: 加载所有群ID和成员IDs到redis
-	// relations, err := dao.Group.DB.GetAllGroupRelation(context.Background())
-	// if err != nil {
-	// 	return err
-	// }
+	relation, err := dao.Group.DB.GetAllGroupRelation(context.Background())
+	if err != nil {
+		return err
+	}
+	for _, v := range relation {
+		member, err := dao.Group.DB.GetGroupMembers(context.Background(), v)
+		if err != nil {
+			return err
+		}
+		relations[v] = member
+	}
 	if err := dao.Group.Redis.ReloadGroupRelationIDs(context.Background(), relations); err != nil {
 		return err
 	}

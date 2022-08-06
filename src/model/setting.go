@@ -11,6 +11,10 @@ type SettingFriendInfo struct {
 }
 
 type SettingGroupInfo struct {
+	RelationID  int64  `json:"relation_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
 }
 
 type SettingInfo struct {

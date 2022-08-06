@@ -25,10 +25,14 @@ func NewRouter() *gin.Engine {
 		rg := routing.Group
 		rg.User.Init(root)
 		rg.Email.Init(root)
+		rg.File.Init(root)
 		rg.Account.Init(root)
 		rg.Application.Init(root)
+		rg.Notify.Init(root)
 		rg.Setting.Init(root)
 		rg.Message.Init(root)
+		rg.MGroup.Init(root)
+
 	}
 	return r
 }

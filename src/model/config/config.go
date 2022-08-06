@@ -50,6 +50,7 @@ type AliyunOSS struct {
 	AccessKeyId     string `yaml:"AccessKeyID"`
 	AccessKeySecret string `yaml:"AccessKeySecret"`
 	BucketName      string `yaml:"BucketName"`
+	GroupAvatarUrl  string `yaml:"GroupAvatarUrl"`
 }
 
 type Redis struct {
@@ -81,6 +82,7 @@ type Rule struct {
 	CodeLength       int           `yaml:"CodeLength"`
 	AccountNumMax    int32         `yaml:"AccountNumMax"`
 	DefaultAvatarURL string        `yaml:"DefaultAvatarURL"`
+	BiggestFileSize  int64         `yaml:"BiggestFileSize"`
 }
 
 type Server struct {
@@ -141,7 +143,8 @@ type APILimit struct {
 }
 
 type Auto struct {
-	Retry Retry `yaml:"Retry"`
+	Retry                     Retry         `yaml:"Retry"`
+	DeleteExpiredFileDuration time.Duration `yaml:"DeleteExpiredFileDuration"`
 }
 
 type Retry struct {

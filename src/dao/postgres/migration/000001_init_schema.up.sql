@@ -203,7 +203,7 @@ execute procedure pin_timestamp();
 create
     or replace function cs_timestamp(
 ) returns trigger as
-$$
+              $$
 begin
     new.update_at
         = now();
