@@ -21,7 +21,7 @@ type mGroup struct {
 // @accept   application/json
 // @Produce  application/json
 // @Param    Authorization  header    string                                true  "Bearer 账户令牌"
-// @Param    data           query     request.CreateGroup                 true  "请求信息"
+// @Param    data           query     request.CreateGroup                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.CreateGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
 // @Router   /api/group/create [post]
 func (mGroup) CreateGroup(c *gin.Context) {
@@ -54,8 +54,8 @@ func (mGroup) CreateGroup(c *gin.Context) {
 // @Summary  转让群
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           query     request.TransferGroup                 true  "请求信息"
+// @Param    Authorization  header    string                                  true  "Bearer 账户令牌"
+// @Param    data           query     request.TransferGroup                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.TransferGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主 7003:非群成员"
 // @Router   /api/group/transfer [post]
 func (mGroup) TransferGroup(c *gin.Context) {
@@ -79,8 +79,8 @@ func (mGroup) TransferGroup(c *gin.Context) {
 // @Summary  解散群
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           query     request.DissolveGroup                 true  "请求信息"
+// @Param    Authorization  header    string                                  true  "Bearer 账户令牌"
+// @Param    data           query     request.DissolveGroup                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.DissolveGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主"
 // @Router   /api/group/dissolve [post]
 func (mGroup) DissolveGroup(c *gin.Context) {
@@ -104,8 +104,8 @@ func (mGroup) DissolveGroup(c *gin.Context) {
 // @Summary  更新群信息
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           query     request.UpdateGroup               true  "请求信息"
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           query     request.UpdateGroup                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.UpdateGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
 // @Router   /api/group/update [post]
 func (mGroup) UpdateGroup(c *gin.Context) {
@@ -129,8 +129,8 @@ func (mGroup) UpdateGroup(c *gin.Context) {
 // @Summary  邀请人进群
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           query     request.InviteAccount                true  "请求信息"
+// @Param    Authorization  header    string                                  true  "Bearer 账户令牌"
+// @Param    data           query     request.InviteAccount                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.InviteAccount}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
 // @Router   /api/group/invite [post]
 func (mGroup) InviteAccount(c *gin.Context) {
@@ -154,8 +154,8 @@ func (mGroup) InviteAccount(c *gin.Context) {
 // @Summary  退群
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           query     request.QuitGroup                true  "请求信息"
+// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
+// @Param    data           query     request.QuitGroup                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.QuitGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主 7003:非群员"
 // @Router   /api/group/quit [post]
 func (mGroup) QuitGroup(c *gin.Context) {

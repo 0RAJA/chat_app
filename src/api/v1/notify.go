@@ -19,8 +19,8 @@ type notify struct {
 // @Summary  创建群通知
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           query     request.CreateNotify                   true  "请求信息"
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           query     request.CreateNotify                  true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.GroupNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
 // @Router   /api/notify/create [post]
 func (notify) CreateNotify(c *gin.Context) {
@@ -45,7 +45,7 @@ func (notify) CreateNotify(c *gin.Context) {
 // @Summary  更新群通知
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
 // @Param    data           query     request.UpdateNotify                   true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.UpdateNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
 // @Router   /api/notify/update [post]

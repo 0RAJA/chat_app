@@ -11,6 +11,7 @@ type group struct {
 	EmailMark emailMark
 	Load      load
 	GenID     genID
+	Chat      chat
 }
 
 var Group = new(group)
@@ -24,6 +25,7 @@ func AllInit() {
 	Group.Worker.Init()
 	Group.EmailMark.Init()
 	Group.GenID.Init()
+	Group.Chat.Init()
 	Group.Load.Init()
 	Group.Auto.Init()
 }
