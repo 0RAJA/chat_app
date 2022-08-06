@@ -90,25 +90,6 @@ func (e *Msgnotifytype) Scan(src interface{}) error {
 	return nil
 }
 
-type Msgtype string
-
-const (
-	MsgtypeText Msgtype = "text"
-	MsgtypeFile Msgtype = "file"
-)
-
-func (e *Msgtype) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = Msgtype(s)
-	case string:
-		*e = Msgtype(s)
-	default:
-		return fmt.Errorf("unsupported scan type for Msgtype: %T", src)
-	}
-	return nil
-}
-
 type Relationtype string
 
 const (
@@ -173,7 +154,7 @@ type GroupNotify struct {
 type Message struct {
 	ID            int64         `json:"id"`
 	NotifyType    Msgnotifytype `json:"notify_type"`
-	MsgType       Msgtype       `json:"msg_type"`
+	MsgType       string        `json:"msg_type"`
 	MsgContent    string        `json:"msg_content"`
 	MsgExtend     pgtype.JSON   `json:"msg_extend"`
 	FileID        sql.NullInt64 `json:"file_id"`

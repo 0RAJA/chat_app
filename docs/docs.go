@@ -652,6 +652,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/msg/file": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upload"
+                ],
+                "summary": "发布文件消息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "关系id",
+                        "name": "relation_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "回复消息id",
+                        "name": "rly_msg_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
         "/api/msg/info/top": {
             "get": {
                 "consumes": [
@@ -673,10 +733,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "关系ID",
                         "name": "relationID",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -734,10 +796,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "关系ID",
                         "name": "relationID",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -795,16 +859,20 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "关系ID",
                         "name": "relationID",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "回复消息ID",
                         "name": "rlyMsgID",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -850,10 +918,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "拉取消息的最晚时间(精确到秒)",
                         "name": "lastTime",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
@@ -868,10 +938,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "关系ID",
                         "name": "relationID",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1793,6 +1865,10 @@ const docTemplate = `{
                     "description": "头像",
                     "type": "string"
                 },
+                "gender": {
+                    "description": "性别 [男,女,未知]",
+                    "type": "string"
+                },
                 "name": {
                     "description": "名称",
                     "type": "string"
@@ -1812,6 +1888,10 @@ const docTemplate = `{
                 },
                 "avatar": {
                     "description": "头像",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "性别 [男,女,未知]",
                     "type": "string"
                 },
                 "name": {
@@ -1903,7 +1983,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "description": "性别",
+                    "description": "性别 [男,女,未知]",
                     "type": "string"
                 },
                 "id": {
@@ -2445,6 +2525,9 @@ const docTemplate = `{
         },
         "request.RevokeMsg": {
             "type": "object",
+            "required": [
+                "id"
+            ],
             "properties": {
                 "id": {
                     "description": "消息ID",
@@ -2498,10 +2581,16 @@ const docTemplate = `{
         },
         "request.UpdateMsgPin": {
             "type": "object",
+            "required": [
+                "id",
+                "is_pin",
+                "relation_id"
+            ],
             "properties": {
                 "id": {
                     "description": "消息ID",
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "is_pin": {
                     "description": "是否pin",
@@ -2509,16 +2598,23 @@ const docTemplate = `{
                 },
                 "relation_id": {
                     "description": "关系ID",
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },
         "request.UpdateMsgTop": {
             "type": "object",
+            "required": [
+                "id",
+                "is_top",
+                "relation_id"
+            ],
             "properties": {
                 "id": {
                     "description": "消息ID",
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "is_top": {
                     "description": "是否置顶",
@@ -2526,7 +2622,8 @@ const docTemplate = `{
                 },
                 "relation_id": {
                     "description": "关系ID",
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

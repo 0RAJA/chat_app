@@ -30,6 +30,8 @@ type TXer interface {
 	DissolveGroup(c context.Context ,relationID int64) error
 	// UpdateMsgTopTrueByMsgIDWithTx 更新此消息置顶(会删除其他置顶)
 	UpdateMsgTopTrueByMsgIDWithTx(c context.Context, relationID, msgID int64) error
+	// RevokeMsgWithTx 撤回消息，如果消息置顶或pin则统统取消
+	RevokeMsgWithTx(c context.Context, msgID int64, isTop, isPin bool) error
 }
 
 type SqlStore struct {

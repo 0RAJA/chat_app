@@ -1,7 +1,15 @@
 package model
 
 import (
+	"mime/multipart"
 	"time"
+)
+
+type MsgType string
+
+const (
+	MsgTypeText MsgType = "text"
+	MsgTypeFile MsgType = "file"
 )
 
 type Remind struct {
@@ -9,6 +17,7 @@ type Remind struct {
 	AccountID int64 `json:"account_id" binding:"required,gte=1"` // 被@的账号ID
 }
 
+// MsgExtend 消息扩展信息 可能为null
 type MsgExtend struct {
 	Remind []Remind `json:"remind"` // @的描述信息
 }
@@ -47,10 +56,13 @@ type RevokeMsgParams struct {
 	AccountID, MsgID int64
 }
 
+type CreateFileMsgParams struct {
+	AccountID, RelationID, RlyMsgID int64
+	File                            multipart.File
+}
+
 type CreateMsgParams struct {
-	AccountID, RelationID           int64
-	NotifyType, MsgType, MsgContent string
-	MsgExtend                       *MsgExtend
-	FileID                          int64
-	RlyMsgID                        int64
+	AccountID, RelationID, FileID, RlyMsgID int64
+	NotifyType, MsgType, MsgContent         string
+	MsgExtend                               *MsgExtend
 }
