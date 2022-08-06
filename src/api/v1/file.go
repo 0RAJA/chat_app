@@ -26,7 +26,7 @@ func (file) Publish(c *gin.Context) {
 		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fileType, mErr := gtype.GetFileType(*params.File)
+	fileType, mErr := gtype.GetFileType(params.File)
 	if mErr != nil {
 		return
 	}
