@@ -230,9 +230,9 @@ func (message) RevokeMsg(c *gin.Context) {
 
 // CreateFileMsg
 // @Tags      upload
-// @Summary   message
+// @Summary   发布文件消息
 // @Security  BasicAuth
-// @accept    application/json
+// @accept    multipart/form-data
 // @Produce   application/json
 // @Param     Authorization  header    string  true   "Bearer 账户令牌"
 // @Param     file           formData  file    true   "文件"

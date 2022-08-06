@@ -1169,7 +1169,7 @@ paths:
   /api/msg/file:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       parameters:
       - description: Bearer 账户令牌
         in: header
@@ -1201,7 +1201,7 @@ paths:
             $ref: '#/definitions/common.State'
       security:
       - BasicAuth: []
-      summary: message
+      summary: 发布文件消息
       tags:
       - upload
   /api/msg/info/top:
