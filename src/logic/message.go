@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
@@ -46,7 +47,7 @@ func existsSetting(c *gin.Context, accountID, relationID int64) (bool, errcode.E
 	return ok, nil
 }
 
-func getMsgInfoByID(c *gin.Context, msgID int64) (*db.Message, errcode.Err) {
+func getMsgInfoByID(c *gin.Context, msgID int64) (*db.GetMsgByIDRow, errcode.Err) {
 	result, err := dao.Group.DB.GetMsgByID(c, msgID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -95,13 +96,17 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 		if params.AccountID == v.AccountID.Int64 {
 			readIDs = v.ReadIds
 		}
-		rlyMsg := &reply.RlyMsg{}
+		var rlyMsg *reply.RlyMsg
 		if v.RlyMsgID.Valid {
+			rlyMsgInfo, merr := getMsgInfoByID(c, v.RlyMsgID.Int64)
+			if merr != nil {
+				continue
+			}
 			var rlyContent string
 			var rlyExtend *model.MsgExtend
-			if !v.RlyIsRevoke.Bool {
-				rlyContent = v.MsgContent
-				rlyExtend, err = jsonToExpand(v.MsgExtend)
+			if !rlyMsgInfo.IsRevoke {
+				rlyContent = rlyMsgInfo.MsgContent
+				rlyExtend, err = jsonToExpand(rlyMsgInfo.MsgExtend)
 				if err != nil {
 					global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 					return reply.GetMsgsByRelationIDAndTime{}, errcode.ErrServer
@@ -109,17 +114,17 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 			}
 			rlyMsg = &reply.RlyMsg{
 				MsgID:      v.RlyMsgID.Int64,
-				MsgType:    string(v.RlyMsgType),
+				MsgType:    rlyMsgInfo.MsgType,
 				MsgContent: rlyContent,
 				MsgExtend:  rlyExtend,
-				IsRevoke:   v.RlyIsRevoke.Bool,
+				IsRevoke:   rlyMsgInfo.IsRevoke,
 			}
 		}
 		result = append(result, &reply.MsgInfoWithRly{
 			MsgInfo: reply.MsgInfo{
 				ID:         v.ID,
 				NotifyType: string(v.NotifyType),
-				MsgType:    string(v.MsgType),
+				MsgType:    v.MsgType,
 				MsgContent: content,
 				Extend:     extend,
 				FileID:     v.FileID.Int64,
@@ -178,7 +183,7 @@ func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByR
 		result = append(result, &reply.MsgInfo{
 			ID:         v.ID,
 			NotifyType: string(v.NotifyType),
-			MsgType:    string(v.MsgType),
+			MsgType:    v.MsgType,
 			MsgContent: content,
 			Extend:     extend,
 			FileID:     v.FileID.Int64,
@@ -366,18 +371,71 @@ func (message) RevokeMsg(c *gin.Context, params model.RevokeMsgParams) errcode.E
 	if merr != nil {
 		return merr
 	}
+	// 检查权限
+	if params.AccountID != msgInfo.AccountID.Int64 {
+		return myerr.AuthPermissionsInsufficient
+	}
 	if msgInfo.IsRevoke {
 		return myerr.MsgAlreadyRevoke
 	}
-	err := dao.Group.DB.UpdateMsgRevoke(c, &db.UpdateMsgRevokeParams{
-		ID:       params.MsgID,
-		IsRevoke: true,
-	})
+	err := dao.Group.DB.RevokeMsgWithTx(c, params.MsgID, msgInfo.IsTop, msgInfo.IsPin)
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
+	if msgInfo.IsTop {
+		// TODO: 推送取消置顶通知
+	}
 	return nil
+}
+
+func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (*reply.CreateFileMsg, errcode.Err) {
+	// 检查权限
+	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	if merr != nil {
+		return nil, merr
+	}
+	if !ok {
+		return nil, myerr.AuthPermissionsInsufficient
+	}
+	// TODO:上传文件
+	var fileID int64
+	var url string
+	// upload(params.File,'')
+	var isRly bool
+	var rlyID int64
+	if params.RlyMsgID > 0 {
+		rlyInfo, merr := getMsgInfoByID(c, params.RlyMsgID)
+		if merr != nil {
+			return nil, merr
+		}
+		if rlyInfo.IsRevoke {
+			return nil, myerr.RlyMsgHasRevoked
+		}
+		isRly = true
+		rlyID = params.RlyMsgID
+	}
+	extend, _ := expandToJson(nil)
+	result, err := dao.Group.DB.CreateMsg(c, &db.CreateMsgParams{
+		NotifyType: db.MsgnotifytypeCommon,
+		MsgType:    string(model.MsgTypeFile),
+		MsgContent: url,
+		MsgExtend:  extend,
+		FileID:     sql.NullInt64{Int64: fileID, Valid: true},
+		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
+		RlyMsgID:   sql.NullInt64{Int64: rlyID, Valid: isRly},
+		RelationID: 0,
+	})
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return nil, errcode.ErrServer
+	}
+	return &reply.CreateFileMsg{
+		ID:         result.ID,
+		MsgContent: result.MsgContent,
+		FileID:     result.FileID.Int64,
+		CreateAt:   result.CreateAt,
+	}, nil
 }
 
 // func (message) CreateMsg(c *gin.Context, params model.CreateMsgParams) errcode.Err {

@@ -25,4 +25,5 @@ var (
 	RelationNotExists           = errcode.NewErr(4002, "关系不存在")
 	MsgNotExists                = errcode.NewErr(5001, "消息不存在")
 	MsgAlreadyRevoke            = errcode.NewErr(5002, "消息已经撤销")
+	RlyMsgHasRevoked            = errcode.NewErr(5003, "回复消息已经撤销")
 )
