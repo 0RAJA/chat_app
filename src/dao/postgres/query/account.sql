@@ -24,7 +24,7 @@ from (select * from account where account.id = @target_id) a
 limit 1;
 
 -- name: GetAccountsByUserID :many
-select id, name, avatar
+select id, name, avatar, gender
 from account
 where user_id = $1;
 
@@ -56,7 +56,7 @@ returning id;
 
 -- name: GetAccountsByName :many
 select a.*, r.id as relation_id, count(*) over () as total
-from (select id, name, avatar from account where name like (@name::varchar || '%')) as a
+from (select id, name, avatar, gender from account where name like (@name::varchar || '%')) as a
          left join relation r on (r.relation_type = 'friend' and
                                   (((r.friend_type).account1_id = a.id and
                                     (r.friend_type).account2_id = @account_id::bigint) or

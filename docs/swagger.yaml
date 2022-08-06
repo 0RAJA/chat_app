@@ -148,6 +148,9 @@ definitions:
       avatar:
         description: 头像
         type: string
+      gender:
+        description: 性别 [男,女,未知]
+        type: string
       name:
         description: 名称
         type: string
@@ -162,6 +165,9 @@ definitions:
         type: integer
       avatar:
         description: 头像
+        type: string
+      gender:
+        description: 性别 [男,女,未知]
         type: string
       name:
         description: 名称
@@ -227,7 +233,7 @@ definitions:
         description: 创建时间
         type: string
       gender:
-        description: 性别
+        description: 性别 [男,女,未知]
         type: string
       id:
         description: 账号ID

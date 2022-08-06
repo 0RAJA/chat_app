@@ -167,8 +167,8 @@ func (q *Queries) GetAccountByID(ctx context.Context, arg *GetAccountByIDParams)
 }
 
 const getAccountsByName = `-- name: GetAccountsByName :many
-select a.id, a.name, a.avatar, r.id as relation_id, count(*) over () as total
-from (select id, name, avatar from account where name like ($3::varchar || '%')) as a
+select a.id, a.name, a.avatar, a.gender, r.id as relation_id, count(*) over () as total
+from (select id, name, avatar, gender from account where name like ($3::varchar || '%')) as a
          left join relation r on (r.relation_type = 'friend' and
                                   (((r.friend_type).account1_id = a.id and
                                     (r.friend_type).account2_id = $4::bigint) or
@@ -188,6 +188,7 @@ type GetAccountsByNameRow struct {
 	ID         int64         `json:"id"`
 	Name       string        `json:"name"`
 	Avatar     string        `json:"avatar"`
+	Gender     Gender        `json:"gender"`
 	RelationID sql.NullInt64 `json:"relation_id"`
 	Total      int64         `json:"total"`
 }
@@ -210,6 +211,7 @@ func (q *Queries) GetAccountsByName(ctx context.Context, arg *GetAccountsByNameP
 			&i.ID,
 			&i.Name,
 			&i.Avatar,
+			&i.Gender,
 			&i.RelationID,
 			&i.Total,
 		); err != nil {
@@ -224,7 +226,7 @@ func (q *Queries) GetAccountsByName(ctx context.Context, arg *GetAccountsByNameP
 }
 
 const getAccountsByUserID = `-- name: GetAccountsByUserID :many
-select id, name, avatar
+select id, name, avatar, gender
 from account
 where user_id = $1
 `
@@ -233,6 +235,7 @@ type GetAccountsByUserIDRow struct {
 	ID     int64  `json:"id"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
+	Gender Gender `json:"gender"`
 }
 
 func (q *Queries) GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error) {
@@ -244,7 +247,12 @@ func (q *Queries) GetAccountsByUserID(ctx context.Context, userID int64) ([]*Get
 	items := []*GetAccountsByUserIDRow{}
 	for rows.Next() {
 		var i GetAccountsByUserIDRow
-		if err := rows.Scan(&i.ID, &i.Name, &i.Avatar); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Avatar,
+			&i.Gender,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

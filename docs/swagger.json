@@ -1858,6 +1858,10 @@
                     "description": "头像",
                     "type": "string"
                 },
+                "gender": {
+                    "description": "性别 [男,女,未知]",
+                    "type": "string"
+                },
                 "name": {
                     "description": "名称",
                     "type": "string"
@@ -1877,6 +1881,10 @@
                 },
                 "avatar": {
                     "description": "头像",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "性别 [男,女,未知]",
                     "type": "string"
                 },
                 "name": {
@@ -1968,7 +1976,7 @@
                     "type": "string"
                 },
                 "gender": {
-                    "description": "性别",
+                    "description": "性别 [男,女,未知]",
                     "type": "string"
                 },
                 "id": {

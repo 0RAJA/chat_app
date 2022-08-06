@@ -165,6 +165,7 @@ func (account) GetAccountsByUserID(c *gin.Context, userID int64) (reply.GetAccou
 			ID:     v.ID,
 			Name:   v.Name,
 			Avatar: v.Avatar,
+			Gender: string(v.Gender),
 		})
 	}
 	return reply.GetAccountsByUserID{
@@ -187,7 +188,9 @@ func (account) GetAccountsByName(c *gin.Context, accountID int64, name string, l
 		result = append(result, &reply.AccountFriendInfo{
 			AccountInfo: reply.AccountInfo{ID: v.ID,
 				Name:   v.Name,
-				Avatar: v.Avatar},
+				Avatar: v.Avatar,
+				Gender: string(v.Gender),
+			},
 			RelationID: v.RelationID.Int64,
 		})
 	}
