@@ -18,7 +18,7 @@ func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc str
 	relationID, err := dao.Group.DB.CreateGroupRelation(c, &db.CreateGroupRelationParams{
 		Name:        name,
 		Description: desc,
-		Avatar:      global.PvSettings.AliyunOSS.GroupAvatarUrl,
+		Avatar:      global.PbSettings.Rule.DefaultAvatarURL,
 	})
 	if err != nil {
 		return 0, errcode.ErrServer
@@ -32,9 +32,9 @@ func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc str
 	if err != nil {
 		return 0, errcode.ErrServer
 	}
-	err = dao.Group.Redis.AddGroupRelationAccount(c,relationID,accountID)
+	err = dao.Group.Redis.AddGroupRelationAccount(c, relationID, accountID)
 	if err != nil {
-		return 0,errcode.ErrServer
+		return 0, errcode.ErrServer
 	}
 	return relationID, nil
 }
@@ -91,9 +91,9 @@ func (mGroup) DissolveGroup(c *gin.Context, relationId int64, accountID int64) (
 	if err != nil {
 		return result, errcode.ErrServer
 	}
-	err=dao.Group.Redis.DelGroupRelation(c,relationId)
+	err = dao.Group.Redis.DelGroupRelation(c, relationId)
 	if err != nil {
-		return result,errcode.ErrServer
+		return result, errcode.ErrServer
 	}
 	return result, nil
 }

@@ -16,7 +16,7 @@ type Querier interface {
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64,error)
-	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
+	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateMsgRow, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
@@ -65,7 +65,7 @@ type Querier interface {
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
 	GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error)
 	GetGroupShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetGroupShowSettingsOrderByShowTimeRow, error)
-	GetMsgByID(ctx context.Context, id int64) (*Message, error)
+	GetMsgByID(ctx context.Context, id int64) (*GetMsgByIDRow, error)
 	GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsByRelationIDAndTimeParams) ([]*GetMsgsByRelationIDAndTimeRow, error)
 	GetPinMsgsByRelationID(ctx context.Context, arg *GetPinMsgsByRelationIDParams) ([]*GetPinMsgsByRelationIDRow, error)
 	GetRlyMsgsInfoByMsgID(ctx context.Context, arg *GetRlyMsgsInfoByMsgIDParams) ([]*GetRlyMsgsInfoByMsgIDRow, error)

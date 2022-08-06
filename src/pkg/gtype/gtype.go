@@ -1,6 +1,11 @@
 package gtype
 
-import "sync"
+import (
+	"github.com/0RAJA/Rutils/pkg/app/errcode"
+	"io/ioutil"
+	"mime/multipart"
+	"sync"
+)
 
 import (
 	"bytes"
@@ -91,7 +96,13 @@ func bytesToHexString(src []byte) string {
 // 用文件前面几个字节来判断
 // fSrc: 文件字节流（就用前面几个字节）
 
-func GetFileType(fSrc []byte) string {
+func GetFileType(file *multipart.FileHeader) (string, errcode.Err) {
+	f, err := file.Open()
+	if err != nil {
+		return "", errcode.ErrServer
+	}
+	fSrc, err := ioutil.ReadAll(f)
+	fSrc = fSrc[:10]
 	var fileType string
 	fileCode := bytesToHexString(fSrc)
 
@@ -105,5 +116,5 @@ func GetFileType(fSrc []byte) string {
 		}
 		return true
 	})
-	return fileType
+	return fileType, nil
 }

@@ -151,13 +151,13 @@ func (mGroup) InviteAccount(c *gin.Context) {
 
 // QuitGroup
 // @Tags     group
-// @Summary  邀请人进群
+// @Summary  退群
 // @accept   application/json
 // @Produce  application/json
 // @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
 // @Param    data           query     request.QuitGroup                true  "请求信息"
 // @Success  200            {object}  common.State{data=reply.QuitGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主 7003:非群员"
-// @Router   /api/group/getnotify [post]
+// @Router   /api/group/quit [post]
 func (mGroup) QuitGroup(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := &request.QuitGroup{}

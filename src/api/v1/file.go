@@ -7,7 +7,6 @@ import (
 	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/pkg/gtype"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
 )
 
 type file struct {
@@ -27,15 +26,8 @@ func (file) Publish(c *gin.Context) {
 		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	f, err := params.File.Open()
-	if err != nil {
-		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
-		return
-	}
-	fSrc, err := ioutil.ReadAll(f)
-	fileType := gtype.GetFileType(fSrc[:10])
-	if err != nil {
-		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+	fileType, mErr := gtype.GetFileType(*params.File)
+	if mErr != nil {
 		return
 	}
 	if fileType != "img" {
@@ -52,7 +44,7 @@ func (file) Publish(c *gin.Context) {
 // @accept   application/json
 // @Param    data           body      request.DeleteFile  true  "文件ID"
 // @Success  200            {object}  common.State{data=reply.DeleteFile}             "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
-// @Router   /api/file/publish [post]
+// @Router   /api/file/delete [post]
 func (file) DeleteFile(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.DeleteFile{}

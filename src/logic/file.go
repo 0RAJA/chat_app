@@ -9,9 +9,10 @@ import (
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
+	files "github.com/0RAJA/chat_app/src/model/file"
 	"github.com/0RAJA/chat_app/src/model/reply"
-	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/pkg/gtype"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"strconv"
@@ -20,18 +21,31 @@ import (
 type file struct {
 }
 
-func PublishFile(c *gin.Context, params request.PublishFile, filetype db.Filetype) (reply.PublishFile, errcode.Err) {
+// PublishFile 上传文件，传出context与relationID,accountID,file(*multipart.FileHeader),返回id，size，url，type
+// 错误代码 1003:系统错误 8001:文件存储失败(aly) 8004:文件过大
+func PublishFile(c context.Context, params files.PublishFile) (files.PublishFileRe, errcode.Err) {
 
 	url, key, err := dao.Group.OSS.UploadAliFile(params.File)
-	result := reply.PublishFile{}
+	result := files.PublishFileRe{}
 	if err != nil {
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		global.Logger.Error(err.Error())
 		return result, myerr.FiledStore
+	}
+	filetype, mErr := gtype.GetFileType(params.File)
+	if mErr != nil {
+		return result, errcode.ErrServer
+	}
+	if filetype != "img" && filetype != "png" && filetype != "jpg" {
+		if params.File.Size > global.PbSettings.Rule.BiggestFileSize {
+			return result, myerr.FileTooBig
+		}
+	} else {
+		filetype = "img"
 	}
 
 	r, err := dao.Group.DB.CreateFile(c, &db.CreateFileParams{
 		FileName: params.File.Filename,
-		FileType: filetype,
+		FileType: db.Filetype(filetype),
 		FileSize: params.File.Size,
 		Key:      key,
 		Url:      url,
@@ -48,9 +62,9 @@ func PublishFile(c *gin.Context, params request.PublishFile, filetype db.Filetyp
 		fmt.Println(err)
 		return result, errcode.ErrServer
 	}
-	result = reply.PublishFile{
+	result = files.PublishFileRe{
 		ID:       r.ID,
-		FileType: string(filetype),
+		FileType: filetype,
 		FileSize: params.File.Size,
 		Url:      url,
 		CreateAt: r.CreateAt,
@@ -170,7 +184,7 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 		return result, errcode.ErrServer
 	}
 	if file == nil {
-		return reply.UploadAvatar{Url: global.PvSettings.AliyunOSS.GroupAvatarUrl}, nil
+		return reply.UploadAvatar{Url: global.PbSettings.Rule.DefaultAvatarURL}, nil
 	}
 	return reply.UploadAvatar{Url: url}, nil
 }

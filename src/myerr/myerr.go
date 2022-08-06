@@ -31,6 +31,7 @@ var (
 	NotGroupMember              = errcode.NewErr(7003, "非该群成员")
 	FiledStore                  = errcode.NewErr(8001, "存储文件失败")
 	FileNotExist                = errcode.NewErr(8002, "文件不存在")
+	FileTooBig                  = errcode.NewErr(8004, "文件过大")
 	FileDeleteFailed            = errcode.NewErr(8003, "文件删除失败")
 	NotifyNotExist              = errcode.NewErr(9001, "通知不存在")
 )

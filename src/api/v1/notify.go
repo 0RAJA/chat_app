@@ -68,13 +68,13 @@ func (notify) UpdateNotify(c *gin.Context) {
 
 // GetNotifyByID
 // @Tags     notify
-// @Summary  更新群通知
+// @Summary  获取群通知
 // @accept   application/json
 // @Produce  application/json
 // @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
 // @Param    data           query     request.GetNotifyByID                 true  "请求信息"
 // @Success  200            {object}  common.State{data=[]reply.GetNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
-// @Router   /api/notify/ [get]
+// @Router   /api/notify/getnotify [get]
 func (notify) GetNotifyByID(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetNotifyByID{}

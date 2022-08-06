@@ -82,6 +82,7 @@ type Rule struct {
 	CodeLength       int           `yaml:"CodeLength"`
 	AccountNumMax    int32         `yaml:"AccountNumMax"`
 	DefaultAvatarURL string        `yaml:"DefaultAvatarURL"`
+	BiggestFileSize  int64         `yaml:"BiggestFileSize"`
 }
 
 type Server struct {
