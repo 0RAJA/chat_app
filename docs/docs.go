@@ -652,6 +652,529 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/file/avatar": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "更新群头像活用户头像",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "文件及账号信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UploadAvatar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 8001:存储失败",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.PublishFile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/file/delete": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "删除文件(测试用)",
+                "parameters": [
+                    {
+                        "description": "文件ID",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DeleteFile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.DeleteFile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/file/getall": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "获取关系文件列表",
+                "parameters": [
+                    {
+                        "description": "关系ID",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.GetRelationFile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 8001:存储失败",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/reply.File"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/file/publish": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "上传文件(测试用)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountID",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relationID",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 8001:存储失败",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.PublishFile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "创建群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "description",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.CreateGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/dissolve": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "解散群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.DissolveGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/invite": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "邀请人进群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.InviteAccount"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/quit": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "退群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主 7003:非群员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.QuitGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/transfer": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "转让群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "from_account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "to_account_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主 7003:非群成员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.TransferGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/update": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "更新群信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "description",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.UpdateGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/msg/file": {
             "post": {
                 "security": [
@@ -1088,6 +1611,197 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/notify/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notify"
+                ],
+                "summary": "创建群通知",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "msg_content",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "msg_expand",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GroupNotify"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notify/getnotify": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notify"
+                ],
+                "summary": "获取群通知",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/reply.GetNotify"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notify/update": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notify"
+                ],
+                "summary": "更新群通知",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "msg_content",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "msg_expand",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.UpdateNotify"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/setting/friend/delete": {
             "delete": {
                 "consumes": [
@@ -1246,7 +1960,7 @@ const docTemplate = `{
                 "tags": [
                     "setting"
                 ],
-                "summary": "获取当前账户pin的好友和群组列表(TODO: 待完善)",
+                "summary": "获取当前账户pin的好友和群组列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -1823,7 +2537,21 @@ const docTemplate = `{
             }
         },
         "model.SettingGroupInfo": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
         },
         "model.SettingPin": {
             "type": "object",
@@ -1962,12 +2690,64 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.CreateGroup": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.DeleteFile": {
+            "type": "object"
+        },
+        "reply.DissolveGroup": {
+            "type": "object"
+        },
         "reply.ExistEmail": {
             "type": "object",
             "properties": {
                 "exist": {
                     "description": "是否已经存在",
                     "type": "boolean"
+                }
+            }
+        },
+        "reply.File": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "create_at": {
+                    "type": "string"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "file_size": {
+                    "type": "integer"
+                },
+                "file_type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -2087,6 +2867,32 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.GetNotify": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "create_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "type": "string"
+                },
+                "read_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "reply.GetPinMsgsByRelationID": {
             "type": "object",
             "properties": {
@@ -2151,6 +2957,35 @@ const docTemplate = `{
                     "$ref": "#/definitions/reply.MsgInfo"
                 }
             }
+        },
+        "reply.GroupNotify": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "create_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "type": "string"
+                },
+                "read_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.InviteAccount": {
+            "type": "object"
         },
         "reply.ListApplications": {
             "type": "object",
@@ -2319,6 +3154,29 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.PublishFile": {
+            "type": "object",
+            "properties": {
+                "create_at": {
+                    "type": "string"
+                },
+                "file_size": {
+                    "type": "integer"
+                },
+                "file_type": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "reply.QuitGroup": {
+            "type": "object"
+        },
         "reply.Register": {
             "type": "object",
             "properties": {
@@ -2356,6 +3214,27 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "reply.TransferGroup": {
+            "type": "object"
+        },
+        "reply.UpdateGroup": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "reply.UpdateNotify": {
+            "type": "object"
         },
         "reply.UserInfo": {
             "type": "object",
@@ -2463,6 +3342,17 @@ const docTemplate = `{
                 }
             }
         },
+        "request.DeleteFile": {
+            "type": "object",
+            "required": [
+                "file_id"
+            ],
+            "properties": {
+                "file_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.DeleteFriend": {
             "type": "object",
             "required": [
@@ -2473,6 +3363,17 @@ const docTemplate = `{
                     "description": "关系ID",
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "request.GetRelationFile": {
+            "type": "object",
+            "required": [
+                "relation_id"
+            ],
+            "properties": {
+                "relation_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -2721,6 +3622,21 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 6
+                }
+            }
+        },
+        "request.UploadAvatar": {
+            "type": "object",
+            "required": [
+                "accountID",
+                "relationID"
+            ],
+            "properties": {
+                "accountID": {
+                    "type": "integer"
+                },
+                "relationID": {
+                    "type": "integer"
                 }
             }
         }

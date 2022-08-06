@@ -1333,6 +1333,30 @@ paths:
       summary: 更新群头像活用户头像
       tags:
       - file
+  /api/file/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 文件ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteFile'
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.DeleteFile'
+              type: object
+      summary: 删除文件(测试用)
+      tags:
+      - file
   /api/file/getall:
     post:
       consumes:
@@ -1362,25 +1386,27 @@ paths:
   /api/file/publish:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       parameters:
-      - description: 文件ID
-        in: body
-        name: data
+      - in: formData
+        name: accountID
         required: true
-        schema:
-          $ref: '#/definitions/request.DeleteFile'
+        type: integer
+      - in: formData
+        name: relationID
+        required: true
+        type: integer
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败
+          description: 1001:参数有误 1003:系统错误 8001:存储失败
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
             - properties:
                 data:
-                  $ref: '#/definitions/reply.DeleteFile'
+                  $ref: '#/definitions/reply.PublishFile'
               type: object
-      summary: 删除文件(测试用)
+      summary: 上传文件(测试用)
       tags:
       - file
   /api/group/create:
@@ -1449,40 +1475,6 @@ paths:
       summary: 解散群
       tags:
       - group
-  /api/group/getnotify:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Bearer 账户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - in: query
-        name: account_id
-        required: true
-        type: integer
-      - in: query
-        name: relation_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主
-            7003:非群员
-          schema:
-            allOf:
-            - $ref: '#/definitions/common.State'
-            - properties:
-                data:
-                  $ref: '#/definitions/reply.QuitGroup'
-              type: object
-      summary: 邀请人进群
-      tags:
-      - group
   /api/group/invite:
     post:
       consumes:
@@ -1514,6 +1506,40 @@ paths:
                   $ref: '#/definitions/reply.InviteAccount'
               type: object
       summary: 邀请人进群
+      tags:
+      - group
+  /api/group/quit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主
+            7003:非群员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.QuitGroup'
+              type: object
+      summary: 退群
       tags:
       - group
   /api/group/transfer:
@@ -1870,36 +1896,6 @@ paths:
       summary: 设置消息的置顶状态
       tags:
       - message
-  /api/notify/:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Bearer 账户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - in: query
-        name: relation_id
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员
-          schema:
-            allOf:
-            - $ref: '#/definitions/common.State'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/reply.GetNotify'
-                  type: array
-              type: object
-      summary: 更新群通知
-      tags:
-      - notify
   /api/notify/create:
     post:
       consumes:
@@ -1939,6 +1935,36 @@ paths:
                   $ref: '#/definitions/reply.GroupNotify'
               type: object
       summary: 创建群通知
+      tags:
+      - notify
+  /api/notify/getnotify:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: relation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/reply.GetNotify'
+                  type: array
+              type: object
+      summary: 获取群通知
       tags:
       - notify
   /api/notify/update:

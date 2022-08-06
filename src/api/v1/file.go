@@ -15,8 +15,8 @@ type file struct {
 // @Tags     file
 // @Summary  上传文件(测试用)
 // @accept   multipart/form-data
-// @Param    file  formData  request.PublishFile   true "文件"
-// @Success  200            {object}  common.State{data=reply.PublishFile}             "1001:参数有误 1003:系统错误 8001:存储失败"
+// @Param    file  formData  request.PublishFile                   true  "文件"
+// @Success  200   {object}  common.State{data=reply.PublishFile}  "1001:参数有误 1003:系统错误 8001:存储失败"
 // @Router   /api/file/publish [post]
 //func (file) Publish(c *gin.Context) {
 //	rly := app.NewResponse(c)
@@ -41,8 +41,8 @@ type file struct {
 // @Tags     file
 // @Summary  删除文件(测试用)
 // @accept   application/json
-// @Param    data           body      request.DeleteFile  true  "文件ID"
-// @Success  200            {object}  common.State{data=reply.DeleteFile}             "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
+// @Param    data  body      request.DeleteFile                   true  "文件ID"
+// @Success  200   {object}  common.State{data=reply.DeleteFile}  "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
 // @Router   /api/file/delete [post]
 func (file) DeleteFile(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -60,8 +60,8 @@ func (file) DeleteFile(c *gin.Context) {
 // @Tags     file
 // @Summary  获取关系文件列表
 // @accept   application/json
-// @Param    data           body      request.GetRelationFile  true  "关系ID"
-// @Success  200            {object}  common.State{data=[]reply.File}             "1001:参数有误 1003:系统错误 8001:存储失败"
+// @Param    data  body      request.GetRelationFile          true  "关系ID"
+// @Success  200   {object}  common.State{data=[]reply.File}  "1001:参数有误 1003:系统错误 8001:存储失败"
 // @Router   /api/file/getall [post]
 func (file) GetRelationFile(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -79,9 +79,9 @@ func (file) GetRelationFile(c *gin.Context) {
 // @Tags     file
 // @Summary  更新群头像活用户头像
 // @accept   multipart/form-data
-// @Param    file formData file true "文件"
-// @Param    data           body      request.UploadAvatar  true  "文件及账号信息"
-// @Success  200            {object}  common.State{data=reply.PublishFile}             "1001:参数有误 1003:系统错误 8001:存储失败"
+// @Param    file  formData  file                                  true  "文件"
+// @Param    data  body      request.UploadAvatar                  true  "文件及账号信息"
+// @Success  200   {object}  common.State{data=reply.PublishFile}  "1001:参数有误 1003:系统错误 8001:存储失败"
 // @Router   /api/file/avatar [post]
 func (file) UploadAvatar(c *gin.Context) {
 	rly := app.NewResponse(c)
