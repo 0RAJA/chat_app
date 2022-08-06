@@ -1865,6 +1865,10 @@ const docTemplate = `{
                     "description": "头像",
                     "type": "string"
                 },
+                "gender": {
+                    "description": "性别 [男,女,未知]",
+                    "type": "string"
+                },
                 "name": {
                     "description": "名称",
                     "type": "string"
@@ -1884,6 +1888,10 @@ const docTemplate = `{
                 },
                 "avatar": {
                     "description": "头像",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "性别 [男,女,未知]",
                     "type": "string"
                 },
                 "name": {
@@ -1975,7 +1983,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "description": "性别",
+                    "description": "性别 [男,女,未知]",
                     "type": "string"
                 },
                 "id": {

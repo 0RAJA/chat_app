@@ -21,7 +21,7 @@ type GetAccountByID struct {
 	ID         int64     `json:"id"`          // 账号ID
 	Name       string    `json:"name"`        // 名称
 	Avatar     string    `json:"avatar"`      // 头像
-	Gender     string    `json:"gender"`      // 性别
+	Gender     string    `json:"gender"`      // 性别 [男,女,未知]
 	Signature  string    `json:"signature"`   // 个性签名
 	CreateAt   time.Time `json:"create_at"`   // 创建时间
 	RelationID int64     `json:"relation_id"` // 关系ID，如果不存在则为0
@@ -31,6 +31,7 @@ type AccountInfo struct {
 	ID     int64  `json:"account_id"` // 账号ID
 	Name   string `json:"name"`       // 名称
 	Avatar string `json:"avatar"`     // 头像
+	Gender string `json:"gender"`     // 性别 [男,女,未知]
 }
 
 type GetAccountsByUserID struct {
