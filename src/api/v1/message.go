@@ -227,3 +227,36 @@ func (message) RevokeMsg(c *gin.Context) {
 	})
 	rly.Reply(err)
 }
+
+// CreateFileMsg
+// @Tags      upload
+// @Summary   message
+// @Security  BasicAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     Authorization  header    string  true   "Bearer 账户令牌"
+// @Param     file           formData  file    true   "文件"
+// @Param     relation_id    body      int64   true   "关系id"
+// @Param     rly_msg_id     body      int64   false  "回复消息id"
+// @Success   200            {object}  common.State{reply.CreateFileMsg}
+// @Router    /api/msg/file [post]
+func (message) CreateFileMsg(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := request.CreateFileMsg{}
+	if err := c.ShouldBind(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	result, err := logic.Group.Message.CreateFileMsg(c, model.CreateFileMsgParams{
+		AccountID:  content.ID,
+		RelationID: params.RelationID,
+		RlyMsgID:   params.RlyMsgID,
+		File:       params.File,
+	})
+	rly.Reply(err, result)
+}

@@ -6,6 +6,7 @@ import (
 	"github.com/0RAJA/chat_app/src/model"
 )
 
+// RlyMsg 回复消息详情 可能为null
 type RlyMsg struct {
 	MsgID      int64            `json:"msg_id"`      // 回复消息ID
 	MsgType    string           `json:"msg_type"`    // 消息类型 [text,file]
@@ -54,4 +55,11 @@ type GetRlyMsgsInfoByMsgID struct {
 
 type GetTopMsgByRelationID struct {
 	MsgInfo MsgInfo `json:"msg_info"` // 置顶消息详情
+}
+
+type CreateFileMsg struct {
+	ID         int64     `json:"id"`          // 消息ID
+	MsgContent string    `json:"msg_content"` // 消息内容 文件则为url,
+	FileID     int64     `json:"file_id"`     // 文件ID
+	CreateAt   time.Time `json:"create_at"`   // 创建时间
 }

@@ -1,7 +1,7 @@
 ;-- name: CreateMsg :one
 insert into message (notify_type, msg_type, msg_content, msg_extend, file_id, account_id, rly_msg_id, relation_id)
 values ($1, $2, $3, $4, $5, $6, $7, $8)
-returning *;
+returning id, msg_content, msg_extend, file_id,create_at;
 
 -- name: UpdateMsgPin :exec
 update message
@@ -35,14 +35,11 @@ select m1.id,
        m1.is_pin,
        m1.pin_time,
        m1.read_ids,
-       (select count(id) from message where rly_msg_id = m1.id and message.relation_id = $1) as reply_count,
-       m2.msg_type                                                                           as rly_msg_type,
-       m2.msg_content                                                                        as rly_msg_content,
-       m2.msg_extend                                                                         as rly_msg_extend,
-       m2.is_revoke                                                                          as rly_is_revoke,
-       count(*) over ()                                                                      as total
+       count(*) over ()                                                                      as total,
+       (select count(id) from message where rly_msg_id = m1.id and message.relation_id = $1) as reply_count
 from message m1
-         left join message m2 on m1.relation_id = $1 and m1.create_at < $2 and m1.rly_msg_id = m2.id
+where m1.relation_id = $1
+  and m1.create_at < $2
 order by m1.create_at desc
 limit $3 offset $4;
 
@@ -134,7 +131,21 @@ set is_top = false
 where id = $1;
 
 -- name: GetMsgByID :one
-select *
+select id,
+       notify_type,
+       msg_type,
+       msg_content,
+       msg_extend,
+       file_id,
+       account_id,
+       rly_msg_id,
+       relation_id,
+       create_at,
+       is_revoke,
+       is_top,
+       is_pin,
+       pin_time,
+       read_ids
 from message
 where id = $1
 limit 1;

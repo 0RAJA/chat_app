@@ -11,7 +11,6 @@ drop table if exists relation cascade;
 drop type if exists gender cascade;
 drop type if exists applicationstatus cascade;
 drop type if exists msgnotifytype cascade;
-drop type if exists msgtype cascade;
 drop type if exists relationtype cascade;
 drop type if exists grouptype cascade;
 drop type if exists friendtype cascade;

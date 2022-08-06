@@ -614,6 +614,8 @@ definitions:
       id:
         description: 消息ID
         type: integer
+    required:
+    - id
     type: object
   request.SendEmail:
     properties:
@@ -652,25 +654,37 @@ definitions:
     properties:
       id:
         description: 消息ID
+        minimum: 1
         type: integer
       is_pin:
         description: 是否pin
         type: boolean
       relation_id:
         description: 关系ID
+        minimum: 1
         type: integer
+    required:
+    - id
+    - is_pin
+    - relation_id
     type: object
   request.UpdateMsgTop:
     properties:
       id:
         description: 消息ID
+        minimum: 1
         type: integer
       is_top:
         description: 是否置顶
         type: boolean
       relation_id:
         description: 关系ID
+        minimum: 1
         type: integer
+    required:
+    - id
+    - is_top
+    - relation_id
     type: object
   request.UpdateNickName:
     properties:
@@ -1152,6 +1166,44 @@ paths:
       summary: 发送邮件
       tags:
       - email
+  /api/msg/file:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 关系id
+        in: body
+        name: relation_id
+        required: true
+        schema:
+          type: integer
+      - description: 回复消息id
+        in: body
+        name: rly_msg_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.State'
+      security:
+      - BasicAuth: []
+      summary: message
+      tags:
+      - upload
   /api/msg/info/top:
     get:
       consumes:
@@ -1164,7 +1216,9 @@ paths:
         type: string
       - description: 关系ID
         in: query
+        minimum: 1
         name: relationID
+        required: true
         type: integer
       produces:
       - application/json
@@ -1201,7 +1255,9 @@ paths:
         type: integer
       - description: 关系ID
         in: query
+        minimum: 1
         name: relationID
+        required: true
         type: integer
       produces:
       - application/json
@@ -1238,11 +1294,15 @@ paths:
         type: integer
       - description: 关系ID
         in: query
+        minimum: 1
         name: relationID
+        required: true
         type: integer
       - description: 回复消息ID
         in: query
+        minimum: 1
         name: rlyMsgID
+        required: true
         type: integer
       produces:
       - application/json
@@ -1271,7 +1331,9 @@ paths:
         type: string
       - description: 拉取消息的最晚时间(精确到秒)
         in: query
+        minimum: 1
         name: lastTime
+        required: true
         type: integer
       - description: 第几页
         in: query
@@ -1283,7 +1345,9 @@ paths:
         type: integer
       - description: 关系ID
         in: query
+        minimum: 1
         name: relationID
+        required: true
         type: integer
       produces:
       - application/json

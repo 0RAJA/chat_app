@@ -16,12 +16,12 @@ import (
 const createMsg = `-- name: CreateMsg :one
 insert into message (notify_type, msg_type, msg_content, msg_extend, file_id, account_id, rly_msg_id, relation_id)
 values ($1, $2, $3, $4, $5, $6, $7, $8)
-returning id, notify_type, msg_type, msg_content, msg_extend, file_id, account_id, rly_msg_id, relation_id, create_at, is_revoke, is_top, is_pin, pin_time, read_ids, msg_content_tsv
+returning id, msg_content, msg_extend, file_id,create_at
 `
 
 type CreateMsgParams struct {
 	NotifyType Msgnotifytype `json:"notify_type"`
-	MsgType    Msgtype       `json:"msg_type"`
+	MsgType    string        `json:"msg_type"`
 	MsgContent string        `json:"msg_content"`
 	MsgExtend  pgtype.JSON   `json:"msg_extend"`
 	FileID     sql.NullInt64 `json:"file_id"`
@@ -30,7 +30,15 @@ type CreateMsgParams struct {
 	RelationID int64         `json:"relation_id"`
 }
 
-func (q *Queries) CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error) {
+type CreateMsgRow struct {
+	ID         int64         `json:"id"`
+	MsgContent string        `json:"msg_content"`
+	MsgExtend  pgtype.JSON   `json:"msg_extend"`
+	FileID     sql.NullInt64 `json:"file_id"`
+	CreateAt   time.Time     `json:"create_at"`
+}
+
+func (q *Queries) CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateMsgRow, error) {
 	row := q.db.QueryRow(ctx, createMsg,
 		arg.NotifyType,
 		arg.MsgType,
@@ -41,38 +49,59 @@ func (q *Queries) CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message
 		arg.RlyMsgID,
 		arg.RelationID,
 	)
-	var i Message
+	var i CreateMsgRow
 	err := row.Scan(
 		&i.ID,
-		&i.NotifyType,
-		&i.MsgType,
 		&i.MsgContent,
 		&i.MsgExtend,
 		&i.FileID,
-		&i.AccountID,
-		&i.RlyMsgID,
-		&i.RelationID,
 		&i.CreateAt,
-		&i.IsRevoke,
-		&i.IsTop,
-		&i.IsPin,
-		&i.PinTime,
-		&i.ReadIds,
-		&i.MsgContentTsv,
 	)
 	return &i, err
 }
 
 const getMsgByID = `-- name: GetMsgByID :one
-select id, notify_type, msg_type, msg_content, msg_extend, file_id, account_id, rly_msg_id, relation_id, create_at, is_revoke, is_top, is_pin, pin_time, read_ids, msg_content_tsv
+select id,
+       notify_type,
+       msg_type,
+       msg_content,
+       msg_extend,
+       file_id,
+       account_id,
+       rly_msg_id,
+       relation_id,
+       create_at,
+       is_revoke,
+       is_top,
+       is_pin,
+       pin_time,
+       read_ids
 from message
 where id = $1
 limit 1
 `
 
-func (q *Queries) GetMsgByID(ctx context.Context, id int64) (*Message, error) {
+type GetMsgByIDRow struct {
+	ID         int64         `json:"id"`
+	NotifyType Msgnotifytype `json:"notify_type"`
+	MsgType    string        `json:"msg_type"`
+	MsgContent string        `json:"msg_content"`
+	MsgExtend  pgtype.JSON   `json:"msg_extend"`
+	FileID     sql.NullInt64 `json:"file_id"`
+	AccountID  sql.NullInt64 `json:"account_id"`
+	RlyMsgID   sql.NullInt64 `json:"rly_msg_id"`
+	RelationID int64         `json:"relation_id"`
+	CreateAt   time.Time     `json:"create_at"`
+	IsRevoke   bool          `json:"is_revoke"`
+	IsTop      bool          `json:"is_top"`
+	IsPin      bool          `json:"is_pin"`
+	PinTime    time.Time     `json:"pin_time"`
+	ReadIds    []int64       `json:"read_ids"`
+}
+
+func (q *Queries) GetMsgByID(ctx context.Context, id int64) (*GetMsgByIDRow, error) {
 	row := q.db.QueryRow(ctx, getMsgByID, id)
-	var i Message
+	var i GetMsgByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.NotifyType,
@@ -89,7 +118,6 @@ func (q *Queries) GetMsgByID(ctx context.Context, id int64) (*Message, error) {
 		&i.IsPin,
 		&i.PinTime,
 		&i.ReadIds,
-		&i.MsgContentTsv,
 	)
 	return &i, err
 }
@@ -110,14 +138,11 @@ select m1.id,
        m1.is_pin,
        m1.pin_time,
        m1.read_ids,
-       (select count(id) from message where rly_msg_id = m1.id and message.relation_id = $1) as reply_count,
-       m2.msg_type                                                                           as rly_msg_type,
-       m2.msg_content                                                                        as rly_msg_content,
-       m2.msg_extend                                                                         as rly_msg_extend,
-       m2.is_revoke                                                                          as rly_is_revoke,
-       count(*) over ()                                                                      as total
+       count(*) over ()                                                                      as total,
+       (select count(id) from message where rly_msg_id = m1.id and message.relation_id = $1) as reply_count
 from message m1
-         left join message m2 on m1.relation_id = $1 and m1.create_at < $2 and m1.rly_msg_id = m2.id
+where m1.relation_id = $1
+  and m1.create_at < $2
 order by m1.create_at desc
 limit $3 offset $4
 `
@@ -130,27 +155,23 @@ type GetMsgsByRelationIDAndTimeParams struct {
 }
 
 type GetMsgsByRelationIDAndTimeRow struct {
-	ID            int64          `json:"id"`
-	NotifyType    Msgnotifytype  `json:"notify_type"`
-	MsgType       Msgtype        `json:"msg_type"`
-	MsgContent    string         `json:"msg_content"`
-	MsgExtend     pgtype.JSON    `json:"msg_extend"`
-	FileID        sql.NullInt64  `json:"file_id"`
-	AccountID     sql.NullInt64  `json:"account_id"`
-	RlyMsgID      sql.NullInt64  `json:"rly_msg_id"`
-	RelationID    int64          `json:"relation_id"`
-	CreateAt      time.Time      `json:"create_at"`
-	IsRevoke      bool           `json:"is_revoke"`
-	IsTop         bool           `json:"is_top"`
-	IsPin         bool           `json:"is_pin"`
-	PinTime       time.Time      `json:"pin_time"`
-	ReadIds       []int64        `json:"read_ids"`
-	ReplyCount    int64          `json:"reply_count"`
-	RlyMsgType    Msgtype        `json:"rly_msg_type"`
-	RlyMsgContent sql.NullString `json:"rly_msg_content"`
-	RlyMsgExtend  pgtype.JSON    `json:"rly_msg_extend"`
-	RlyIsRevoke   sql.NullBool   `json:"rly_is_revoke"`
-	Total         int64          `json:"total"`
+	ID         int64         `json:"id"`
+	NotifyType Msgnotifytype `json:"notify_type"`
+	MsgType    string        `json:"msg_type"`
+	MsgContent string        `json:"msg_content"`
+	MsgExtend  pgtype.JSON   `json:"msg_extend"`
+	FileID     sql.NullInt64 `json:"file_id"`
+	AccountID  sql.NullInt64 `json:"account_id"`
+	RlyMsgID   sql.NullInt64 `json:"rly_msg_id"`
+	RelationID int64         `json:"relation_id"`
+	CreateAt   time.Time     `json:"create_at"`
+	IsRevoke   bool          `json:"is_revoke"`
+	IsTop      bool          `json:"is_top"`
+	IsPin      bool          `json:"is_pin"`
+	PinTime    time.Time     `json:"pin_time"`
+	ReadIds    []int64       `json:"read_ids"`
+	Total      int64         `json:"total"`
+	ReplyCount int64         `json:"reply_count"`
 }
 
 func (q *Queries) GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsByRelationIDAndTimeParams) ([]*GetMsgsByRelationIDAndTimeRow, error) {
@@ -183,12 +204,8 @@ func (q *Queries) GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsBy
 			&i.IsPin,
 			&i.PinTime,
 			&i.ReadIds,
-			&i.ReplyCount,
-			&i.RlyMsgType,
-			&i.RlyMsgContent,
-			&i.RlyMsgExtend,
-			&i.RlyIsRevoke,
 			&i.Total,
+			&i.ReplyCount,
 		); err != nil {
 			return nil, err
 		}
@@ -233,7 +250,7 @@ type GetPinMsgsByRelationIDParams struct {
 type GetPinMsgsByRelationIDRow struct {
 	ID         int64         `json:"id"`
 	NotifyType Msgnotifytype `json:"notify_type"`
-	MsgType    Msgtype       `json:"msg_type"`
+	MsgType    string        `json:"msg_type"`
 	MsgContent string        `json:"msg_content"`
 	MsgExtend  pgtype.JSON   `json:"msg_extend"`
 	FileID     sql.NullInt64 `json:"file_id"`
@@ -320,7 +337,7 @@ type GetRlyMsgsInfoByMsgIDParams struct {
 type GetRlyMsgsInfoByMsgIDRow struct {
 	ID         int64         `json:"id"`
 	NotifyType Msgnotifytype `json:"notify_type"`
-	MsgType    Msgtype       `json:"msg_type"`
+	MsgType    string        `json:"msg_type"`
 	MsgContent string        `json:"msg_content"`
 	MsgExtend  pgtype.JSON   `json:"msg_extend"`
 	FileID     sql.NullInt64 `json:"file_id"`
@@ -404,7 +421,7 @@ limit 1
 type GetTopMsgByRelationIDRow struct {
 	ID         int64         `json:"id"`
 	NotifyType Msgnotifytype `json:"notify_type"`
-	MsgType    Msgtype       `json:"msg_type"`
+	MsgType    string        `json:"msg_type"`
 	MsgContent string        `json:"msg_content"`
 	MsgExtend  pgtype.JSON   `json:"msg_extend"`
 	FileID     sql.NullInt64 `json:"file_id"`

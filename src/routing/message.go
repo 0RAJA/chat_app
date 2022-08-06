@@ -12,6 +12,7 @@ type message struct {
 func (message) Init(router *gin.RouterGroup) {
 	mg := router.Group("msg", mid.MustAccount())
 	{
+		mg.POST("file", v1.Group.Message.CreateFileMsg)
 		list := mg.Group("list")
 		{
 			list.GET("time", v1.Group.Message.GetMsgsByRelationIDAndTime)
