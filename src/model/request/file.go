@@ -5,7 +5,7 @@ import (
 )
 
 type PublishFile struct {
-	File       *multipart.FileHeader `form:"file"  binding:"required"`
+	File       *multipart.FileHeader `form:"file"  binding:"required" swaggerignore:"true"`
 	RelationID int64                 `form:"relation_id"  binding:"required"`
 	AccountID  int64                 `form:"account_id"  binding:"required"`
 }
@@ -19,6 +19,7 @@ type GetRelationFile struct {
 }
 
 type UploadAvatar struct {
-	File       *multipart.FileHeader `form:"file"  binding:"required"`
+	File       *multipart.FileHeader `form:"file"  binding:"required" swaggerignore:"true"`
 	AccountID  int64                 `form:"account_id"  binding:"required"`
+	RelationID int64                 `form:"relation_id" binding:"required"`
 }

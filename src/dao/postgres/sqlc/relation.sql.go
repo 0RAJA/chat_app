@@ -46,7 +46,6 @@ func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelat
 	err := row.Scan(&id)
 	return id, err
 }
-
 const deleteFriendRelationsByAccountID = `-- name: DeleteFriendRelationsByAccountID :exec
 delete
 from relation
@@ -101,6 +100,54 @@ func (q *Queries) ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRel
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+const getAllGroupRelation = `-- name: GetAllGroupRelation :many
+select id from relation where relation_type = group_type and  friend_type is NULL
+`
+
+func (q *Queries) GetAllGroupRelation(ctx context.Context) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getAllGroupRelation)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllRelationOnRelation = `-- name: GetAllRelationOnRelation :many
+select id from relation
+`
+
+func (q *Queries) GetAllRelationOnRelation(ctx context.Context) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getAllRelationOnRelation)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getFriendRelationByID = `-- name: GetFriendRelationByID :one
@@ -162,18 +209,24 @@ func (q *Queries) GetGroupRelationByID(ctx context.Context, id int64) (*GetGroup
 
 const updateGroupRelation = `-- name: UpdateGroupRelation :exec
 update relation
-set (group_type) = (ROW ($1::varchar(50), $2::varchar(255)))
+set group_type = (ROW ($1::varchar(50), $2::varchar(255),$3::varchar(255)))
 where relation_type = 'group'
-  and id = $3
+  and id = $4
 `
 
 type UpdateGroupRelationParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
 	ID          int64  `json:"id"`
 }
 
 func (q *Queries) UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error {
-	_, err := q.db.Exec(ctx, updateGroupRelation, arg.Name, arg.Description, arg.ID)
+	_, err := q.db.Exec(ctx, updateGroupRelation,
+		arg.Name,
+		arg.Description,
+		arg.Avatar,
+		arg.ID,
+	)
 	return err
 }

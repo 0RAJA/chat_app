@@ -25,10 +25,20 @@ func (store *SqlStore)UploadGroupAvatar(c context.Context,arg CreateFileParams) 
 			}
 		} else {
 			err = queries.UpdateGroupAvatar(c,&UpdateGroupAvatarParams{
-				Url:        "",
+				Url:        arg.Url,
 				RelationID: arg.RelationID,
 			})
 		}
-		return err
+		data,err := queries.GetGroupRelationByID(c,arg.RelationID.Int64)
+		if err != nil {
+			return err
+		}
+
+		return queries.UpdateGroupRelation(c,&UpdateGroupRelationParams{
+			Name:        data.Name,
+			Description: data.Description,
+			Avatar:      arg.Url,
+			ID:          arg.RelationID.Int64,
+		})
 	})
 }

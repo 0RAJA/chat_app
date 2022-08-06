@@ -63,6 +63,30 @@ func (q *Queries) DeleteFileByID(ctx context.Context, id int64) error {
 	return err
 }
 
+const getAllRelationsOnFile = `-- name: GetAllRelationsOnFile :many
+select relation_id from file group by relation_id
+`
+
+func (q *Queries) GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error) {
+	rows, err := q.db.Query(ctx, getAllRelationsOnFile)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []sql.NullInt64{}
+	for rows.Next() {
+		var relation_id sql.NullInt64
+		if err := rows.Scan(&relation_id); err != nil {
+			return nil, err
+		}
+		items = append(items, relation_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAvatar = `-- name: GetAvatar :one
 select f.url, f.file_name
 from file f
@@ -108,6 +132,35 @@ func (q *Queries) GetFileByRelationID(ctx context.Context, relationID sql.NullIn
 			&i.AccountID,
 			&i.CreateAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFileByRelationIDIsNUll = `-- name: GetFileByRelationIDIsNUll :many
+select id,key from file where relation_id is null
+`
+
+type GetFileByRelationIDIsNUllRow struct {
+	ID  int64  `json:"id"`
+	Key string `json:"key"`
+}
+
+func (q *Queries) GetFileByRelationIDIsNUll(ctx context.Context) ([]*GetFileByRelationIDIsNUllRow, error) {
+	rows, err := q.db.Query(ctx, getFileByRelationIDIsNUll)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetFileByRelationIDIsNUllRow{}
+	for rows.Next() {
+		var i GetFileByRelationIDIsNUllRow
+		if err := rows.Scan(&i.ID, &i.Key); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

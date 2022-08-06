@@ -15,7 +15,7 @@ type PublishFile struct {
 type DeleteFile struct {
 }
 type File struct {
-	FileID    int64    `json:"file_id"`
+	FileID    int64     `json:"file_id"`
 	FileName  string    `json:"file_name"`
 	FileType  string    `json:"file_type"`
 	FileSize  int64     `json:"file_size"`
@@ -28,5 +28,5 @@ type GetRelationFile struct {
 }
 
 type UploadAvatar struct {
-
+	Url string `json:"url"`
 }

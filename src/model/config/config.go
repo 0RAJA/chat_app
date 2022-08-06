@@ -142,7 +142,8 @@ type APILimit struct {
 }
 
 type Auto struct {
-	Retry Retry `yaml:"Retry"`
+	Retry                     Retry         `yaml:"Retry"`
+	DeleteExpiredFileDuration time.Duration `yaml:"DeleteExpiredFileDuration"`
 }
 
 type Retry struct {

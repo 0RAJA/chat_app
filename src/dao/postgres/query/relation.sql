@@ -1,11 +1,11 @@
--- name: CreateGroupRelation :exec
+-- name: CreateGroupRelation :one
 insert into relation (relation_type, group_type)
 values ('group', ROW (@name::varchar(50), @description::varchar(255), @avatar::varchar(255)))
 returning id;
 
 -- name: UpdateGroupRelation :exec
 update relation
-set (group_type) = (ROW (@name::varchar(50), @description::varchar(255)))
+set group_type = (ROW (@name::varchar(50), @description::varchar(255),@avatar::varchar(255)))
 where relation_type = 'group'
   and id = @id;
 
@@ -57,3 +57,8 @@ select (friend_type).account1_id as account1_id,
 from relation
 where relation_type = 'friend'
   and id = $1;
+-- name: GetAllGroupRelation :many
+select id from relation where relation_type = group_type and  friend_type is NULL;
+
+-- name: GetAllRelationOnRelation :many
+select id from relation;

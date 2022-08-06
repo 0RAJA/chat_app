@@ -1,6 +1,7 @@
 package setting
 
 type group struct {
+	Auto      auto
 	Dao       mDao
 	Log       log
 	Maker     maker
@@ -24,4 +25,5 @@ func AllInit() {
 	Group.EmailMark.Init()
 	Group.GenID.Init()
 	Group.Load.Init()
+	Group.Auto.Init()
 }

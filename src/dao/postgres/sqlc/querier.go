@@ -17,7 +17,7 @@ type Querier interface {
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64,error)
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*Message, error)
-	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*GroupNotify, error)
+	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
@@ -38,16 +38,21 @@ type Querier interface {
 	ExistsApplicationByIDWithLock(ctx context.Context, arg *ExistsApplicationByIDWithLockParams) (bool, error)
 	ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRelationParams) (bool, error)
 	ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error)
+	ExistsIsLeader(ctx context.Context, arg *ExistsIsLeaderParams) (bool, error)
 	ExistsSetting(ctx context.Context, arg *ExistsSettingParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, arg *GetAccountByIDParams) (*GetAccountByIDRow, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
+	GetAllGroupRelation(ctx context.Context) ([]int64, error)
+	GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error)
+	GetAllRelationOnRelation(ctx context.Context) ([]int64, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
 	GetAvatar(ctx context.Context, accountID sql.NullInt64) (*GetAvatarRow, error)
 	GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error)
+	GetFileByRelationIDIsNUll(ctx context.Context) ([]*GetFileByRelationIDIsNUllRow, error)
 	GetFileKeyByID(ctx context.Context, id int64) (string, error)
 	GetFriendPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetFriendPinSettingsOrderByPinTimeRow, error)
 	GetFriendRelationByID(ctx context.Context, id int64) (*GetFriendRelationByIDRow, error)
@@ -55,8 +60,11 @@ type Querier interface {
 	GetFriendSettingsOrderByName(ctx context.Context, accountID int64) ([]*GetFriendSettingsOrderByNameRow, error)
 	GetFriendShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetFriendShowSettingsOrderByShowTimeRow, error)
 	GetGroupAvatar(ctx context.Context, relationID sql.NullInt64) (*File, error)
-	GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) (*GroupNotify, error)
+	GetGroupMembers(ctx context.Context, relationID int64) ([]int64, error)
+	GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) ([]*GetGroupNotifyByIDRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
+	GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error)
+	GetGroupShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetGroupShowSettingsOrderByShowTimeRow, error)
 	GetMsgByID(ctx context.Context, id int64) (*Message, error)
 	GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsByRelationIDAndTimeParams) ([]*GetMsgsByRelationIDAndTimeRow, error)
 	GetPinMsgsByRelationID(ctx context.Context, arg *GetPinMsgsByRelationIDParams) ([]*GetPinMsgsByRelationIDRow, error)
@@ -71,7 +79,7 @@ type Querier interface {
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupAvatar(ctx context.Context, arg *UpdateGroupAvatarParams) error
-	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*GroupNotify, error)
+	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*UpdateGroupNotifyRow, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
 	UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) error
 	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error

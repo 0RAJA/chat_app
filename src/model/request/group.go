@@ -25,3 +25,8 @@ type InviteAccount struct {
 	AccountID  int64 `json:"account_id,omitempty" form:"account_id" binding:"required"`
 	RelationID int64 `json:"relation_id,omitempty" form:"relation_id" binding:"required"`
 }
+
+type QuitGroup struct {
+	AccountID  int64 `json:"account_id,omitempty" form:"account_id" binding:"required"`
+	RelationID int64 `json:"relation_id,omitempty" form:"relation_id" binding:"required"`
+}

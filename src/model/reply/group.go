@@ -18,3 +18,6 @@ type UpdateGroup struct {
 type InviteAccount struct {
 
 }
+type QuitGroup struct {
+
+}

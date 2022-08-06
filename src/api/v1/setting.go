@@ -36,7 +36,7 @@ func (setting) GetFriends(c *gin.Context) {
 
 // GetPins
 // @Tags     setting
-// @Summary  获取当前账户pin的好友和群组列表(TODO: 待完善)
+// @Summary  获取当前账户pin的好友和群组列表
 // @accept   application/json
 // @Produce  application/json
 // @Param    Authorization  header    string                            true  "Bearer 账户令牌"

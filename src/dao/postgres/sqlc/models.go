@@ -168,7 +168,6 @@ type GroupNotify struct {
 	AccountID     sql.NullInt64 `json:"account_id"`
 	CreateAt      time.Time     `json:"create_at"`
 	ReadIds       []int64       `json:"read_ids"`
-	MsgContentTsv interface{}   `json:"msg_content_tsv"`
 }
 
 type Message struct {

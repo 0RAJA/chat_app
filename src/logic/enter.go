@@ -9,6 +9,7 @@ type group struct {
 	Notify      notify
 	Setting     setting
 	MGroup      mGroup
+	Auto        auto
 	Message     message
 }
 

@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -33,7 +34,8 @@ func (q *Queries) CreateSetting(ctx context.Context, arg *CreateSettingParams) e
 }
 
 const deleteGroup = `-- name: DeleteGroup :exec
-delete from setting
+delete
+from setting
 where relation_id = $1
 `
 
@@ -78,6 +80,28 @@ type ExistsFriendSettingParams struct {
 
 func (q *Queries) ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error) {
 	row := q.db.QueryRow(ctx, existsFriendSetting, arg.Account1ID, arg.Account2ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const existsIsLeader = `-- name: ExistsIsLeader :one
+select exists(
+               select 1
+               from setting
+               where relation_id = $1
+                 and account_id = $2
+                 and is_leader is true
+           )
+`
+
+type ExistsIsLeaderParams struct {
+	RelationID int64 `json:"relation_id"`
+	AccountID  int64 `json:"account_id"`
+}
+
+func (q *Queries) ExistsIsLeader(ctx context.Context, arg *ExistsIsLeaderParams) (bool, error) {
+	row := q.db.QueryRow(ctx, existsIsLeader, arg.RelationID, arg.AccountID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -385,11 +409,36 @@ func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, acco
 	return items, nil
 }
 
+const getGroupMembers = `-- name: GetGroupMembers :many
+select account_id from setting where relation_id = $1
+`
+
+func (q *Queries) GetGroupMembers(ctx context.Context, relationID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getGroupMembers, relationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var account_id int64
+		if err := rows.Scan(&account_id); err != nil {
+			return nil, err
+		}
+		items = append(items, account_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGroupPinSettingsOrderByPinTime = `-- name: GetGroupPinSettingsOrderByPinTime :many
-select s.relation_id, s.nick_name, s.pin_time,
-       a.id     as account_id,
-       a.name   as account_name,
-       a.avatar as account_avatar
+select s.relation_id,
+       s.nick_name,
+       s.pin_time,
+       r.id,
+       r.group_type
 from (select setting.relation_id, setting.nick_name, setting.pin_time
       from setting,
            relation
@@ -397,18 +446,17 @@ from (select setting.relation_id, setting.nick_name, setting.pin_time
         and setting.is_pin = true
         and setting.relation_id = relation.id
         and relation.relation_type = 'group') as s,
-     account a
-where a.id = (select account_id from setting where relation_id = s.relation_id)
+     relation r
+where r.id = (select relation_id from setting where relation_id = s.relation_id and account_id = $1)
 order by s.pin_time
 `
 
 type GetGroupPinSettingsOrderByPinTimeRow struct {
-	RelationID    int64     `json:"relation_id"`
-	NickName      string    `json:"nick_name"`
-	PinTime       time.Time `json:"pin_time"`
-	AccountID     int64     `json:"account_id"`
-	AccountName   string    `json:"account_name"`
-	AccountAvatar string    `json:"account_avatar"`
+	RelationID int64          `json:"relation_id"`
+	NickName   string         `json:"nick_name"`
+	PinTime    time.Time      `json:"pin_time"`
+	ID         int64          `json:"id"`
+	GroupType  sql.NullString `json:"group_type"`
 }
 
 func (q *Queries) GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error) {
@@ -424,9 +472,75 @@ func (q *Queries) GetGroupPinSettingsOrderByPinTime(ctx context.Context, account
 			&i.RelationID,
 			&i.NickName,
 			&i.PinTime,
-			&i.AccountID,
-			&i.AccountName,
-			&i.AccountAvatar,
+			&i.ID,
+			&i.GroupType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGroupShowSettingsOrderByShowTime = `-- name: GetGroupShowSettingsOrderByShowTime :many
+select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
+       r.id,
+       r.group_type
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.is_pin = true
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     relation r
+where r.id = (select relation_id from setting where relation_id = s.relation_id and account_id = $1)
+order by s.last_show desc
+`
+
+type GetGroupShowSettingsOrderByShowTimeRow struct {
+	RelationID   int64          `json:"relation_id"`
+	NickName     string         `json:"nick_name"`
+	IsNotDisturb bool           `json:"is_not_disturb"`
+	IsPin        bool           `json:"is_pin"`
+	PinTime      time.Time      `json:"pin_time"`
+	IsShow       bool           `json:"is_show"`
+	LastShow     time.Time      `json:"last_show"`
+	IsSelf       bool           `json:"is_self"`
+	ID           int64          `json:"id"`
+	GroupType    sql.NullString `json:"group_type"`
+}
+
+func (q *Queries) GetGroupShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetGroupShowSettingsOrderByShowTimeRow, error) {
+	rows, err := q.db.Query(ctx, getGroupShowSettingsOrderByShowTime, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetGroupShowSettingsOrderByShowTimeRow{}
+	for rows.Next() {
+		var i GetGroupShowSettingsOrderByShowTimeRow
+		if err := rows.Scan(
+			&i.RelationID,
+			&i.NickName,
+			&i.IsNotDisturb,
+			&i.IsPin,
+			&i.PinTime,
+			&i.IsShow,
+			&i.LastShow,
+			&i.IsSelf,
+			&i.ID,
+			&i.GroupType,
 		); err != nil {
 			return nil, err
 		}
@@ -470,7 +584,9 @@ func (q *Queries) GetSettingByID(ctx context.Context, arg *GetSettingByIDParams)
 
 const transferIsSelfFalse = `-- name: TransferIsSelfFalse :exec
 update setting
-set is_leader = false where relation_id =$1 and account_id = $2
+set is_leader = false
+where relation_id = $1
+  and account_id = $2
 `
 
 type TransferIsSelfFalseParams struct {
@@ -485,7 +601,9 @@ func (q *Queries) TransferIsSelfFalse(ctx context.Context, arg *TransferIsSelfFa
 
 const transferIsSelfTrue = `-- name: TransferIsSelfTrue :exec
 update setting
-set is_leader = true where relation_id =$1 and account_id = $2
+set is_leader = true
+where relation_id = $1
+  and account_id = $2
 `
 
 type TransferIsSelfTrueParams struct {

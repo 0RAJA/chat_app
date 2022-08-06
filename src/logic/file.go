@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
@@ -11,7 +12,6 @@ import (
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/myerr"
-	"github.com/0RAJA/chat_app/src/upload/oss"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"strconv"
@@ -20,17 +20,9 @@ import (
 type file struct {
 }
 
-func (file) PublishFile(c *gin.Context, params request.PublishFile, filetype string, file *multipart.FileHeader) (reply.PublishFile, errcode.Err) {
-	var con = oss.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	}
-	o := oss.Init(con)
-	url, key, err := o.UploadFile(file)
+func PublishFile(c *gin.Context, params request.PublishFile, filetype db.Filetype) (reply.PublishFile, errcode.Err) {
+
+	url, key, err := dao.Group.OSS.UploadAliFile(params.File)
 	result := reply.PublishFile{}
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -39,7 +31,7 @@ func (file) PublishFile(c *gin.Context, params request.PublishFile, filetype str
 
 	r, err := dao.Group.DB.CreateFile(c, &db.CreateFileParams{
 		FileName: params.File.Filename,
-		FileType: db.Filetype(filetype),
+		FileType: filetype,
 		FileSize: params.File.Size,
 		Key:      key,
 		Url:      url,
@@ -58,7 +50,7 @@ func (file) PublishFile(c *gin.Context, params request.PublishFile, filetype str
 	}
 	result = reply.PublishFile{
 		ID:       r.ID,
-		FileType: filetype,
+		FileType: string(filetype),
 		FileSize: params.File.Size,
 		Url:      url,
 		CreateAt: r.CreateAt,
@@ -66,7 +58,7 @@ func (file) PublishFile(c *gin.Context, params request.PublishFile, filetype str
 	return result, nil
 }
 
-func (file) DeleteFile(c *gin.Context, fileID int64) (result reply.DeleteFile, mErr errcode.Err) {
+func (file) DeleteFile(c context.Context, fileID int64) (result reply.DeleteFile, mErr errcode.Err) {
 	key, err := dao.Group.DB.GetFileKeyByID(c, fileID)
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -74,17 +66,7 @@ func (file) DeleteFile(c *gin.Context, fileID int64) (result reply.DeleteFile, m
 		}
 		return result, errcode.ErrServer
 	}
-	var con = oss.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	}
-	o := oss.Init(con)
-	r, err := o.DeleteFile(key)
-	fmt.Println(r)
+	_, err = dao.Group.OSS.DeleteAliFile(key)
 	if err != nil {
 		return result, myerr.FileDeleteFailed
 	}
@@ -99,7 +81,6 @@ func (file) GetRelationFile(c *gin.Context, relationID int64) ([]reply.File, err
 	list, err := dao.Group.DB.GetFileByRelationID(c, sql.NullInt64{Int64: relationID, Valid: true})
 	result := make([]reply.File, 0, 20)
 	if err != nil {
-
 		if err != sql.ErrNoRows {
 			return result, myerr.FileNotExist
 		}
@@ -122,17 +103,7 @@ func (file) GetRelationFile(c *gin.Context, relationID int64) ([]reply.File, err
 }
 
 func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart.FileHeader) (reply.UploadAvatar, errcode.Err) {
-	var con = oss.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	}
-
-	o := oss.Init(con)
-	url, key, err := o.UploadFile(file)
+	url, key, err := dao.Group.OSS.UploadAliFile(file)
 	result := reply.UploadAvatar{}
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -147,7 +118,7 @@ func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart
 		if err.Error() == "no rows in result set" {
 			t = 1
 		} else {
-			global.Logger.Error(err.Error(),mid.ErrLogMsg(c)...)
+			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return result, errcode.ErrServer
 		}
 	} else {
@@ -173,31 +144,20 @@ func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart
 	if err != nil {
 		return result, errcode.ErrServer
 	}
-	result = reply.UploadAvatar{
-	}
-	return result, nil
+	return reply.UploadAvatar{Url: url}, nil
 }
-func (file)UploadGroupAvatar(c *gin.Context,file *multipart.FileHeader,relationID int64) (errcode.Err,string) {
-	var url,key string
+func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relationID int64) (reply.UploadAvatar, errcode.Err) {
+	var url, key string
 	var err error
-	if file != nil{
-		var con = oss.Config{
-			BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-			BasePath:        global.PvSettings.AliyunOSS.BasePath,
-			Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-			AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-			AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-			BucketName:      global.PvSettings.AliyunOSS.BucketName,
-		}
-
-		o := oss.Init(con)
-		url, key, err = o.UploadFile(file)
+	result := reply.UploadAvatar{}
+	if file != nil {
+		url, key, err = dao.Group.OSS.UploadAliFile(file)
 		if err != nil {
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
-			return myerr.FiledStore,""
+			return result, myerr.FiledStore
 		}
 	}
-	err = dao.Group.DB.UploadGroupAvatar(c,db.CreateFileParams{
+	err = dao.Group.DB.UploadGroupAvatar(c, db.CreateFileParams{
 		FileName:   "groupAvatar",
 		FileType:   "",
 		FileSize:   0,
@@ -207,10 +167,10 @@ func (file)UploadGroupAvatar(c *gin.Context,file *multipart.FileHeader,relationI
 		AccountID:  sql.NullInt64{},
 	})
 	if err != nil {
-		return errcode.ErrServer,""
+		return result, errcode.ErrServer
 	}
 	if file == nil {
-		return nil,global.PvSettings.AliyunOSS.GroupAvatarUrl
+		return reply.UploadAvatar{Url: global.PvSettings.AliyunOSS.GroupAvatarUrl}, nil
 	}
-	return nil,url
+	return reply.UploadAvatar{Url: url}, nil
 }

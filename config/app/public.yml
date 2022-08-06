@@ -38,6 +38,7 @@ Auto: # 自动任务配置
   Retry:
     Duration: 5s # 重试间隔时间
     MaxTimes: 3 # 最大重试次数
+  DeleteExpiredFileDuration: 12h
 Worker: # 工作池配置
   TaskChanCapacity: 50 # 任务队列容量
   WorkerChanCapacity: 50 # 工作队列容量
