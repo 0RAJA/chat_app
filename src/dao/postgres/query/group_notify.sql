@@ -24,7 +24,7 @@ where id=$7
 -- name: GetGroupNotifyByID :many
 select id, relation_id, msg_content, msg_expand, account_id, create_at, read_ids
 from group_notify
-where relation_id = $1
+where relation_id = $1;
 
 
 
