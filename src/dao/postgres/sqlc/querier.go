@@ -15,9 +15,9 @@ type Querier interface {
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
+	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64, error)
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateMsgRow, error)
-	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
 	DeleteAccount(ctx context.Context, id int64) error
@@ -26,8 +26,8 @@ type Querier interface {
 	DeleteFileByID(ctx context.Context, id int64) error
 	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error
 	DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error
-	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteGroup(ctx context.Context, relationID int64) error
+	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
 	DeleteUser(ctx context.Context, id int64) error
@@ -46,8 +46,8 @@ type Querier interface {
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
 	GetAllGroupRelation(ctx context.Context) ([]int64, error)
-	GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error)
 	GetAllRelationOnRelation(ctx context.Context) ([]int64, error)
+	GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
 	GetAvatar(ctx context.Context, accountID sql.NullInt64) (*GetAvatarRow, error)
@@ -62,8 +62,8 @@ type Querier interface {
 	GetGroupAvatar(ctx context.Context, relationID sql.NullInt64) (*File, error)
 	GetGroupMembers(ctx context.Context, relationID int64) ([]int64, error)
 	GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) ([]*GetGroupNotifyByIDRow, error)
-	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
 	GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error)
+	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
 	GetGroupShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetGroupShowSettingsOrderByShowTimeRow, error)
 	GetMsgByID(ctx context.Context, id int64) (*GetMsgByIDRow, error)
 	GetMsgsByRelationIDAndTime(ctx context.Context, arg *GetMsgsByRelationIDAndTimeParams) ([]*GetMsgsByRelationIDAndTimeRow, error)

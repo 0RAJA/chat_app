@@ -1383,32 +1383,6 @@ paths:
       summary: 获取关系文件列表
       tags:
       - file
-  /api/file/publish:
-    post:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - in: formData
-        name: accountID
-        required: true
-        type: integer
-      - in: formData
-        name: relationID
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: 1001:参数有误 1003:系统错误 8001:存储失败
-          schema:
-            allOf:
-            - $ref: '#/definitions/common.State'
-            - properties:
-                data:
-                  $ref: '#/definitions/reply.PublishFile'
-              type: object
-      summary: 上传文件(测试用)
-      tags:
-      - file
   /api/group/create:
     post:
       consumes:

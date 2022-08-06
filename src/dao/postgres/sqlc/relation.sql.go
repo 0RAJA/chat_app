@@ -28,7 +28,7 @@ func (q *Queries) CreateFriendRelation(ctx context.Context, arg *CreateFriendRel
 	return id, err
 }
 
-const createGroupRelation = `-- name: CreateGroupRelation :exec
+const createGroupRelation = `-- name: CreateGroupRelation :one
 insert into relation (relation_type, group_type)
 values ('group', ROW ($1::varchar(50), $2::varchar(255), $3::varchar(255)))
 returning id
