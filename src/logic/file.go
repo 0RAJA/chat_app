@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"mime/multipart"
+	"strconv"
+
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
@@ -14,8 +17,6 @@ import (
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/0RAJA/chat_app/src/pkg/gtype"
 	"github.com/gin-gonic/gin"
-	"mime/multipart"
-	"strconv"
 )
 
 type file struct {

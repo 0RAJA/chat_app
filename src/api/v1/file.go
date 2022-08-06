@@ -5,7 +5,6 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/logic"
 	"github.com/0RAJA/chat_app/src/model/request"
-	"github.com/0RAJA/chat_app/src/pkg/gtype"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,24 +18,24 @@ type file struct {
 // @Param    file  formData  request.PublishFile   true "文件"
 // @Success  200            {object}  common.State{data=reply.PublishFile}             "1001:参数有误 1003:系统错误 8001:存储失败"
 // @Router   /api/file/publish [post]
-func (file) Publish(c *gin.Context) {
-	rly := app.NewResponse(c)
-	params := request.PublishFile{}
-	if err := c.ShouldBind(&params); err != nil {
-		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
-		return
-	}
-	fileType, mErr := gtype.GetFileType(params.File)
-	if mErr != nil {
-		return
-	}
-	if fileType != "img" {
-		fileType = "file"
-	}
-	//result, mErr := logic.Group.File.PublishFile(c, params, fileType)
-
-	rly.Reply(nil)
-}
+//func (file) Publish(c *gin.Context) {
+//	rly := app.NewResponse(c)
+//	params := request.PublishFile{}
+//	if err := c.ShouldBind(&params); err != nil {
+//		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+//		return
+//	}
+//	fileType, mErr := gtype.GetFileType(params.File)
+//	if mErr != nil {
+//		return
+//	}
+//	if fileType != "img" && fileType != "png" && fileType != "jpg" {
+//		fileType = "file"
+//	}
+//	//result, mErr := logic.Group.File.PublishFile(c, params, fileType)
+//
+//	rly.Reply(nil)
+//}
 
 // DeleteFile
 // @Tags     file
@@ -98,5 +97,4 @@ func (file) UploadAvatar(c *gin.Context) {
 	}
 	result, mErr := logic.Group.File.UploadGroupAvatar(c, params.File, params.RelationID)
 	rly.Reply(mErr, result)
-	return
 }

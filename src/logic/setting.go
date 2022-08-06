@@ -1,6 +1,8 @@
 package logic
 
 import (
+	"strings"
+
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
@@ -11,7 +13,6 @@ import (
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
-	"strings"
 )
 
 type setting struct {
@@ -50,67 +51,67 @@ func (setting) GetFriends(c *gin.Context, accountID int64) (reply.GetFriends, er
 }
 
 func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.Err) {
-	result := make([]*model.SettingPin,0,20)
+	result := make([]*model.SettingPin, 0, 20)
 	friendData, err := dao.Group.DB.GetFriendPinSettingsOrderByPinTime(c, accountID)
-	if  err!= nil {
-		return reply.GetPins{List: []*model.SettingPin{}},errcode.ErrServer
+	if err != nil {
+		return reply.GetPins{List: []*model.SettingPin{}}, errcode.ErrServer
 	}
-	for _,v := range friendData {
+	for _, v := range friendData {
 		friendInfo := &model.SettingFriendInfo{
 			AccountID: v.AccountID,
 			Name:      v.NickName,
 			Avatar:    v.AccountAvatar,
 		}
-		result = append(result,&model.SettingPin{
+		result = append(result, &model.SettingPin{
 			SettingPinInfo: model.SettingPinInfo{
 				RelationID:   v.RelationID,
 				RelationType: "friend",
 				NickName:     v.NickName,
 				PinTime:      v.PinTime,
 			},
-			GroupInfo:      nil,
-			FriendInfo:     friendInfo,
+			GroupInfo:  nil,
+			FriendInfo: friendInfo,
 		})
 	}
-	groupData,err := dao.Group.DB.GetGroupPinSettingsOrderByPinTime(c,accountID)
-	if  err!= nil {
-		return reply.GetPins{List: []*model.SettingPin{}},errcode.ErrServer
+	groupData, err := dao.Group.DB.GetGroupPinSettingsOrderByPinTime(c, accountID)
+	if err != nil {
+		return reply.GetPins{List: []*model.SettingPin{}}, errcode.ErrServer
 	}
-	for _,v := range groupData{
-		groupType := strings.Split(v.GroupType.String,",")
+	for _, v := range groupData {
+		groupType := strings.Split(v.GroupType.String, ",")
 		groupInfo := &model.SettingGroupInfo{
 			RelationID:  v.RelationID,
 			Name:        groupType[0][1:],
 			Description: groupType[1],
 			Avatar:      groupType[2][:len(groupType[2])-1],
 		}
-		result = append(result,&model.SettingPin{
+		result = append(result, &model.SettingPin{
 			SettingPinInfo: model.SettingPinInfo{
 				RelationID:   v.RelationID,
 				RelationType: "group",
 				NickName:     v.NickName,
 				PinTime:      v.PinTime,
 			},
-			GroupInfo:      groupInfo,
-			FriendInfo:     nil,
+			GroupInfo:  groupInfo,
+			FriendInfo: nil,
 		})
 	}
 	return reply.GetPins{List: result}, nil
 }
 
 func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcode.Err) {
-	result := make([]*model.Setting,0,20)
+	result := make([]*model.Setting, 0, 20)
 	data, err := dao.Group.DB.GetFriendShowSettingsOrderByShowTime(c, accountID)
-	if  err!= nil {
-		return reply.GetShows{List: []*model.Setting{}},errcode.ErrServer
+	if err != nil {
+		return reply.GetShows{List: []*model.Setting{}}, errcode.ErrServer
 	}
-	for _,v := range data {
+	for _, v := range data {
 		friendInfo := &model.SettingFriendInfo{
 			AccountID: v.AccountID,
 			Name:      v.NickName,
 			Avatar:    v.AccountAvatar,
 		}
-		result = append(result,&model.Setting{
+		result = append(result, &model.Setting{
 			SettingInfo: model.SettingInfo{
 				RelationID:   v.RelationID,
 				RelationType: "friend",
@@ -121,23 +122,23 @@ func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcod
 				IsShow:       v.IsShow,
 				LastShow:     v.LastShow,
 			},
-			GroupInfo:      nil,
-			FriendInfo:     friendInfo,
+			GroupInfo:  nil,
+			FriendInfo: friendInfo,
 		})
 	}
-	groupData,err := dao.Group.DB.GetGroupShowSettingsOrderByShowTime(c,accountID)
-	if  err!= nil {
-		return reply.GetShows{List: []*model.Setting{}},errcode.ErrServer
+	groupData, err := dao.Group.DB.GetGroupShowSettingsOrderByShowTime(c, accountID)
+	if err != nil {
+		return reply.GetShows{List: []*model.Setting{}}, errcode.ErrServer
 	}
-	for _,v := range groupData{
-		groupType := strings.Split(v.GroupType.String,",")
+	for _, v := range groupData {
+		groupType := strings.Split(v.GroupType.String, ",")
 		groupInfo := &model.SettingGroupInfo{
 			RelationID:  v.RelationID,
 			Name:        groupType[0][1:],
 			Description: groupType[1],
 			Avatar:      groupType[2][:len(groupType[2])-1],
 		}
-		result = append(result,&model.Setting{
+		result = append(result, &model.Setting{
 			SettingInfo: model.SettingInfo{
 				RelationID:   v.RelationID,
 				RelationType: "group",
@@ -148,8 +149,8 @@ func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcod
 				IsShow:       v.IsShow,
 				LastShow:     v.LastShow,
 			},
-			GroupInfo:      groupInfo,
-			FriendInfo:     nil,
+			GroupInfo:  groupInfo,
+			FriendInfo: nil,
 		})
 	}
 	return reply.GetShows{List: result}, nil

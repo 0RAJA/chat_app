@@ -7,14 +7,13 @@ import (
 )
 
 type notify struct {
-
 }
 
-func (notify)Init(router *gin.RouterGroup)  {
+func (notify) Init(router *gin.RouterGroup) {
 	r := router.Group("notify").Use(mid.MustAccount())
 	{
-		r.POST("create",v1.Group.Notify.CreateNotify)
-		r.POST("update",v1.Group.Notify.UpdateNotify)
-		r.POST("getnotify",v1.Group.Notify.GetNotifyByID)
+		r.POST("create", v1.Group.Notify.CreateNotify)
+		r.POST("update", v1.Group.Notify.UpdateNotify)
+		r.POST("getnotify", v1.Group.Notify.GetNotifyByID)
 	}
 }

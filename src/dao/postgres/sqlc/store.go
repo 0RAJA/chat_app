@@ -25,9 +25,9 @@ type TXer interface {
 	// DeleteUserTx 删除用户和他的所有账户并删除与之相关的好友关系
 	DeleteUserTx(c context.Context, userID int64) error
 	// UploadGroupAvatar 创建群组头像文件
-	UploadGroupAvatar(c context.Context,arg CreateFileParams) error
+	UploadGroupAvatar(c context.Context, arg CreateFileParams) error
 	// DissolveGroup 删除群关系并删除所有群员
-	DissolveGroup(c context.Context ,relationID int64) error
+	DissolveGroup(c context.Context, relationID int64) error
 	// UpdateMsgTopTrueByMsgIDWithTx 更新此消息置顶(会删除其他置顶)
 	UpdateMsgTopTrueByMsgIDWithTx(c context.Context, relationID, msgID int64) error
 	// RevokeMsgWithTx 撤回消息，如果消息置顶或pin则统统取消

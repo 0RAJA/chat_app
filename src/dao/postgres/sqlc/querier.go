@@ -15,7 +15,7 @@ type Querier interface {
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
-	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64,error)
+	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64, error)
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateMsgRow, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error

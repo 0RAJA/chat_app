@@ -1,8 +1,9 @@
 package reply
 
 import (
-	"github.com/jackc/pgtype"
 	"time"
+
+	"github.com/jackc/pgtype"
 )
 
 type GroupNotify struct {

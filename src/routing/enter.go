@@ -8,7 +8,7 @@ type group struct {
 	Application application
 	Notify      notify
 	Setting     setting
-	MGroup     mGroup
+	MGroup      mGroup
 	Message     message
 }
 

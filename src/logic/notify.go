@@ -3,6 +3,8 @@ package logic
 import (
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
@@ -13,7 +15,6 @@ import (
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgtype"
-	"time"
 )
 
 type notify struct {
@@ -36,10 +37,10 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.
 	r, err := dao.Group.DB.CreateGroupNotify(c, &db.CreateGroupNotifyParams{
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
-		MsgExpand:  pgtype.JSON{Status: pgtype.Status(2),Bytes: []byte(params.MsgExpand)},
-		AccountID: sql.NullInt64{Int64: params.AccountID, Valid: true},
-		ReadIds:   []int64{params.AccountID},
-		CreateAt:  time.Now(),
+		MsgExpand:  pgtype.JSON{Status: pgtype.Status(2), Bytes: []byte(params.MsgExpand)},
+		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
+		ReadIds:    []int64{params.AccountID},
+		CreateAt:   time.Now(),
 	})
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -73,11 +74,11 @@ func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result
 	_, err = dao.Group.DB.UpdateGroupNotify(c, &db.UpdateGroupNotifyParams{
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
-		MsgExpand: pgtype.JSON{Status: pgtype.Status(2),Bytes: []byte(params.MsgExpand)},
-		AccountID: sql.NullInt64{Int64: params.AccountID, Valid: true},
-		ReadIds:   []int64{params.AccountID},
-		CreateAt:  time.Now(),
-		ID:        params.ID,
+		MsgExpand:  pgtype.JSON{Status: pgtype.Status(2), Bytes: []byte(params.MsgExpand)},
+		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
+		ReadIds:    []int64{params.AccountID},
+		CreateAt:   time.Now(),
+		ID:         params.ID,
 	})
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -90,7 +91,7 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 		AccountID:  accountId,
 		RelationID: relationID,
 	})
-	fmt.Println(relationID,accountId)
+	fmt.Println(relationID, accountId)
 	if err != nil {
 		return result, errcode.ErrServer
 	}
@@ -107,7 +108,7 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 		}
 		return result, errcode.ErrServer
 	}
-	for _,v:=range r{
+	for _, v := range r {
 		re := reply.GetNotify{
 			ID:         v.ID,
 			RelationID: v.RelationID.Int64,
@@ -117,7 +118,7 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 			CreateAt:   v.CreateAt,
 			ReadIds:    v.ReadIds,
 		}
-		result = append(result,re)
+		result = append(result, re)
 	}
 
 	return result, nil

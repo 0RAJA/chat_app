@@ -142,13 +142,13 @@ type File struct {
 }
 
 type GroupNotify struct {
-	ID            int64         `json:"id"`
-	RelationID    sql.NullInt64 `json:"relation_id"`
-	MsgContent    string        `json:"msg_content"`
-	MsgExpand     pgtype.JSON   `json:"msg_expand"`
-	AccountID     sql.NullInt64 `json:"account_id"`
-	CreateAt      time.Time     `json:"create_at"`
-	ReadIds       []int64       `json:"read_ids"`
+	ID         int64         `json:"id"`
+	RelationID sql.NullInt64 `json:"relation_id"`
+	MsgContent string        `json:"msg_content"`
+	MsgExpand  pgtype.JSON   `json:"msg_expand"`
+	AccountID  sql.NullInt64 `json:"account_id"`
+	CreateAt   time.Time     `json:"create_at"`
+	ReadIds    []int64       `json:"read_ids"`
 }
 
 type Message struct {
