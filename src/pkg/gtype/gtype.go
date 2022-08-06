@@ -10,7 +10,7 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 )
 
-var fileTypeMap map[string]string
+var fileTypeMap = make(map[string]string)
 
 func init() {
 	fileTypeMap["ffd8ffe000104a464946"] = "jpg"  //JPEG [jpg]
