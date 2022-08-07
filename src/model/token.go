@@ -2,6 +2,8 @@ package model
 
 import (
 	"encoding/json"
+
+	"github.com/0RAJA/Rutils/pkg/token"
 )
 
 type TokenType string
@@ -29,4 +31,10 @@ func (c *Content) Unmarshal(data []byte) error {
 		return err
 	}
 	return nil
+}
+
+// Token 结合token.Payload和Token
+type Token struct {
+	Payload *token.Payload
+	Content *Content
 }

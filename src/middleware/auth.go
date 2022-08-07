@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/0RAJA/Rutils/pkg/app"
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
+	"github.com/0RAJA/Rutils/pkg/token"
 	"github.com/0RAJA/chat_app/src/dao"
 	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/model"
@@ -12,31 +14,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ParseHeader 获取并解析header中token
+func ParseHeader(header http.Header) (*token.Payload, errcode.Err) {
+	authorizationHeader := header.Get(global.PvSettings.Token.AuthorizationKey)
+	if len(authorizationHeader) == 0 {
+		return nil, myerr.AuthNotExist
+	}
+	fields := strings.SplitN(authorizationHeader, " ", 2)
+	if len(fields) != 2 || strings.ToLower(fields[0]) != global.PvSettings.Token.AuthorizationType {
+		return nil, myerr.AuthenticationFailed
+	}
+	accessToken := fields[1]
+	payload, err := global.Maker.VerifyToken(accessToken)
+	if err != nil {
+		if err.Error() == "超时错误" {
+			return nil, myerr.AuthOverTime
+		}
+		return nil, myerr.AuthenticationFailed
+	}
+	return payload, nil
+
+}
+
 // Auth 鉴权中间件,用于解析并写入token
 func Auth() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		authorizationHeader := c.GetHeader(global.PvSettings.Token.AuthorizationKey)
-		if len(authorizationHeader) == 0 {
+		payload, merr := ParseHeader(c.Request.Header)
+		if merr != nil {
 			c.Next()
 			return
 		}
-		fields := strings.SplitN(authorizationHeader, " ", 2)
-		if len(fields) != 2 || strings.ToLower(fields[0]) != global.PvSettings.Token.AuthorizationType {
-			c.Next()
-			return
-		}
-		accessToken := fields[1]
-		payload, err := global.Maker.VerifyToken(accessToken)
-		if err != nil {
-			c.Next()
-			return
-		}
-		var content model.Content
+		content := &model.Content{}
 		if err := content.Unmarshal(payload.Content); err != nil {
 			c.Next()
 			return
 		}
-		c.Set(global.PvSettings.Token.AuthorizationKey, &content)
+		c.Set(global.PvSettings.Token.AuthorizationKey, content)
 		c.Next()
 	}
 }
@@ -105,7 +118,7 @@ func MustAccount() gin.HandlerFunc {
 	}
 }
 
-// GetTokenContent 获取token内容
+// GetTokenContent 从当前上下文中获取保存的content内容
 func GetTokenContent(c *gin.Context) (*model.Content, bool) {
 	val, ok := c.Get(global.PvSettings.Token.AuthorizationKey)
 	if !ok {

@@ -12,7 +12,7 @@ import (
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
-	files "github.com/0RAJA/chat_app/src/model/file"
+	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/0RAJA/chat_app/src/pkg/gtype"
@@ -22,12 +22,12 @@ import (
 type file struct {
 }
 
-// PublishFile 上传文件，传出context与relationID,accountID,file(*multipart.FileHeader),返回id，size，url，type
+// PublishFile 上传文件，传出context与relationID,accountID,file(*multipart.FileHeader),返回 model.PublishFileRe
 // 错误代码 1003:系统错误 8001:文件存储失败(aly) 8004:文件过大
-func PublishFile(c context.Context, params files.PublishFile) (files.PublishFileRe, errcode.Err) {
+func PublishFile(c context.Context, params model.PublishFile) (model.PublishFileRe, errcode.Err) {
 
 	url, key, err := dao.Group.OSS.UploadAliFile(params.File)
-	result := files.PublishFileRe{}
+	result := model.PublishFileRe{}
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, myerr.FiledStore
@@ -63,7 +63,7 @@ func PublishFile(c context.Context, params files.PublishFile) (files.PublishFile
 		fmt.Println(err)
 		return result, errcode.ErrServer
 	}
-	result = files.PublishFileRe{
+	result = model.PublishFileRe{
 		ID:       r.ID,
 		FileType: filetype,
 		FileSize: params.File.Size,

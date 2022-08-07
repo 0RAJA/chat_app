@@ -11,6 +11,7 @@ type group struct {
 	MGroup      mGroup
 	Auto        auto
 	Message     message
+	Chat        chat
 }
 
 var Group = new(group)

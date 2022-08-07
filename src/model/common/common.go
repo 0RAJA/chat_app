@@ -22,19 +22,9 @@ type State struct {
 	Data interface{} `json:"data,omitempty"` // 失败时返回空
 }
 
-// List 列表
-type List struct {
-	List  interface{} `json:"list"`  // 数据
-	Total int         `json:"total"` // 总数
-}
-
-// Token token
-type Token struct {
-	Token     string    `json:"token"`      // token
-	ExpiredAt time.Time `json:"expired_at"` // token过期时间
-}
-
 // NewState 创建一个标准回复格式
+// 参数: merr 错误信息(可为nil) datas 数据(存在只选择第一个值)
+// 返回: 标准的回复格式结构
 func NewState(merr errcode.Err, datas ...interface{}) *State {
 	var data interface{}
 	if len(datas) > 0 {
@@ -52,10 +42,37 @@ func NewState(merr errcode.Err, datas ...interface{}) *State {
 	}
 }
 
+// Json 将结构体转换为json格式的数据
+func (s *State) Json() ([]byte, error) {
+	return json.Marshal(s)
+}
+
+// MustJson 将结构体转换为json格式的数据，如果出错，则返回空json字符串
+func (s *State) MustJson() []byte {
+	if b, err := s.Json(); err == nil {
+		return b
+	}
+	return []byte("{}")
+}
+
+// List 列表
+type List struct {
+	List  interface{} `json:"list"`  // 数据
+	Total int         `json:"total"` // 总数
+}
+
+// Token token
+type Token struct {
+	Token     string    `json:"token"`      // token
+	ExpiredAt time.Time `json:"expired_at"` // token过期时间
+}
+
 var validate *validator.Validate
 var validateOnce sync.Once
 
 // Decode 将json格式的数据解析到结构体,并进行校验
+// 参数: data: json格式的数据，v: 绑定的结构体
+// 返回: 错误信息
 func Decode(data string, v interface{}) error {
 	if err := json.Unmarshal([]byte(data), v); err != nil {
 		return err

@@ -22,6 +22,9 @@ type user struct {
 }
 
 // getUserInfoByID 通过ID获取用户信息
+// 参数：userID 用户ID
+// 成功: 用户信息,nil
+// 失败: 打印日志 myerr.UserNotFound,errcode.ErrServer
 func getUserInfoByID(c *gin.Context, userID int64) (*db.User, errcode.Err) {
 	userInfo, err := dao.Group.DB.GetUserByID(c, userID)
 	if err != nil {
@@ -35,6 +38,9 @@ func getUserInfoByID(c *gin.Context, userID int64) (*db.User, errcode.Err) {
 }
 
 // getUserInfoByEmail 通过email获取用户信息
+// 参数：email 邮箱
+// 成功: 用户信息,nil
+// 失败: 打印日志 myerr.UserNotFound,errcode.ErrServer
 func getUserInfoByEmail(c *gin.Context, email string) (*db.User, errcode.Err) {
 	userInfo, err := dao.Group.DB.GetUserByEmail(c, email)
 	if err != nil {

@@ -49,7 +49,7 @@ type RevokeMsg struct {
 }
 
 type CreateFileMsg struct {
-	RelationID int64          `form:"relation_id" binding:"required,gte=1"` // 关系ID
-	File       multipart.File `form:"file" binding:"required"`              // 文件
-	RlyMsgID   int64          `form:"rly_msg_id"`                           // 回复消息ID
+	RelationID int64                 `form:"relation_id" binding:"required,gte=1"` // 关系ID
+	File       *multipart.FileHeader `form:"file" binding:"required"`              // 文件
+	RlyMsgID   int64                 `form:"rly_msg_id"`                           // 回复消息ID
 }
