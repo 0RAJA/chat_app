@@ -176,7 +176,7 @@ func (setting) DeleteFriend(c *gin.Context, accountID, relationID int64) errcode
 	if accountID != relationInfo.Account1ID || accountID != relationInfo.Account2ID {
 		return myerr.AuthPermissionsInsufficient
 	}
-	if err := dao.Group.DB.DeleteRelation(c, relationID); err != nil {
+	if err := dao.Group.DB.DeleteRelationWithTx(c, dao.Group.Redis, relationID); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}

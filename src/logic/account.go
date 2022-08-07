@@ -6,6 +6,7 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
+	"github.com/0RAJA/chat_app/src/dao/postgres/tx"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
@@ -20,27 +21,6 @@ type account struct {
 }
 
 func (account) CreateAccount(c *gin.Context, userID int64, name, avatar, gender, signature string) (*reply.CreateAccount, errcode.Err) {
-	// 判断账户数量
-	accountNum, err := dao.Group.DB.CountAccountByUserID(c, userID)
-	if err != nil {
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
-		return nil, errcode.ErrServer
-	}
-	if accountNum >= global.PbSettings.Rule.AccountNumMax {
-		return nil, myerr.AccountNumExcessive
-	}
-	// 判断账户名称是否存在
-	ok, err := dao.Group.DB.ExistsAccountByNameAndUserID(c, &db.ExistsAccountByNameAndUserIDParams{
-		UserID: userID,
-		Name:   name,
-	})
-	if err != nil {
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
-		return nil, errcode.ErrServer
-	}
-	if ok {
-		return nil, myerr.AccountNameExists
-	}
 	arg := &db.CreateAccountParams{
 		ID:        global.GenID.GetID(),
 		UserID:    userID,
@@ -49,8 +29,15 @@ func (account) CreateAccount(c *gin.Context, userID int64, name, avatar, gender,
 		Gender:    db.Gender(gender),
 		Signature: signature,
 	}
-	// 创建账户以及和自己的关系g
-	if err := dao.Group.DB.CreateAccountTx(c, arg); err != nil {
+	// 创建账户以及和自己的关系
+	err := dao.Group.DB.CreateAccountWithTx(c, dao.Group.Redis, global.PbSettings.Rule.AccountNumMax, arg)
+	switch err {
+	case tx.ErrAccountOverNum:
+		return nil, myerr.AccountNumExcessive
+	case tx.ErrAccountNameExists:
+		return nil, myerr.AccountNameExists
+	case nil:
+	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return nil, errcode.ErrServer
 	}
@@ -116,11 +103,16 @@ func (account) DeleteAccount(c *gin.Context, userID, accountID int64) errcode.Er
 	if accountInfo.UserID != userID {
 		return myerr.AuthPermissionsInsufficient
 	}
-	if err := dao.Group.DB.DeleteAccountWithTx(c, accountID); err != nil {
+	err := dao.Group.DB.DeleteAccountWithTx(c, dao.Group.Redis, accountID)
+	switch err {
+	case tx.ErrAccountGroupLeader:
+		return myerr.AccountGroupLeader
+	case nil:
+		return nil
+	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	return nil
 }
 
 func (account) UpdateAccount(c *gin.Context, accountID int64, name, gender, signature string) errcode.Err {

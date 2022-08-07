@@ -18,7 +18,7 @@ func TestQueries_AddGroupRelationAccount(t *testing.T) {
 		{
 			name: "good",
 			f: func() {
-				require.NoError(t, dao.Group.Redis.DelAllGroupRelation(context.Background()))
+				require.NoError(t, dao.Group.Redis.DelAllRelations(context.Background()))
 				groupNum := utils.RandomInt(1, 10)
 				groupMap := make(map[int64][]int64, groupNum)
 				for i := int64(0); i < groupNum; i++ {
@@ -28,19 +28,19 @@ func TestQueries_AddGroupRelationAccount(t *testing.T) {
 						groupMap[i][j] = j
 					}
 				}
-				require.NoError(t, dao.Group.Redis.ReloadGroupRelationIDs(context.Background(), groupMap))
+				require.NoError(t, dao.Group.Redis.ReloadRelationIDs(context.Background(), groupMap))
 				for i := int64(0); i < groupNum; i++ {
-					accounts, err := dao.Group.Redis.GetAccountsByGroupRelationID(context.Background(), i)
+					accounts, err := dao.Group.Redis.GetAccountsByRelationID(context.Background(), i)
 					require.NoError(t, err)
 					sort.Slice(accounts, func(i, j int) bool { return accounts[i] < accounts[j] })
 					require.EqualValues(t, groupMap[i], accounts)
 				}
-				accounts, err := dao.Group.Redis.GetAccountsByGroupRelationID(context.Background(), -1)
+				accounts, err := dao.Group.Redis.GetAccountsByRelationID(context.Background(), -1)
 				require.NoError(t, err)
 				require.Empty(t, accounts)
 				groupIdx := utils.RandomInt(0, groupNum)
-				require.NoError(t, dao.Group.Redis.DelGroupRelation(context.Background(), groupIdx))
-				accounts, err = dao.Group.Redis.GetAccountsByGroupRelationID(context.Background(), groupIdx)
+				require.NoError(t, dao.Group.Redis.DelRelation(context.Background(), groupIdx))
+				accounts, err = dao.Group.Redis.GetAccountsByRelationID(context.Background(), groupIdx)
 				require.NoError(t, err)
 				require.Empty(t, accounts)
 				accountNum := utils.RandomInt(1, 10)
@@ -48,14 +48,14 @@ func TestQueries_AddGroupRelationAccount(t *testing.T) {
 				for i := int64(0); i < accountNum; i++ {
 					accountIDs = append(accountIDs, i)
 				}
-				require.NoError(t, dao.Group.Redis.AddGroupRelationAccount(context.Background(), groupIdx, accountIDs...))
-				result, err := dao.Group.Redis.GetAccountsByGroupRelationID(context.Background(), groupIdx)
+				require.NoError(t, dao.Group.Redis.AddRelationAccount(context.Background(), groupIdx, accountIDs...))
+				result, err := dao.Group.Redis.GetAccountsByRelationID(context.Background(), groupIdx)
 				require.NoError(t, err)
 				sort.Slice(accounts, func(i, j int) bool { return accounts[i] < accounts[j] })
 				require.EqualValues(t, accountIDs, result)
 				accountID := utils.RandomInt(0, accountNum-1)
-				require.NoError(t, dao.Group.Redis.DelGroupRelationAccount(context.Background(), groupIdx, accountID))
-				result, err = dao.Group.Redis.GetAccountsByGroupRelationID(context.Background(), groupIdx)
+				require.NoError(t, dao.Group.Redis.DelRelationAccount(context.Background(), groupIdx, accountID))
+				result, err = dao.Group.Redis.GetAccountsByRelationID(context.Background(), groupIdx)
 				require.NoError(t, err)
 				sort.Slice(accounts, func(i, j int) bool { return accounts[i] < accounts[j] })
 				require.Len(t, result, int(accountNum-1))
@@ -64,6 +64,7 @@ func TestQueries_AddGroupRelationAccount(t *testing.T) {
 						require.Fail(t, "accountID should not be in result")
 					}
 				}
+				require.NoError(t, dao.Group.Redis.DelAllRelations(context.Background()))
 			},
 		},
 	}

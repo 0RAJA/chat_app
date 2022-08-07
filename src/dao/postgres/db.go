@@ -4,11 +4,13 @@ import (
 	"context"
 
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
+	"github.com/0RAJA/chat_app/src/dao/postgres/tx"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type DB interface {
-	db.Store
+	tx.TXer
+	db.Querier
 }
 
 func Init(dataSourceName string) DB {
@@ -16,5 +18,5 @@ func Init(dataSourceName string) DB {
 	if err != nil {
 		panic(err)
 	}
-	return &db.SqlStore{Queries: db.New(pool), DB: pool}
+	return &tx.SqlStore{Queries: db.New(pool), DB: pool}
 }
