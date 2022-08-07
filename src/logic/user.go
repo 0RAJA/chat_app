@@ -100,11 +100,19 @@ func (user) Register(c *gin.Context, emailStr, pwd, code string) (*reply.Registe
 }
 
 func (user) DeleteUser(c *gin.Context, userID int64) errcode.Err {
-	userInfo, err := getUserInfoByID(c, userID)
-	if err != nil {
-		return err
+	userInfo, merr := getUserInfoByID(c, userID)
+	if merr != nil {
+		return merr
 	}
-	if err := dao.Group.DB.DeleteUserTx(c, userID); err != nil {
+	accountNum, err := dao.Group.DB.CountAccountByUserIDWithLock(c, userID)
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return errcode.ErrServer
+	}
+	if accountNum > 0 {
+		return myerr.UserHasAccount
+	}
+	if err := dao.Group.DB.DeleteUser(c, userID); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}

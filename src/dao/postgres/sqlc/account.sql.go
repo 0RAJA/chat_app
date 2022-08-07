@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-const countAccountByUserID = `-- name: CountAccountByUserID :one
+const countAccountByUserIDWithLock = `-- name: CountAccountByUserIDWithLock :one
 select count(id)::int
 from account
-where user_id = $1
+where user_id = $1 for update
 `
 
-func (q *Queries) CountAccountByUserID(ctx context.Context, userID int64) (int32, error) {
-	row := q.db.QueryRow(ctx, countAccountByUserID, userID)
+func (q *Queries) CountAccountByUserIDWithLock(ctx context.Context, userID int64) (int32, error) {
+	row := q.db.QueryRow(ctx, countAccountByUserIDWithLock, userID)
 	var column_1 int32
 	err := row.Scan(&column_1)
 	return column_1, err

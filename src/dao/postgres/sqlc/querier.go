@@ -10,7 +10,7 @@ import (
 )
 
 type Querier interface {
-	CountAccountByUserID(ctx context.Context, userID int64) (int32, error)
+	CountAccountByUserIDWithLock(ctx context.Context, userID int64) (int32, error)
 	CreateAccount(ctx context.Context, arg *CreateAccountParams) error
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)
@@ -24,12 +24,12 @@ type Querier interface {
 	DeleteAccountsByUserID(ctx context.Context, userID int64) ([]int64, error)
 	DeleteApplication(ctx context.Context, arg *DeleteApplicationParams) error
 	DeleteFileByID(ctx context.Context, id int64) error
-	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error
-	DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error
+	DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) ([]int64, error)
 	DeleteGroup(ctx context.Context, relationID int64) error
 	DeleteGroupNotify(ctx context.Context, id int64) error
 	DeleteRelation(ctx context.Context, id int64) error
 	DeleteSetting(ctx context.Context, arg *DeleteSettingParams) error
+	DeleteSettingsByAccountID(ctx context.Context, accountID int64) ([]int64, error)
 	DeleteUser(ctx context.Context, id int64) error
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	ExistsAccountByID(ctx context.Context, id int64) (bool, error)
@@ -38,14 +38,17 @@ type Querier interface {
 	ExistsApplicationByIDWithLock(ctx context.Context, arg *ExistsApplicationByIDWithLockParams) (bool, error)
 	ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRelationParams) (bool, error)
 	ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error)
+	ExistsGroupLeaderByAccountIDWithLock(ctx context.Context, accountID int64) (bool, error)
 	ExistsIsLeader(ctx context.Context, arg *ExistsIsLeaderParams) (bool, error)
 	ExistsSetting(ctx context.Context, arg *ExistsSettingParams) (bool, error)
 	ExistsUserByID(ctx context.Context, id int64) (bool, error)
 	GetAccountByID(ctx context.Context, arg *GetAccountByIDParams) (*GetAccountByIDRow, error)
+	GetAccountIDsByRelationID(ctx context.Context, relationID int64) ([]int64, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)
 	GetAllGroupRelation(ctx context.Context) ([]int64, error)
+	GetAllRelationIDs(ctx context.Context) ([]int64, error)
 	GetAllRelationOnRelation(ctx context.Context) ([]int64, error)
 	GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)

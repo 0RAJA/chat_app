@@ -37,18 +37,13 @@ select exists(select 1
                 and (friend_type).account1_id = @account1_id::bigint
                 and (friend_type).account2_id = @account2_id::bigint);
 
--- name: DeleteFriendRelationsByAccountID :exec
+-- name: DeleteFriendRelationsByAccountID :many
 delete
 from relation
 where relation_type = 'friend'
-  and ((friend_type).account1_id = @account_id::bigint or (friend_type).account2_id = @account_id::bigint);
+  and ((friend_type).account1_id = @account_id::bigint or (friend_type).account2_id = @account_id::bigint)
+returning id;
 
--- name: DeleteFriendRelationsByAccountIDs :exec
-delete
-from relation
-where relation_type = 'friend'
-  and ((friend_type).account1_id = ANY (@account_ids::bigint[])
-    or (friend_type).account2_id = ANY (@account_ids::bigint[]));
 
 -- name: GetFriendRelationByID :one
 select (friend_type).account1_id as account1_id,
@@ -58,7 +53,15 @@ from relation
 where relation_type = 'friend'
   and id = $1;
 -- name: GetAllGroupRelation :many
-select id from relation where relation_type = group_type and  friend_type is NULL;
+select id
+from relation
+where relation_type = group_type
+  and friend_type is NULL;
 
 -- name: GetAllRelationOnRelation :many
-select id from relation;
+select id
+from relation;
+
+-- name: GetAllRelationIDs :many
+select id
+from relation;

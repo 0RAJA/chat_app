@@ -32,7 +32,7 @@ func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc str
 	if err != nil {
 		return 0, errcode.ErrServer
 	}
-	err = dao.Group.Redis.AddGroupRelationAccount(c, relationID, accountID)
+	err = dao.Group.Redis.AddRelationAccount(c, relationID, accountID)
 	if err != nil {
 		return 0, errcode.ErrServer
 	}
@@ -91,7 +91,7 @@ func (mGroup) DissolveGroup(c *gin.Context, relationId int64, accountID int64) (
 	if err != nil {
 		return result, errcode.ErrServer
 	}
-	err = dao.Group.Redis.DelGroupRelation(c, relationId)
+	err = dao.Group.Redis.DelRelation(c, relationId)
 	if err != nil {
 		return result, errcode.ErrServer
 	}
@@ -152,7 +152,7 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
-	err = dao.Group.Redis.AddGroupRelationAccount(c, relationID, tID)
+	err = dao.Group.Redis.AddRelationAccount(c, relationID, tID)
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
@@ -177,7 +177,7 @@ func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (resu
 	if err != nil {
 		return result, errcode.ErrServer
 	}
-	err = dao.Group.Redis.DelGroupRelationAccount(c, relationID, accountID)
+	err = dao.Group.Redis.DelRelationAccount(c, relationID, accountID)
 	if err != nil {
 		return result, errcode.ErrServer
 	}

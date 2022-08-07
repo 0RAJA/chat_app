@@ -61,6 +61,33 @@ func (q *Queries) DeleteSetting(ctx context.Context, arg *DeleteSettingParams) e
 	return err
 }
 
+const deleteSettingsByAccountID = `-- name: DeleteSettingsByAccountID :many
+delete
+from setting
+where account_id = $1
+returning relation_id
+`
+
+func (q *Queries) DeleteSettingsByAccountID(ctx context.Context, accountID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, deleteSettingsByAccountID, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var relation_id int64
+		if err := rows.Scan(&relation_id); err != nil {
+			return nil, err
+		}
+		items = append(items, relation_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const existsFriendSetting = `-- name: ExistsFriendSetting :one
 select exists(
                select 1
@@ -80,6 +107,17 @@ type ExistsFriendSettingParams struct {
 
 func (q *Queries) ExistsFriendSetting(ctx context.Context, arg *ExistsFriendSettingParams) (bool, error) {
 	row := q.db.QueryRow(ctx, existsFriendSetting, arg.Account1ID, arg.Account2ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const existsGroupLeaderByAccountIDWithLock = `-- name: ExistsGroupLeaderByAccountIDWithLock :one
+select exists(select 1 from setting where account_id = $1 and is_leader = true) for update
+`
+
+func (q *Queries) ExistsGroupLeaderByAccountIDWithLock(ctx context.Context, accountID int64) (bool, error) {
+	row := q.db.QueryRow(ctx, existsGroupLeaderByAccountIDWithLock, accountID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -126,6 +164,32 @@ func (q *Queries) ExistsSetting(ctx context.Context, arg *ExistsSettingParams) (
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+const getAccountIDsByRelationID = `-- name: GetAccountIDsByRelationID :many
+select DISTINCT account_id
+from setting
+where relation_id = $1
+`
+
+func (q *Queries) GetAccountIDsByRelationID(ctx context.Context, relationID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getAccountIDsByRelationID, relationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var account_id int64
+		if err := rows.Scan(&account_id); err != nil {
+			return nil, err
+		}
+		items = append(items, account_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getFriendPinSettingsOrderByPinTime = `-- name: GetFriendPinSettingsOrderByPinTime :many
@@ -410,7 +474,9 @@ func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, acco
 }
 
 const getGroupMembers = `-- name: GetGroupMembers :many
-select account_id from setting where relation_id = $1
+select account_id
+from setting
+where relation_id = $1
 `
 
 func (q *Queries) GetGroupMembers(ctx context.Context, relationID int64) ([]int64, error) {

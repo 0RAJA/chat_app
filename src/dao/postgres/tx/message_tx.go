@@ -1,14 +1,15 @@
-package db
+package tx
 
 import (
 	"context"
 
+	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/pkg/tool"
 )
 
 // UpdateMsgTopTrueByMsgIDWithTx 更新此消息置顶(会删除其他置顶)
 func (store *SqlStore) UpdateMsgTopTrueByMsgIDWithTx(c context.Context, relationID, msgID int64) error {
-	return store.execTx(c, func(queries *Queries) error {
+	return store.execTx(c, func(queries *db.Queries) error {
 		var err error
 		err = tool.DoThat(err, func() error { return queries.UpdateMsgTopFalseByRelationID(c, relationID) })
 		err = tool.DoThat(err, func() error { return queries.UpdateMsgTopTrueByMsgID(c, msgID) })
@@ -18,10 +19,10 @@ func (store *SqlStore) UpdateMsgTopTrueByMsgIDWithTx(c context.Context, relation
 
 // RevokeMsgWithTx 撤回消息，如果消息置顶或pin则统统取消
 func (store *SqlStore) RevokeMsgWithTx(c context.Context, msgID int64, isTop, isPin bool) error {
-	return store.execTx(c, func(queries *Queries) error {
+	return store.execTx(c, func(queries *db.Queries) error {
 		var err error
 		err = tool.DoThat(err, func() error {
-			return queries.UpdateMsgRevoke(c, &UpdateMsgRevokeParams{
+			return queries.UpdateMsgRevoke(c, &db.UpdateMsgRevokeParams{
 				ID:       msgID,
 				IsRevoke: true,
 			})
@@ -31,7 +32,7 @@ func (store *SqlStore) RevokeMsgWithTx(c context.Context, msgID int64, isTop, is
 		}
 		if isPin {
 			err = tool.DoThat(err, func() error {
-				return queries.UpdateMsgPin(c, &UpdateMsgPinParams{
+				return queries.UpdateMsgPin(c, &db.UpdateMsgPinParams{
 					ID:    msgID,
 					IsPin: false,
 				})

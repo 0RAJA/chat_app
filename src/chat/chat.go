@@ -8,6 +8,7 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	"github.com/0RAJA/chat_app/src/global"
+	"github.com/0RAJA/chat_app/src/logic"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/common"
@@ -21,6 +22,9 @@ type chat struct {
 }
 
 // MustAccount 从header中获取并解析token并判断是否是账户，返回token
+// 参数: header
+// 成功: 从header中解析出token和content并进行校验返回*model.Token,nil
+// 失败: 返回 myerr.AuthenticationFailed,myerr.UserNotFound,errcode.ErrServer
 func MustAccount(header http.Header) (*model.Token, errcode.Err) {
 	payload, merr := mid.ParseHeader(header)
 	if merr != nil {
@@ -47,16 +51,19 @@ func MustAccount(header http.Header) (*model.Token, errcode.Err) {
 	}, nil
 }
 
-// CheckConnCtxToken 检查连接上下文中的token是否有效
-func CheckConnCtxToken(v interface{}) errcode.Err {
+// CheckConnCtxToken 检查连接上下文中的token是否有效，有效返回token
+// 参数: 连接上下文
+// 成功: 上下文中包含 *model.Token 且有效
+// 失败: 返回 myerr.AuthenticationFailed,myerr.AuthOverTime
+func CheckConnCtxToken(v interface{}) (*model.Token, errcode.Err) {
 	token, ok := v.(*model.Token)
 	if !ok {
-		return myerr.AuthenticationFailed
+		return nil, myerr.AuthenticationFailed
 	}
 	if token.Payload.ExpiredAt.Before(time.Now()) {
-		return myerr.AuthOverTime
+		return nil, myerr.AuthOverTime
 	}
-	return nil
+	return token, nil
 }
 
 func (chat) OnConnect(s socketio.Conn) error {
@@ -69,13 +76,21 @@ func (chat) OnConnect(s socketio.Conn) error {
 }
 
 func (chat) ClientSendMsg(s socketio.Conn, msg string) string {
-	if merr := CheckConnCtxToken(s.Context()); merr != nil {
-		return string(common.NewState(merr).MustJson())
+	token, merr := CheckConnCtxToken(s.Context())
+	if merr != nil {
+		return common.NewState(merr).JsonStr()
 	}
 	params := &request.ClientSendMsg{}
 	if err := common.Decode(msg, params); err != nil {
-		return string(common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).MustJson())
+		return common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).JsonStr()
 	}
-	// logic.Group.Chat.ClientSendMsg(params)
-	return ""
+	result, err := logic.Group.Chat.ClientSendMsg(&model.ClientSendMsgParams{
+		ID:         params.ID,
+		AccountID:  token.Content.ID,
+		IsFriend:   params.IsFriend,
+		MsgContent: params.MsgContent,
+		MsgExtend:  params.MsgExtend,
+		RlyMsgID:   params.RlyMsgID,
+	})
+	return common.NewState(err, result).JsonStr()
 }

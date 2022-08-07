@@ -47,12 +47,12 @@ func (s *State) Json() ([]byte, error) {
 	return json.Marshal(s)
 }
 
-// MustJson 将结构体转换为json格式的数据，如果出错，则返回空json字符串
-func (s *State) MustJson() []byte {
+// JsonStr 将结构体转换为json格式的数据，如果出错，则返回空json字符串
+func (s *State) JsonStr() string {
 	if b, err := s.Json(); err == nil {
-		return b
+		return string(b)
 	}
-	return []byte("{}")
+	return "{}"
 }
 
 // List 列表
