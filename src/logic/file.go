@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"mime/multipart"
-	"strconv"
-
+	upload "github.com/0RAJA/Rutils/pkg/upload/oss"
 	"github.com/0RAJA/Rutils/pkg/upload/oss/aliyun"
 	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/pkg/gtype"
+	"mime/multipart"
+	"strconv"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
@@ -24,22 +24,19 @@ import (
 type file struct {
 }
 
-var con = aliyun.Config{
+var oss upload.OSS = aliyun.Init(aliyun.Config{
 	BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
 	BasePath:        global.PvSettings.AliyunOSS.BasePath,
 	Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
 	AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
 	AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
 	BucketName:      global.PvSettings.AliyunOSS.BucketName,
-}
-
-var upload = aliyun.Init(con)
+})
 
 // PublishFile 上传文件，传出context与relationID,accountID,file(*multipart.FileHeader),返回 model.PublishFileRe
 // 错误代码 1003:系统错误 8001:文件存储失败(aly) 8004:文件过大
 func PublishFile(c context.Context, params model.PublishFile) (model.PublishFileRe, errcode.Err) {
-
-	url, key, err := upload.UploadFile(params.File)
+	url, key, err := oss.UploadFile(params.File)
 	result := model.PublishFileRe{}
 	if err != nil {
 		global.Logger.Error(err.Error())
@@ -94,7 +91,7 @@ func (file) DeleteFile(c context.Context, fileID int64) (result reply.DeleteFile
 		}
 		return result, errcode.ErrServer
 	}
-	_, err = upload.DeleteFile(key)
+	_, err = oss.DeleteFile(key)
 	if err != nil {
 		return result, myerr.FileDeleteFailed
 	}
@@ -131,7 +128,7 @@ func (file) GetRelationFile(c *gin.Context, relationID int64) ([]reply.File, err
 }
 
 func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart.FileHeader) (reply.UploadAvatar, errcode.Err) {
-	url, key, err := upload.UploadFile(file)
+	url, key, err := oss.UploadFile(file)
 	result := reply.UploadAvatar{}
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -179,7 +176,7 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 	var err error
 	result := reply.UploadAvatar{}
 	if file != nil {
-		url, key, err = upload.UploadFile(file)
+		url, key, err = oss.UploadFile(file)
 		if err != nil {
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return result, myerr.FiledStore
