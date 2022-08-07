@@ -67,6 +67,35 @@ func TestQueries_AddGroupRelationAccount(t *testing.T) {
 				require.NoError(t, dao.Group.Redis.DelAllRelations(context.Background()))
 			},
 		},
+		{
+			name: "测试从多个群中删除一个账号",
+			f: func() {
+				require.NoError(t, dao.Group.Redis.DelAllRelations(context.Background()))
+				groupNum := utils.RandomInt(1, 10)
+				accountID := utils.RandomInt(0, 10)
+				groupMap := make(map[int64][]int64, groupNum)
+				for i := int64(0); i < groupNum; i++ {
+					groupMap[i] = []int64{accountID}
+				}
+				require.NoError(t, dao.Group.Redis.ReloadRelationIDs(context.Background(), groupMap))
+				for groupID, accounts := range groupMap {
+					result, err := dao.Group.Redis.GetAccountsByRelationID(context.Background(), groupID)
+					require.NoError(t, err)
+					require.EqualValues(t, accounts, result)
+				}
+				groupIDs := make([]int64, 0, groupNum)
+				for groupID := range groupMap {
+					groupIDs = append(groupIDs, groupID)
+				}
+				require.NoError(t, dao.Group.Redis.DelAccountFromRelations(context.Background(), accountID, groupIDs...))
+				for groupID := range groupMap {
+					result, err := dao.Group.Redis.GetAccountsByRelationID(context.Background(), groupID)
+					require.NoError(t, err)
+					require.Empty(t, result)
+				}
+				require.NoError(t, dao.Group.Redis.DelAllRelations(context.Background()))
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
