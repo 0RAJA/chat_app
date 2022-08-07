@@ -3,6 +3,8 @@ package model
 import (
 	"mime/multipart"
 	"time"
+
+	"github.com/jackc/pgtype"
 )
 
 type MsgType string
@@ -11,6 +13,27 @@ const (
 	MsgTypeText MsgType = "text"
 	MsgTypeFile MsgType = "file"
 )
+
+// ExpandToJson MsgExtend 转 pgtype.Json 可以存nil
+// 参数: 消息扩展信息
+// 返回: pgtype.Json 对象
+func ExpandToJson(extend *MsgExtend) (pgtype.JSON, error) {
+	data := pgtype.JSON{}
+	err := data.Set(extend)
+	return data, err
+}
+
+// JsonToExpand pgtype.Json 转 MsgExtend,
+// 参数: pgtype.Json 对象(如果存的json为nil或未定义则返回nil)
+// 返回: 解析后的消息扩展信息(可能为nil)
+func JsonToExpand(data pgtype.JSON) (*MsgExtend, error) {
+	if data.Status != pgtype.Present {
+		return nil, nil
+	}
+	var extend = &MsgExtend{}
+	err := data.AssignTo(&extend)
+	return extend, err
+}
 
 type Remind struct {
 	Idx       int64 `json:"idx" binding:"required,gte=1"`        // 第几个@
@@ -58,7 +81,7 @@ type RevokeMsgParams struct {
 
 type CreateFileMsgParams struct {
 	AccountID, RelationID, RlyMsgID int64
-	File                            multipart.File
+	File                            *multipart.FileHeader
 }
 
 type CreateMsgParams struct {

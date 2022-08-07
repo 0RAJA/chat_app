@@ -13,32 +13,17 @@ import (
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
 type message struct {
 }
 
-// MsgExtend 转 pgtype.Json 可以存nil
-// nolint
-func expandToJson(extend *model.MsgExtend) (pgtype.JSON, error) {
-	data := pgtype.JSON{}
-	err := data.Set(extend)
-	return data, err
-}
-
-// pgtype.Json 转 MsgExtend,如果存的json为nil或未定义则返回nil
-func jsonToExpand(data pgtype.JSON) (*model.MsgExtend, error) {
-	if data.Status != pgtype.Present {
-		return nil, nil
-	}
-	var extend = &model.MsgExtend{}
-	err := data.AssignTo(&extend)
-	return extend, err
-}
-
-func existsSetting(c *gin.Context, accountID, relationID int64) (bool, errcode.Err) {
+// ExistsSetting 是否存在关系
+// 参数: accountID, relationID
+// 成功: 是否存在,nil
+// 失败: 打印错误日志 errcode.ErrServer
+func ExistsSetting(c *gin.Context, accountID, relationID int64) (bool, errcode.Err) {
 	ok, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{AccountID: accountID, RelationID: relationID})
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -47,7 +32,11 @@ func existsSetting(c *gin.Context, accountID, relationID int64) (bool, errcode.E
 	return ok, nil
 }
 
-func getMsgInfoByID(c *gin.Context, msgID int64) (*db.GetMsgByIDRow, errcode.Err) {
+// GetMsgInfoByID 获取消息详情
+// 参数: msgID 消息ID
+// 成功: 消息详情,nil
+// 失败: 打印错误日志 errcode.ErrServer,myerr.MsgNotExists
+func GetMsgInfoByID(c *gin.Context, msgID int64) (*db.GetMsgByIDRow, errcode.Err) {
 	result, err := dao.Group.DB.GetMsgByID(c, msgID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -60,7 +49,7 @@ func getMsgInfoByID(c *gin.Context, msgID int64) (*db.GetMsgByIDRow, errcode.Err
 }
 
 func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsByRelationIDAndTimeParams) (reply.GetMsgsByRelationIDAndTime, errcode.Err) {
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return reply.GetMsgsByRelationIDAndTime{}, merr
 	}
@@ -86,7 +75,7 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 		var extend *model.MsgExtend
 		if !v.IsRevoke {
 			content = v.MsgContent
-			extend, err = jsonToExpand(v.MsgExtend)
+			extend, err = model.JsonToExpand(v.MsgExtend)
 			if err != nil {
 				global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 				return reply.GetMsgsByRelationIDAndTime{}, errcode.ErrServer
@@ -98,7 +87,7 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 		}
 		var rlyMsg *reply.RlyMsg
 		if v.RlyMsgID.Valid {
-			rlyMsgInfo, merr := getMsgInfoByID(c, v.RlyMsgID.Int64)
+			rlyMsgInfo, merr := GetMsgInfoByID(c, v.RlyMsgID.Int64)
 			if merr != nil {
 				continue
 			}
@@ -106,7 +95,7 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 			var rlyExtend *model.MsgExtend
 			if !rlyMsgInfo.IsRevoke {
 				rlyContent = rlyMsgInfo.MsgContent
-				rlyExtend, err = jsonToExpand(rlyMsgInfo.MsgExtend)
+				rlyExtend, err = model.JsonToExpand(rlyMsgInfo.MsgExtend)
 				if err != nil {
 					global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 					return reply.GetMsgsByRelationIDAndTime{}, errcode.ErrServer
@@ -145,7 +134,7 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 }
 
 func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByRelationIDParams) (reply.GetPinMsgsByRelationID, errcode.Err) {
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return reply.GetPinMsgsByRelationID{}, merr
 	}
@@ -170,7 +159,7 @@ func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByR
 		var extend *model.MsgExtend
 		if !v.IsRevoke {
 			content = v.MsgContent
-			extend, err = jsonToExpand(v.MsgExtend)
+			extend, err = model.JsonToExpand(v.MsgExtend)
 			if err != nil {
 				global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 				return reply.GetPinMsgsByRelationID{}, errcode.ErrServer
@@ -202,7 +191,7 @@ func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByR
 }
 
 func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfoByMsgIDParams) (reply.GetRlyMsgsInfoByMsgID, errcode.Err) {
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return reply.GetRlyMsgsInfoByMsgID{}, merr
 	}
@@ -228,7 +217,7 @@ func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfo
 		var extend *model.MsgExtend
 		if !v.IsRevoke {
 			content = v.MsgContent
-			extend, err = jsonToExpand(v.MsgExtend)
+			extend, err = model.JsonToExpand(v.MsgExtend)
 			if err != nil {
 				global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 				return reply.GetRlyMsgsInfoByMsgID{}, errcode.ErrServer
@@ -241,7 +230,7 @@ func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfo
 		result = append(result, &reply.MsgInfo{
 			ID:         v.ID,
 			NotifyType: string(v.NotifyType),
-			MsgType:    string(v.MsgType),
+			MsgType:    v.MsgType,
 			MsgContent: content,
 			Extend:     extend,
 			FileID:     v.FileID.Int64,
@@ -260,7 +249,7 @@ func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfo
 }
 
 func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRelationIDParams) (*reply.GetTopMsgByRelationID, errcode.Err) {
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return nil, merr
 	}
@@ -279,7 +268,7 @@ func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRel
 	var extend *model.MsgExtend
 	if !data.IsRevoke {
 		content = data.MsgContent
-		extend, err = jsonToExpand(data.MsgExtend)
+		extend, err = model.JsonToExpand(data.MsgExtend)
 		if err != nil {
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return nil, errcode.ErrServer
@@ -311,14 +300,14 @@ func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRel
 }
 
 func (message) UpdateMsgPin(c *gin.Context, params model.UpdateMsgPinParams) errcode.Err {
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return merr
 	}
 	if !ok {
 		return myerr.AuthPermissionsInsufficient
 	}
-	msgInfo, merr := getMsgInfoByID(c, params.MsgID)
+	msgInfo, merr := GetMsgInfoByID(c, params.MsgID)
 	if merr != nil {
 		return merr
 	}
@@ -338,14 +327,14 @@ func (message) UpdateMsgPin(c *gin.Context, params model.UpdateMsgPinParams) err
 }
 
 func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTopParams) errcode.Err {
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return merr
 	}
 	if !ok {
 		return myerr.AuthPermissionsInsufficient
 	}
-	msgInfo, merr := getMsgInfoByID(c, params.MsgID)
+	msgInfo, merr := GetMsgInfoByID(c, params.MsgID)
 	if merr != nil {
 		return merr
 	}
@@ -367,7 +356,7 @@ func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTopParams) err
 }
 
 func (message) RevokeMsg(c *gin.Context, params model.RevokeMsgParams) errcode.Err {
-	msgInfo, merr := getMsgInfoByID(c, params.MsgID)
+	msgInfo, merr := GetMsgInfoByID(c, params.MsgID)
 	if merr != nil {
 		return merr
 	}
@@ -391,21 +380,26 @@ func (message) RevokeMsg(c *gin.Context, params model.RevokeMsgParams) errcode.E
 
 func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (*reply.CreateFileMsg, errcode.Err) {
 	// 检查权限
-	ok, merr := existsSetting(c, params.AccountID, params.RelationID)
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return nil, merr
 	}
 	if !ok {
 		return nil, myerr.AuthPermissionsInsufficient
 	}
-	// TODO:上传文件
-	var fileID int64
-	var url string
-	// upload(params.File,'')
+	// 上传文件
+	fileInfo, merr := PublishFile(c, model.PublishFile{
+		File:       params.File,
+		RelationID: params.RelationID,
+		AccountID:  params.AccountID,
+	})
+	if merr != nil {
+		return nil, merr
+	}
 	var isRly bool
 	var rlyID int64
 	if params.RlyMsgID > 0 {
-		rlyInfo, merr := getMsgInfoByID(c, params.RlyMsgID)
+		rlyInfo, merr := GetMsgInfoByID(c, params.RlyMsgID)
 		if merr != nil {
 			return nil, merr
 		}
@@ -415,13 +409,13 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		isRly = true
 		rlyID = params.RlyMsgID
 	}
-	extend, _ := expandToJson(nil)
+	extend, _ := model.ExpandToJson(nil)
 	result, err := dao.Group.DB.CreateMsg(c, &db.CreateMsgParams{
 		NotifyType: db.MsgnotifytypeCommon,
 		MsgType:    string(model.MsgTypeFile),
-		MsgContent: url,
+		MsgContent: fileInfo.Url,
 		MsgExtend:  extend,
-		FileID:     sql.NullInt64{Int64: fileID, Valid: true},
+		FileID:     sql.NullInt64{Int64: fileInfo.ID, Valid: true},
 		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
 		RlyMsgID:   sql.NullInt64{Int64: rlyID, Valid: isRly},
 		RelationID: 0,
@@ -437,40 +431,3 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		CreateAt:   result.CreateAt,
 	}, nil
 }
-
-// func (message) CreateMsg(c *gin.Context, params model.CreateMsgParams) errcode.Err {
-// 	var (
-// 		fileID    sql.NullInt64
-// 		accountID sql.NullInt64
-// 		rlyMsgID  sql.NullInt64
-// 	)
-// 	if params.FileID > 0 {
-// 		fileID.Int64 = params.FileID
-// 		fileID.Valid = true
-// 	}
-// 	if params.AccountID > 0 {
-// 		accountID.Int64 = params.AccountID
-// 		accountID.Valid = true
-// 	}
-// 	if params.RlyMsgID > 0 {
-// 		msgInfo, merr := getMsgInfoByID(c, params.RlyMsgID)
-// 		if merr != nil {
-// 			return merr
-// 		}
-// 		if msgInfo.IsRevoke {
-// 			return myerr.MsgAlreadyRevoke
-// 		}
-// 		rlyMsgID.Int64 = params.RlyMsgID
-// 		rlyMsgID.Valid = true
-// 	}
-// 	dao.Group.DB.CreateMsg(c, &db.CreateMsgParams{
-// 		NotifyType: "",
-// 		MsgType:    "",
-// 		MsgContent: "",
-// 		MsgExtend:  pgtype.JSON{},
-// 		FileID:     sql.NullInt64{},
-// 		AccountID:  sql.NullInt64{},
-// 		RlyMsgID:   sql.NullInt64{},
-// 		RelationID: 0,
-// 	})
-// }

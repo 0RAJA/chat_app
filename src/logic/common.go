@@ -8,6 +8,7 @@ import (
 )
 
 // 尝试重试
+// 失败: 打印日志
 func reTry(name string, f func() error) {
 	go func() {
 		d := global.PbSettings.Auto.Retry.Duration
@@ -17,7 +18,9 @@ func reTry(name string, f func() error) {
 	}()
 }
 
-// 新建token并返回token，payload, err
+// 新建token
+// 成功: 返回 token，*token.Payload
+// 失败: 返回 nil，error
 func newToken(t model.TokenType, id int64) (string, *token.Payload, error) {
 	duration := global.PvSettings.Token.UserTokenDuration
 	if t == model.AccountToken {

@@ -15,6 +15,9 @@ import (
 type application struct {
 }
 
+// 通过AccountID获取申请信息，返回申请信息
+// 成功: 申请信息
+// 错误: 打印日志, myerr.ApplicationNotExists,errcode.ErrServer
 func getApplication(c *gin.Context, account1ID, account2ID int64) (*db.Application, errcode.Err) {
 	aply, err := dao.Group.DB.GetApplicationByID(c, &db.GetApplicationByIDParams{Account1ID: account1ID, Account2ID: account2ID})
 	switch err {
