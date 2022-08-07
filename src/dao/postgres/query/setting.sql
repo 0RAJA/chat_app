@@ -8,6 +8,15 @@ from setting
 where account_id = $1
   and relation_id = $2;
 
+-- name: DeleteSettingsByAccountID :many
+delete
+from setting
+where account_id = $1
+returning relation_id;
+
+-- name: ExistsGroupLeaderByAccountIDWithLock :one
+select exists(select 1 from setting where account_id = $1 and is_leader = true) for update;
+
 -- name: UpdateSettingNickName :exec
 update setting
 set nick_name = $3
@@ -210,5 +219,11 @@ select exists(
            );
 
 -- name: GetGroupMembers :many
-select account_id from setting where relation_id = $1;
+select account_id
+from setting
+where relation_id = $1;
 
+-- name: GetAccountIDsByRelationID :many
+select DISTINCT account_id
+from setting
+where relation_id = $1;

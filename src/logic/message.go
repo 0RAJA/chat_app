@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -23,10 +24,10 @@ type message struct {
 // 参数: accountID, relationID
 // 成功: 是否存在,nil
 // 失败: 打印错误日志 errcode.ErrServer
-func ExistsSetting(c *gin.Context, accountID, relationID int64) (bool, errcode.Err) {
+func ExistsSetting(c context.Context, accountID, relationID int64) (bool, errcode.Err) {
 	ok, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{AccountID: accountID, RelationID: relationID})
 	if err != nil {
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		global.Logger.Error(err.Error())
 		return false, errcode.ErrServer
 	}
 	return ok, nil
@@ -36,13 +37,13 @@ func ExistsSetting(c *gin.Context, accountID, relationID int64) (bool, errcode.E
 // 参数: msgID 消息ID
 // 成功: 消息详情,nil
 // 失败: 打印错误日志 errcode.ErrServer,myerr.MsgNotExists
-func GetMsgInfoByID(c *gin.Context, msgID int64) (*db.GetMsgByIDRow, errcode.Err) {
+func GetMsgInfoByID(c context.Context, msgID int64) (*db.GetMsgByIDRow, errcode.Err) {
 	result, err := dao.Group.DB.GetMsgByID(c, msgID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, myerr.MsgNotExists
 		}
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		global.Logger.Error(err.Error())
 		return nil, errcode.ErrServer
 	}
 	return result, nil

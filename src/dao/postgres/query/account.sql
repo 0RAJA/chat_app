@@ -43,10 +43,10 @@ select exists(
                  and name = $2
            );
 
--- name: CountAccountByUserID :one
+-- name: CountAccountByUserIDWithLock :one
 select count(id)::int
 from account
-where user_id = $1;
+where user_id = $1 for update;
 
 -- name: DeleteAccountsByUserID :many
 delete

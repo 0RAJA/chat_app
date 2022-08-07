@@ -11,8 +11,8 @@ const KeyGroup = "KeyGroup"
 
 const DelAllPrefixLua = "local redisKeys = redis.call('keys', KEYS[1] .. '*');for i, k in pairs(redisKeys) do redis.call('expire', k, 0);end"
 
-// ReloadGroupRelationIDs 重新加载群聊名单
-func (q *Queries) ReloadGroupRelationIDs(c context.Context, groupMap map[int64][]int64) error {
+// ReloadRelationIDs 重新加载群聊名单
+func (q *Queries) ReloadRelationIDs(c context.Context, groupMap map[int64][]int64) error {
 	if err := q.rdb.Eval(c, DelAllPrefixLua, []string{KeyGroup}).Err(); err != nil && err != redis.Nil {
 		return err
 	}
@@ -28,13 +28,13 @@ func (q *Queries) ReloadGroupRelationIDs(c context.Context, groupMap map[int64][
 	return err
 }
 
-// DelGroupRelation 删除一个群聊名单
-func (q *Queries) DelGroupRelation(c context.Context, relationID int64) error {
+// DelRelation 删除一个群聊名单
+func (q *Queries) DelRelation(c context.Context, relationID int64) error {
 	return q.rdb.Del(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID))).Err()
 }
 
-// AddGroupRelationAccount 向群聊名单中增加人员
-func (q *Queries) AddGroupRelationAccount(c context.Context, relationID int64, accountIDs ...int64) error {
+// AddRelationAccount 向群聊名单中增加人员
+func (q *Queries) AddRelationAccount(c context.Context, relationID int64, accountIDs ...int64) error {
 	if len(accountIDs) == 0 {
 		return nil
 	}
@@ -45,8 +45,8 @@ func (q *Queries) AddGroupRelationAccount(c context.Context, relationID int64, a
 	return q.rdb.SAdd(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID)), data...).Err()
 }
 
-// DelGroupRelationAccount 从群聊名单中删除人员
-func (q *Queries) DelGroupRelationAccount(c context.Context, relationID int64, accountIDs ...int64) error {
+// DelRelationAccount 从一个群中删除多个人员
+func (q *Queries) DelRelationAccount(c context.Context, relationID int64, accountIDs ...int64) error {
 	if len(accountIDs) == 0 {
 		return nil
 	}
@@ -57,8 +57,21 @@ func (q *Queries) DelGroupRelationAccount(c context.Context, relationID int64, a
 	return q.rdb.SRem(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID)), data...).Err()
 }
 
-// GetAccountsByGroupRelationID 获取群聊名单中的所有人员
-func (q *Queries) GetAccountsByGroupRelationID(c context.Context, relationID int64) ([]int64, error) {
+// DelAccountFromRelations 从多个群中删除一个人员
+func (q *Queries) DelAccountFromRelations(c context.Context, accountID int64, relationIDs ...int64) error {
+	if len(relationIDs) == 0 {
+		return nil
+	}
+	pipe := q.rdb.TxPipeline()
+	for _, relationID := range relationIDs {
+		pipe.SRem(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID)), utils.IDToSting(accountID))
+	}
+	_, err := pipe.Exec(c)
+	return err
+}
+
+// GetAccountsByRelationID 获取群聊名单中的所有人员
+func (q *Queries) GetAccountsByRelationID(c context.Context, relationID int64) ([]int64, error) {
 	data, err := q.rdb.SMembers(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID))).Result()
 	if err != nil {
 		return nil, err
@@ -70,8 +83,8 @@ func (q *Queries) GetAccountsByGroupRelationID(c context.Context, relationID int
 	return ret, nil
 }
 
-// DelAllGroupRelation 删除所有群聊名单(用于测试)
-func (q *Queries) DelAllGroupRelation(c context.Context) error {
+// DelAllRelations 删除所有群聊名单(用于测试)
+func (q *Queries) DelAllRelations(c context.Context) error {
 	if err := q.rdb.Eval(c, DelAllPrefixLua, []string{KeyGroup}).Err(); err != nil && err != redis.Nil {
 		return err
 	}

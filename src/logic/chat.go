@@ -10,13 +10,18 @@ import (
 type chat struct {
 }
 
-// nolint
-
 func (chat) ClientSendMsg(params *model.ClientSendMsgParams) (*reply.ClientSendMsg, errcode.Err) {
 	// msgExtend, err := model.ExpandToJson(params.MsgExtend)
 	// if err != nil {
 	// 	global.Logger.Error(err.Error())
 	// 	return nil, errcode.ErrServer
+	// }
+	// ok, merr := ExistsSetting(context.Background(), params.AccountID, params.ID)
+	// if merr != nil {
+	// 	return nil, merr
+	// }
+	// if !ok {
+	// 	return nil, myerr.AuthPermissionsInsufficient
 	// }
 	// dao.Group.DB.CreateMsg(context.Background(), &db.CreateMsgParams{
 	// 	NotifyType: db.MsgnotifytypeCommon,

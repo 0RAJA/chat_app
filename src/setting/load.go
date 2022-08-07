@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/0RAJA/chat_app/src/dao"
+	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/pkg/tool"
 )
 
@@ -12,7 +13,7 @@ import (
 type load struct {
 }
 
-// LoadAllEmailsToRedis 加载所有邮件到redis
+// LoadAllEmailsToRedis 加载所有邮箱到redis
 func LoadAllEmailsToRedis() error {
 	emails, err := dao.Group.DB.GetAllEmails(context.Background())
 	if err != nil {
@@ -21,28 +22,29 @@ func LoadAllEmailsToRedis() error {
 	if err := dao.Group.Redis.ReloadEmails(context.Background(), emails...); err != nil {
 		return err
 	}
+	global.Logger.Info("邮箱加载完成")
 	return nil
 }
 
-// LoadAllGroupRelationToRedis 加载所有群组关系名单到redis
-// nolint
+// LoadAllGroupRelationToRedis 加载所有关系名单到redis
 func LoadAllGroupRelationToRedis() error {
 	// 群ID和成员IDs
-	var relations map[int64][]int64
-	relation, err := dao.Group.DB.GetAllGroupRelation(context.Background())
+	relations := make(map[int64][]int64)
+	relationIDs, err := dao.Group.DB.GetAllRelationIDs(context.Background())
 	if err != nil {
 		return err
 	}
-	for _, v := range relation {
-		member, err := dao.Group.DB.GetGroupMembers(context.Background(), v)
+	for _, relationID := range relationIDs {
+		accountIDs, err := dao.Group.DB.GetAccountIDsByRelationID(context.Background(), relationID)
 		if err != nil {
 			return err
 		}
-		relations[v] = member
+		relations[relationID] = accountIDs
 	}
-	if err := dao.Group.Redis.ReloadGroupRelationIDs(context.Background(), relations); err != nil {
+	if err := dao.Group.Redis.ReloadRelationIDs(context.Background(), relations); err != nil {
 		return err
 	}
+	global.Logger.Info("关系名单加载完成")
 	return nil
 }
 
@@ -50,6 +52,7 @@ func (load) Init() {
 	var err error
 	// 加载所有邮件到redis
 	err = tool.DoThat(err, LoadAllEmailsToRedis)
+	err = tool.DoThat(err, LoadAllGroupRelationToRedis)
 	if err != nil {
 		panic(err)
 	}

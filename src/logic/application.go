@@ -4,6 +4,7 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
+	"github.com/0RAJA/chat_app/src/dao/postgres/tx"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model/reply"
@@ -51,7 +52,7 @@ func (application) Create(c *gin.Context, account1ID, account2ID int64, applyMsg
 	switch err {
 	case nil:
 		return nil
-	case db.ErrApplicationExists:
+	case tx.ErrApplicationExists:
 		return myerr.ApplicationExists
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -91,7 +92,7 @@ func (application) Accept(c *gin.Context, account1ID, account2ID int64) errcode.
 	if merr != nil {
 		return merr
 	}
-	if err := dao.Group.DB.AcceptApplicationTx(c, account1Info, account2Info); err != nil {
+	if err := dao.Group.DB.AcceptApplicationTx(c, dao.Group.Redis, account1Info, account2Info); err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}

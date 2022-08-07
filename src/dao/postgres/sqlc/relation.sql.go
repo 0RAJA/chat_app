@@ -47,29 +47,32 @@ func (q *Queries) CreateGroupRelation(ctx context.Context, arg *CreateGroupRelat
 	return id, err
 }
 
-const deleteFriendRelationsByAccountID = `-- name: DeleteFriendRelationsByAccountID :exec
+const deleteFriendRelationsByAccountID = `-- name: DeleteFriendRelationsByAccountID :many
 delete
 from relation
 where relation_type = 'friend'
   and ((friend_type).account1_id = $1::bigint or (friend_type).account2_id = $1::bigint)
+returning id
 `
 
-func (q *Queries) DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) error {
-	_, err := q.db.Exec(ctx, deleteFriendRelationsByAccountID, accountID)
-	return err
-}
-
-const deleteFriendRelationsByAccountIDs = `-- name: DeleteFriendRelationsByAccountIDs :exec
-delete
-from relation
-where relation_type = 'friend'
-  and ((friend_type).account1_id = ANY ($1::bigint[])
-    or (friend_type).account2_id = ANY ($1::bigint[]))
-`
-
-func (q *Queries) DeleteFriendRelationsByAccountIDs(ctx context.Context, accountIds []int64) error {
-	_, err := q.db.Exec(ctx, deleteFriendRelationsByAccountIDs, accountIds)
-	return err
+func (q *Queries) DeleteFriendRelationsByAccountID(ctx context.Context, accountID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, deleteFriendRelationsByAccountID, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const deleteRelation = `-- name: DeleteRelation :exec
@@ -104,7 +107,10 @@ func (q *Queries) ExistsFriendRelation(ctx context.Context, arg *ExistsFriendRel
 }
 
 const getAllGroupRelation = `-- name: GetAllGroupRelation :many
-select id from relation where relation_type = group_type and  friend_type is NULL
+select id
+from relation
+where relation_type = group_type
+  and friend_type is NULL
 `
 
 func (q *Queries) GetAllGroupRelation(ctx context.Context) ([]int64, error) {
@@ -127,8 +133,34 @@ func (q *Queries) GetAllGroupRelation(ctx context.Context) ([]int64, error) {
 	return items, nil
 }
 
+const getAllRelationIDs = `-- name: GetAllRelationIDs :many
+select id
+from relation
+`
+
+func (q *Queries) GetAllRelationIDs(ctx context.Context) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getAllRelationIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllRelationOnRelation = `-- name: GetAllRelationOnRelation :many
-select id from relation
+select id
+from relation
 `
 
 func (q *Queries) GetAllRelationOnRelation(ctx context.Context) ([]int64, error) {
