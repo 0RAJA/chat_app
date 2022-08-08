@@ -23,7 +23,9 @@ func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc str
 	if err != nil {
 		return 0, errcode.ErrServer
 	}
+
 	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true)
+
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return 0, errcode.ErrServer
@@ -125,6 +127,7 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int
 		return result, myerr.NotGroupMember
 	}
 	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, tID, false)
+
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
@@ -142,7 +145,9 @@ func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (resu
 	if t {
 		return result, myerr.IsLeader
 	}
+
 	err = dao.Group.DB.DeleteSettingWithTx(c, dao.Group.Redis, relationID, accountID)
+
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
