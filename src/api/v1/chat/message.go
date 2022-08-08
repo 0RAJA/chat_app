@@ -2,8 +2,8 @@ package chat
 
 import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
+	"github.com/0RAJA/chat_app/src/chat"
 	"github.com/0RAJA/chat_app/src/global"
-	"github.com/0RAJA/chat_app/src/logic"
 	"github.com/0RAJA/chat_app/src/model"
 	chat2 "github.com/0RAJA/chat_app/src/model/chat/client"
 	"github.com/0RAJA/chat_app/src/model/common"
@@ -25,7 +25,7 @@ func (message) SendMsg(s socketio.Conn, msg string) string {
 	}
 	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
-	result, merr := logic.Group.Chat.Message.SendMsg(c, &model.HandleSendMsg{
+	result, merr := chat.Group.Message.SendMsg(c, &model.HandleSendMsg{
 		RelationID: params.RelationID,
 		AccountID:  token.Content.ID,
 		MsgContent: params.MsgContent,
@@ -46,7 +46,7 @@ func (message) ReadMsg(s socketio.Conn, msg string) string {
 	}
 	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
-	merr = logic.Group.Chat.Message.ReadMsg(c, &model.HandleReadMsg{
+	merr = chat.Group.Message.ReadMsg(c, &model.HandleReadMsg{
 		MsgID:     params.MsgID,
 		AccountID: token.Content.ID,
 	})
