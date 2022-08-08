@@ -495,18 +495,18 @@ func (q *Queries) UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) err
 
 const updateMsgReads = `-- name: UpdateMsgReads :exec
 update message
-set read_ids = array_append(read_ids, $2)
+set read_ids = array_append(read_ids, $2::bigint)
 where id = $1
-  and $2 != ANY (read_ids)
+  and $2::bigint != ANY (read_ids)
 `
 
 type UpdateMsgReadsParams struct {
-	ID          int64       `json:"id"`
-	ArrayAppend interface{} `json:"array_append"`
+	ID        int64 `json:"id"`
+	Accountid int64 `json:"accountid"`
 }
 
 func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error {
-	_, err := q.db.Exec(ctx, updateMsgReads, arg.ID, arg.ArrayAppend)
+	_, err := q.db.Exec(ctx, updateMsgReads, arg.ID, arg.Accountid)
 	return err
 }
 

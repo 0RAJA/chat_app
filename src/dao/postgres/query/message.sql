@@ -15,9 +15,9 @@ where id = $1;
 
 -- name: UpdateMsgReads :exec
 update message
-set read_ids = array_append(read_ids, $2)
+set read_ids = array_append(read_ids, @AccountID::bigint)
 where id = $1
-  and $2 != ANY (read_ids);
+  and @AccountID::bigint != ANY (read_ids);
 
 -- name: GetMsgsByRelationIDAndTime :many
 select m1.id,

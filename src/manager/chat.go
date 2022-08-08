@@ -50,7 +50,19 @@ func (c *ChatMap) Leave(s socketio.Conn, accountID int64) {
 }
 
 // Send 给指定账号的全部设备推送消息
-func (c *ChatMap) Send(accountIDs []int64, event string, args ...interface{}) {
+func (c *ChatMap) Send(accountID int64, event string, args ...interface{}) {
+	cm, ok := c.m.Load(accountID)
+	if !ok {
+		return
+	}
+	cm.(*ConnMap).m.Range(func(k, v interface{}) bool {
+		v.(socketio.Conn).Emit(event, args...)
+		return true
+	})
+}
+
+// SendMany 给指定多个账号的全部设备推送消息
+func (c *ChatMap) SendMany(accountIDs []int64, event string, args ...interface{}) {
 	for accountID := range accountIDs {
 		cm, ok := c.m.Load(accountID)
 		if !ok {
