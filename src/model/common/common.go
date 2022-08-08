@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
+	"github.com/0RAJA/chat_app/src/global"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -49,10 +50,12 @@ func (s *State) Json() ([]byte, error) {
 
 // JsonStr 将结构体转换为json格式的数据，如果出错，则返回空json字符串
 func (s *State) JsonStr() string {
-	if b, err := s.Json(); err == nil {
-		return string(b)
+	b, err := s.Json()
+	if err != nil {
+		global.Logger.Error(err.Error())
+		return "{}"
 	}
-	return "{}"
+	return string(b)
 }
 
 // List 列表
