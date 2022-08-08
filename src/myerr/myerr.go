@@ -29,6 +29,7 @@ var (
 	MsgNotExists                = errcode.NewErr(5001, "消息不存在")
 	MsgAlreadyRevoke            = errcode.NewErr(5002, "消息已经撤销")
 	RlyMsgHasRevoked            = errcode.NewErr(5003, "回复消息已经撤销")
+	RlyMsgNotOneRelation        = errcode.NewErr(5004, "回复的消息和发送的消息并非在一个群")
 	NotLeader                   = errcode.NewErr(7001, "非群主")
 	IsLeader                    = errcode.NewErr(7002, "群主不可退群")
 	NotGroupMember              = errcode.NewErr(7003, "非该群成员")

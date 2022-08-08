@@ -8,18 +8,10 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	"github.com/0RAJA/chat_app/src/global"
-	"github.com/0RAJA/chat_app/src/logic"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
-	"github.com/0RAJA/chat_app/src/model/common"
-	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/myerr"
-	socketio "github.com/googollee/go-socket.io"
 )
-
-// TODO: 聊天接收层
-type chat struct {
-}
 
 // MustAccount 从header中获取并解析token并判断是否是账户，返回token
 // 参数: header
@@ -66,31 +58,8 @@ func CheckConnCtxToken(v interface{}) (*model.Token, errcode.Err) {
 	return token, nil
 }
 
-func (chat) OnConnect(s socketio.Conn) error {
-	token, err := MustAccount(s.RemoteHeader())
-	if err != nil {
-		return err
-	}
-	s.SetContext(token)
-	return nil
-}
-
-func (chat) ClientSendMsg(s socketio.Conn, msg string) string {
-	token, merr := CheckConnCtxToken(s.Context())
-	if merr != nil {
-		return common.NewState(merr).JsonStr()
-	}
-	params := &request.ClientSendMsg{}
-	if err := common.Decode(msg, params); err != nil {
-		return common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).JsonStr()
-	}
-	result, err := logic.Group.Chat.ClientSendMsg(&model.ClientSendMsgParams{
-		ID:         params.ID,
-		AccountID:  token.Content.ID,
-		IsFriend:   params.IsFriend,
-		MsgContent: params.MsgContent,
-		MsgExtend:  params.MsgExtend,
-		RlyMsgID:   params.RlyMsgID,
-	})
-	return common.NewState(err, result).JsonStr()
+// DefaultContextWithTimeOut 获取默认限时连接上下文
+// 成功: 返回上下文和终止函数
+func DefaultContextWithTimeOut() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), global.PbSettings.Server.DefaultContextTimeout)
 }
