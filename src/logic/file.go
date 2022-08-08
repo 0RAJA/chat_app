@@ -4,6 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	upload "github.com/0RAJA/Rutils/pkg/upload/oss"
+	"github.com/0RAJA/Rutils/pkg/upload/oss/aliyun"
+	"github.com/0RAJA/chat_app/src/model"
+	"github.com/0RAJA/chat_app/src/pkg/gtype"
 	"mime/multipart"
 	"strconv"
 
@@ -12,21 +16,27 @@ import (
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
-	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
-	"github.com/0RAJA/chat_app/src/pkg/gtype"
 	"github.com/gin-gonic/gin"
 )
 
 type file struct {
 }
 
+var oss upload.OSS = aliyun.Init(aliyun.Config{
+	BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
+	BasePath:        global.PvSettings.AliyunOSS.BasePath,
+	Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
+	AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
+	AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
+	BucketName:      global.PvSettings.AliyunOSS.BucketName,
+})
+
 // PublishFile 上传文件，传出context与relationID,accountID,file(*multipart.FileHeader),返回 model.PublishFileRe
 // 错误代码 1003:系统错误 8001:文件存储失败(aly) 8004:文件过大
 func PublishFile(c context.Context, params model.PublishFile) (model.PublishFileRe, errcode.Err) {
-
-	url, key, err := dao.Group.OSS.UploadAliFile(params.File)
+	url, key, err := oss.UploadFile(params.File)
 	result := model.PublishFileRe{}
 	if err != nil {
 		global.Logger.Error(err.Error())
@@ -81,7 +91,7 @@ func (file) DeleteFile(c context.Context, fileID int64) (result reply.DeleteFile
 		}
 		return result, errcode.ErrServer
 	}
-	_, err = dao.Group.OSS.DeleteAliFile(key)
+	_, err = oss.DeleteFile(key)
 	if err != nil {
 		return result, myerr.FileDeleteFailed
 	}
@@ -118,7 +128,7 @@ func (file) GetRelationFile(c *gin.Context, relationID int64) ([]reply.File, err
 }
 
 func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart.FileHeader) (reply.UploadAvatar, errcode.Err) {
-	url, key, err := dao.Group.OSS.UploadAliFile(file)
+	url, key, err := oss.UploadFile(file)
 	result := reply.UploadAvatar{}
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -166,7 +176,7 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 	var err error
 	result := reply.UploadAvatar{}
 	if file != nil {
-		url, key, err = dao.Group.OSS.UploadAliFile(file)
+		url, key, err = oss.UploadFile(file)
 		if err != nil {
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return result, myerr.FiledStore

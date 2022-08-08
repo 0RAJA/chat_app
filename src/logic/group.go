@@ -23,56 +23,42 @@ func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc str
 	if err != nil {
 		return 0, errcode.ErrServer
 	}
-	err = dao.Group.DB.CreateSetting(c, &db.CreateSettingParams{
-		AccountID:  accountID,
-		RelationID: relationID,
-		IsLeader:   true,
-		IsSelf:     false,
-	})
+
+	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true)
+
 	if err != nil {
-		return 0, errcode.ErrServer
-	}
-	err = dao.Group.Redis.AddRelationAccount(c, relationID, accountID)
-	if err != nil {
+		global.Logger.Error(err.Error())
 		return 0, errcode.ErrServer
 	}
 	return relationID, nil
 }
-func (mGroup) TransferGroup(c *gin.Context, relationID int64, fID int64, tID int64) (reply.TransferGroup, errcode.Err) {
+
+func (mGroup) TransferGroup(c *gin.Context, relationID int64, fID int64, tID int64) (result reply.TransferGroup, mErr errcode.Err) {
 	t, err := dao.Group.DB.ExistsIsLeader(c, &db.ExistsIsLeaderParams{
 		RelationID: relationID,
 		AccountID:  fID,
 	})
 	if err != nil {
 		global.Logger.Error(err.Error())
-		return reply.TransferGroup{}, errcode.ErrServer
+		return result, errcode.ErrServer
 	}
 	if !t {
-		return reply.TransferGroup{}, myerr.NotLeader
+		return result, myerr.NotLeader
 	}
 	t, err = dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
 		AccountID:  tID,
 		RelationID: relationID,
 	})
 	if err != nil {
-		return reply.TransferGroup{}, errcode.ErrServer
+		return result, errcode.ErrServer
 	}
 	if !t {
-		return reply.TransferGroup{}, myerr.NotGroupMember
+		return result, myerr.NotGroupMember
 	}
-	err = dao.Group.DB.TransferIsSelfFalse(c, &db.TransferIsSelfFalseParams{
-		RelationID: relationID,
-		AccountID:  fID,
-	})
+	err = dao.Group.DB.TransferGroup(c, relationID, fID, tID)
 	if err != nil {
-		return reply.TransferGroup{}, errcode.ErrServer
-	}
-	err = dao.Group.DB.TransferIsSelfTrue(c, &db.TransferIsSelfTrueParams{
-		RelationID: relationID,
-		AccountID:  tID,
-	})
-	if err != nil {
-		return reply.TransferGroup{}, errcode.ErrServer
+		global.Logger.Error(err.Error())
+		return result, errcode.ErrServer
 	}
 	return reply.TransferGroup{}, nil
 }
@@ -82,17 +68,15 @@ func (mGroup) DissolveGroup(c *gin.Context, relationId int64, accountID int64) (
 		AccountID:  accountID,
 	})
 	if err != nil {
+		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
 	if !t {
 		return result, myerr.NotLeader
 	}
-	err = dao.Group.DB.DissolveGroup(c, relationId)
+	err = dao.Group.DB.DeleteRelationWithTx(c, dao.Group.Redis, relationId)
 	if err != nil {
-		return result, errcode.ErrServer
-	}
-	err = dao.Group.Redis.DelRelation(c, relationId)
-	if err != nil {
+		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
 	return result, nil
@@ -142,17 +126,8 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int
 	if !t {
 		return result, myerr.NotGroupMember
 	}
-	err = dao.Group.DB.CreateSetting(c, &db.CreateSettingParams{
-		AccountID:  tID,
-		RelationID: relationID,
-		IsLeader:   false,
-		IsSelf:     false,
-	})
-	if err != nil {
-		global.Logger.Error(err.Error())
-		return result, errcode.ErrServer
-	}
-	err = dao.Group.Redis.AddRelationAccount(c, relationID, tID)
+	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, tID, false)
+
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
@@ -170,15 +145,11 @@ func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (resu
 	if t {
 		return result, myerr.IsLeader
 	}
-	err = dao.Group.DB.DeleteSetting(c, &db.DeleteSettingParams{
-		AccountID:  accountID,
-		RelationID: relationID,
-	})
+
+	err = dao.Group.DB.DeleteSettingWithTx(c, dao.Group.Redis, relationID, accountID)
+
 	if err != nil {
-		return result, errcode.ErrServer
-	}
-	err = dao.Group.Redis.DelRelationAccount(c, relationID, accountID)
-	if err != nil {
+		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
 	return result, nil

@@ -29,6 +29,12 @@ type TXer interface {
 	RevokeMsgWithTx(c context.Context, msgID int64, isTop, isPin bool) error
 	// DeleteRelationWithTx 从数据库中删除关系并删除redis中的关系
 	DeleteRelationWithTx(c context.Context, rdb *query.Queries, relationID int64) error
+	// AddSettingWithTx 向数据库和redis中同时添加群员
+	AddSettingWithTx(c context.Context, rdb *query.Queries, relationID int64, accountID int64, isLeader bool) error
+	// DeleteSettingWithTx 向数据库和redis中同时删除群员
+	DeleteSettingWithTx(c context.Context, rdb *query.Queries, relationID int64, accountID int64) error
+	// TransferGroup 转让群
+	TransferGroup(c context.Context, relationID int64, fID int64, tID int64) error
 }
 
 type SqlStore struct {
