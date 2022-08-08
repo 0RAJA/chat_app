@@ -1,5 +1,9 @@
 package logic
 
+import (
+	"github.com/0RAJA/chat_app/src/logic/chat"
+)
+
 type group struct {
 	User        user
 	Email       email
@@ -11,7 +15,7 @@ type group struct {
 	MGroup      mGroup
 	Auto        auto
 	Message     message
-	Chat        chat
+	Chat        chat.Group
 }
 
 var Group = new(group)

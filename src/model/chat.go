@@ -1,6 +1,6 @@
 package model
 
-type ClientSendMsgParams struct {
+type HandleSendMsg struct {
 	RelationID int64      // 关系ID
 	AccountID  int64      // 账户ID
 	MsgContent string     // 消息内容
@@ -8,7 +8,7 @@ type ClientSendMsgParams struct {
 	RlyMsgID   int64      // 回复消息ID (如果是回复消息，则此字段大于0)
 }
 
-type ClientReadMsgParams struct {
+type HandleReadMsg struct {
 	MsgID     int64 // 消息ID
 	AccountID int64 // 账户ID
 }

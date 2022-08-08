@@ -57,9 +57,3 @@ func CheckConnCtxToken(v interface{}) (*model.Token, errcode.Err) {
 	}
 	return token, nil
 }
-
-// DefaultContextWithTimeOut 获取默认限时连接上下文
-// 成功: 返回上下文和终止函数
-func DefaultContextWithTimeOut() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), global.PbSettings.Server.DefaultContextTimeout)
-}
