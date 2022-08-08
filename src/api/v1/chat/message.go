@@ -2,47 +2,30 @@ package chat
 
 import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
-	"github.com/0RAJA/chat_app/src/logic"
+	"github.com/0RAJA/chat_app/src/chat"
+	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/model"
-	chat2 "github.com/0RAJA/chat_app/src/model/chat"
+	chat2 "github.com/0RAJA/chat_app/src/model/chat/client"
 	"github.com/0RAJA/chat_app/src/model/common"
 	socketio "github.com/googollee/go-socket.io"
 )
 
 // 用于处理客户端发送的event
-type client struct {
+type message struct {
 }
 
-func (client) OnConnect(s socketio.Conn) error {
-	token, err := MustAccount(s.RemoteHeader())
-	if err != nil {
-		return err
-	}
-	// TODO: 通知其他账户
-	s.SetContext(token)
-	return nil
-}
-
-func (client) OnError(s socketio.Conn, e error) {
-
-}
-
-func (client) OnDisconnect(s socketio.Conn) {
-	// TODO: 通知其他账户
-}
-
-func (client) SendMsg(s socketio.Conn, msg string) string {
+func (message) SendMsg(s socketio.Conn, msg string) string {
 	token, merr := CheckConnCtxToken(s.Context())
 	if merr != nil {
 		return common.NewState(merr).JsonStr()
 	}
-	params := &chat2.ClientSendMsgParams{}
+	params := &chat2.HandleSendMsgParams{}
 	if err := common.Decode(msg, params); err != nil {
 		return common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).JsonStr()
 	}
-	c, cancel := DefaultContextWithTimeOut()
+	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
-	result, merr := logic.Group.Chat.ClientSendMsg(c, &model.ClientSendMsgParams{
+	result, merr := chat.Group.Message.SendMsg(c, &model.HandleSendMsg{
 		RelationID: params.RelationID,
 		AccountID:  token.Content.ID,
 		MsgContent: params.MsgContent,
@@ -52,18 +35,18 @@ func (client) SendMsg(s socketio.Conn, msg string) string {
 	return common.NewState(merr, result).JsonStr()
 }
 
-func (client) ReadMsg(s socketio.Conn, msg string) string {
+func (message) ReadMsg(s socketio.Conn, msg string) string {
 	token, merr := CheckConnCtxToken(s.Context())
 	if merr != nil {
 		return common.NewState(merr).JsonStr()
 	}
-	params := &chat2.ClientReadMsgParams{}
+	params := &chat2.HandleReadMsgParams{}
 	if err := common.Decode(msg, params); err != nil {
 		return common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).JsonStr()
 	}
-	c, cancel := DefaultContextWithTimeOut()
+	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
-	merr = logic.Group.Chat.ClientReadMsg(c, &model.ClientReadMsgParams{
+	merr = chat.Group.Message.ReadMsg(c, &model.HandleReadMsg{
 		MsgID:     params.MsgID,
 		AccountID: token.Content.ID,
 	})

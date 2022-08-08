@@ -1,11 +1,11 @@
 package chat
 
 const (
-	ServerSendMsg = "server_send_msg"
-	ServerReadMsg = "server_read_msg"
+	EventServerSendMsg = "server_send_msg"
+	EventServerReadMsg = "server_read_msg"
 )
 
 const (
-	ClientSendMsg = "client_send_msg"
-	ClientReadMsg = "client_read_msg"
+	EventClientSendMsg = "client_send_msg"
+	EventClientReadMsg = "client_read_msg"
 )

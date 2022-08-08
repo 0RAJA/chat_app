@@ -32,7 +32,7 @@ func NewRouter() *gin.Engine {
 		rg.Setting.Init(root)
 		rg.Message.Init(root)
 		rg.MGroup.Init(root)
-		rg.Ws.Init(root)
+		rg.Chat.Init(root)
 	}
 	return r
 }
