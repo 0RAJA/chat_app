@@ -10,6 +10,7 @@ type group struct {
 	Setting     setting
 	MGroup      mGroup
 	Message     message
+	Ws          ws
 }
 
 var Group = new(group)
