@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
@@ -16,6 +17,19 @@ import (
 )
 
 type setting struct {
+}
+
+// ExistsSetting 是否存在account和relation关系的联系
+// 参数: accountID, relationID
+// 成功: 是否存在,nil
+// 失败: 打印错误日志 errcode.ErrServer
+func ExistsSetting(c context.Context, accountID, relationID int64) (bool, errcode.Err) {
+	ok, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{AccountID: accountID, RelationID: relationID})
+	if err != nil {
+		global.Logger.Error(err.Error())
+		return false, errcode.ErrServer
+	}
+	return ok, nil
 }
 
 func (setting) GetFriends(c *gin.Context, accountID int64) (reply.GetFriends, errcode.Err) {

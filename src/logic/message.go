@@ -20,19 +20,6 @@ import (
 type message struct {
 }
 
-// ExistsSetting 是否存在关系
-// 参数: accountID, relationID
-// 成功: 是否存在,nil
-// 失败: 打印错误日志 errcode.ErrServer
-func ExistsSetting(c context.Context, accountID, relationID int64) (bool, errcode.Err) {
-	ok, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{AccountID: accountID, RelationID: relationID})
-	if err != nil {
-		global.Logger.Error(err.Error())
-		return false, errcode.ErrServer
-	}
-	return ok, nil
-}
-
 // GetMsgInfoByID 获取消息详情
 // 参数: msgID 消息ID
 // 成功: 消息详情,nil
