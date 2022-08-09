@@ -174,7 +174,7 @@ func (setting) UpdateSettingDisturb(c *gin.Context) {
 
 // GetFriendsByName
 // @Tags     setting
-// @Summary  通过姓名模糊查询好友或群组
+// @Summary  通过姓名模糊查询好友(好友姓名或者昵称)
 // @accept   application/json
 // @Produce  application/json
 // @Param    Authorization  header    string                                     true  "Bearer 账户令牌"
