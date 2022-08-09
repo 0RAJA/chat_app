@@ -10,7 +10,7 @@ import (
 )
 
 type Querier interface {
-	CountAccountByUserIDWithLock(ctx context.Context, userID int64) (int32, error)
+	CountAccountByUserID(ctx context.Context, userID int64) (int32, error)
 	CreateAccount(ctx context.Context, arg *CreateAccountParams) error
 	CreateApplication(ctx context.Context, arg *CreateApplicationParams) error
 	CreateFile(ctx context.Context, arg *CreateFileParams) (*File, error)

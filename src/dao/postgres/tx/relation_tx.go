@@ -47,6 +47,6 @@ func (store *SqlStore) DeleteRelationWithTx(c context.Context, rdb *query.Querie
 		if err != nil {
 			return err
 		}
-		return rdb.DelRelation(c, relationID)
+		return rdb.DelRelations(c, relationID)
 	})
 }

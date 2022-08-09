@@ -63,7 +63,6 @@ func (account) GetAccountToken(c *gin.Context) {
 	}
 	result, err := logic.Group.Account.GetAccountToken(c, content.ID, params.AccountID)
 	rly.Reply(err, result)
-
 }
 
 // DeleteAccount

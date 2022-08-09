@@ -202,6 +202,7 @@ where relation_id = $1
 delete
 from setting
 where relation_id = $1;
+
 -- name: ExistsSetting :one
 select exists(
                select 1
@@ -209,6 +210,7 @@ select exists(
                where account_id = $1
                  and relation_id = $2
            );
+
 -- name: ExistsIsLeader :one
 select exists(
                select 1
