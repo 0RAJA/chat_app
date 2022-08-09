@@ -32,9 +32,13 @@ type file struct {
 //	if fileType != "img" && fileType != "png" && fileType != "jpg" {
 //		fileType = "file"
 //	}
-//	//result, mErr := logic.Group.File.PublishFile(c, params, fileType)
+//	result, mErr := logic.PublishFile(c, model.PublishFile{
+//		File:       params.File,
+//		RelationID: params.RelationID,
+//		AccountID:  params.AccountID,
+//	})
 //
-//	rly.Reply(nil)
+//	rly.Reply(mErr, result)
 //}
 
 // DeleteFile
