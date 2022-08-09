@@ -1,0 +1,27 @@
+name: Run unit tests
+
+on: # 触发此工作流的事件
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: check out code into the go module directory
+        uses: actions/checkout@v2
+
+      - name: install tools
+        run: make init
+
+      # 测试
+      - name: format
+        run: make format
