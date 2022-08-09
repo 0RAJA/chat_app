@@ -19,6 +19,7 @@ func (setting) Init(router *gin.RouterGroup) {
 			updateGroup.PUT("nick_name", v1.Group.Setting.UpdateNickName)
 			updateGroup.PUT("pin", v1.Group.Setting.UpdateSettingPin)
 			updateGroup.PUT("disturb", v1.Group.Setting.UpdateSettingDisturb)
+			updateGroup.PUT("show", v1.Group.Setting.UpdateSettingShow)
 		}
 		friendGroup := sg.Group("friend")
 		{
