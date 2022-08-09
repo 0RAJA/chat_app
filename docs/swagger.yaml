@@ -855,6 +855,19 @@ definitions:
     - is_pin
     - relation_id
     type: object
+  request.UpdateSettingShow:
+    properties:
+      is_show:
+        description: 是否展示
+        type: boolean
+      relation_id:
+        description: 关系ID
+        minimum: 1
+        type: integer
+    required:
+    - is_show
+    - relation_id
+    type: object
   request.UpdateUserEmail:
     properties:
       code:
@@ -2204,6 +2217,32 @@ paths:
           schema:
             $ref: '#/definitions/common.State'
       summary: 更新好友或群组pin选项
+      tags:
+      - setting
+  /api/setting/update/show:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 关系ID，展示状态
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateSettingShow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 更改好友或群组是否展示选项
       tags:
       - setting
   /api/user/delete:

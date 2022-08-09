@@ -143,7 +143,7 @@ select m1.id,
 from message m1
 where m1.relation_id = $1
   and m1.create_at < $2
-order by m1.create_at desc
+order by m1.create_at
 limit $3 offset $4
 `
 

@@ -94,6 +94,7 @@ type Querier interface {
 	UpdateSettingLeader(ctx context.Context, arg *UpdateSettingLeaderParams) error
 	UpdateSettingNickName(ctx context.Context, arg *UpdateSettingNickNameParams) error
 	UpdateSettingPin(ctx context.Context, arg *UpdateSettingPinParams) error
+	UpdateSettingShow(ctx context.Context, arg *UpdateSettingShowParams) error
 	UpdateUser(ctx context.Context, arg *UpdateUserParams) error
 }
 

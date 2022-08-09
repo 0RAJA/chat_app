@@ -2106,6 +2106,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/setting/update/show": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "setting"
+                ],
+                "summary": "更改好友或群组是否展示选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "关系ID，展示状态",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateSettingShow"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在",
+                        "schema": {
+                            "$ref": "#/definitions/common.State"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/delete": {
             "delete": {
                 "security": [
@@ -3526,6 +3566,24 @@ const docTemplate = `{
             "properties": {
                 "is_pin": {
                     "description": "是否pin",
+                    "type": "boolean"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "request.UpdateSettingShow": {
+            "type": "object",
+            "required": [
+                "is_show",
+                "relation_id"
+            ],
+            "properties": {
+                "is_show": {
+                    "description": "是否展示",
                     "type": "boolean"
                 },
                 "relation_id": {

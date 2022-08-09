@@ -278,6 +278,33 @@ func (setting) UpdateSettingDisturb(c *gin.Context, accountID, relationID int64,
 	}
 }
 
+func (setting) UpdateSettingShow(c *gin.Context, accountID, relationID int64, isShow bool) errcode.Err {
+	settingInfo, err := dao.Group.DB.GetSettingByID(c, &db.GetSettingByIDParams{
+		AccountID:  accountID,
+		RelationID: relationID,
+	})
+	switch err {
+	case pgx.ErrNoRows:
+		return myerr.RelationNotExists
+	case nil:
+		if settingInfo.IsShow == isShow {
+			return nil
+		}
+		if err := dao.Group.DB.UpdateSettingShow(c, &db.UpdateSettingShowParams{
+			AccountID:  accountID,
+			RelationID: relationID,
+			IsShow:     isShow,
+		}); err != nil {
+			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			return errcode.ErrServer
+		}
+		return nil
+	default:
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return errcode.ErrServer
+	}
+}
+
 func (setting) GetFriendsByName(c *gin.Context, accountID int64, name string, limit, offset int32) (reply.GetFriendsByName, errcode.Err) {
 	data, err := dao.Group.DB.GetFriendSettingsByName(c, &db.GetFriendSettingsByNameParams{
 		AccountID: accountID,

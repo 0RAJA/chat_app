@@ -753,3 +753,21 @@ func (q *Queries) UpdateSettingPin(ctx context.Context, arg *UpdateSettingPinPar
 	_, err := q.db.Exec(ctx, updateSettingPin, arg.AccountID, arg.RelationID, arg.IsPin)
 	return err
 }
+
+const updateSettingShow = `-- name: UpdateSettingShow :exec
+update setting
+set is_show = $3
+where account_id = $1
+  and relation_id = $2
+`
+
+type UpdateSettingShowParams struct {
+	AccountID  int64 `json:"account_id"`
+	RelationID int64 `json:"relation_id"`
+	IsShow     bool  `json:"is_show"`
+}
+
+func (q *Queries) UpdateSettingShow(ctx context.Context, arg *UpdateSettingShowParams) error {
+	_, err := q.db.Exec(ctx, updateSettingShow, arg.AccountID, arg.RelationID, arg.IsShow)
+	return err
+}
