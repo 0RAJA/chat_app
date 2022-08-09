@@ -5,6 +5,7 @@ import (
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
+	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/myerr"
@@ -153,4 +154,74 @@ func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (resu
 		return result, errcode.ErrServer
 	}
 	return result, nil
+}
+
+func (mGroup) GroupList(c *gin.Context, accountID int64) (reply.GetGroup, errcode.Err) {
+	data, err := dao.Group.DB.GetGroupList(c, accountID)
+	if err != nil {
+		return reply.GetGroup{}, errcode.ErrServer
+	}
+	groupList := make([]model.SettingGroup, 0, data[0].Total)
+	for _, v := range data {
+		t := model.SettingGroup{
+			SettingInfo: model.SettingInfo{
+				RelationID:   v.RelationID,
+				RelationType: "group",
+				NickName:     v.NickName,
+				IsNotDisturb: v.IsNotDisturb,
+				IsPin:        v.IsPin,
+				PinTime:      v.PinTime,
+				IsShow:       v.IsShow,
+				LastShow:     v.LastShow,
+			},
+			GroupInfo: &model.SettingGroupInfo{
+				RelationID:  v.RelationID,
+				Name:        v.GroupName.(string),
+				Description: v.Description.(string),
+				Avatar:      v.GroupAvatar.(string),
+			},
+		}
+		groupList = append(groupList, t)
+	}
+	return reply.GetGroup{
+		List:  groupList,
+		Total: data[0].Total,
+	}, nil
+}
+func (mGroup) GetGroupByName(c *gin.Context, accountID int64, limit int32, offset int32, name string) (reply.GetGroup, errcode.Err) {
+	data, err := dao.Group.DB.GetGroupSettingsByName(c, &db.GetGroupSettingsByNameParams{
+		AccountID: accountID,
+		Limit:     limit,
+		Offset:    offset,
+		Name:      name,
+	})
+	if err != nil {
+		return reply.GetGroup{}, errcode.ErrServer
+	}
+	groupList := make([]model.SettingGroup, 0, data[0].Total)
+	for _, v := range data {
+		t := model.SettingGroup{
+			SettingInfo: model.SettingInfo{
+				RelationID:   v.RelationID,
+				RelationType: "group",
+				NickName:     v.NickName,
+				IsNotDisturb: v.IsNotDisturb,
+				IsPin:        v.IsPin,
+				PinTime:      v.PinTime,
+				IsShow:       v.IsShow,
+				LastShow:     v.LastShow,
+			},
+			GroupInfo: &model.SettingGroupInfo{
+				RelationID:  v.RelationID,
+				Name:        v.GroupName.(string),
+				Description: v.Description.(string),
+				Avatar:      v.GroupAvatar.(string),
+			},
+		}
+		groupList = append(groupList, t)
+	}
+	return reply.GetGroup{
+		List:  groupList,
+		Total: data[0].Total,
+	}, nil
 }

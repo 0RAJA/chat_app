@@ -269,7 +269,7 @@ where a.id = (select account_id
               from setting
               where relation_id = s.relation_id
                 and (account_id != $1 or is_self = true))
-  and ((a.name like ($4::varchar || '%')) or (nick_name like ($4::varchar || '%')))
+  and ((a.name like (%@name::varchar % || '%')) or (nick_name like ($4::varchar || '%')))
 order by s.pin_time
 limit $2 offset $3
 `
@@ -473,6 +473,84 @@ func (q *Queries) GetFriendShowSettingsOrderByShowTime(ctx context.Context, acco
 	return items, nil
 }
 
+const getGroupList = `-- name: GetGroupList :many
+select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
+       r.id                       as relation_id,
+       (r.group_type).name        as group_name,
+       (r.group_type).avatar      as group_avatar,
+       (r.group_type).description as description,
+       count(*) over ()           as total
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     relation r
+where r.id = (select s.relation_id
+              from setting
+              where relation_id = s.relation_id
+                and (setting.account_id = $1))
+order by s.last_show
+`
+
+type GetGroupListRow struct {
+	RelationID   int64       `json:"relation_id"`
+	NickName     string      `json:"nick_name"`
+	IsNotDisturb bool        `json:"is_not_disturb"`
+	IsPin        bool        `json:"is_pin"`
+	PinTime      time.Time   `json:"pin_time"`
+	IsShow       bool        `json:"is_show"`
+	LastShow     time.Time   `json:"last_show"`
+	IsSelf       bool        `json:"is_self"`
+	RelationID_2 int64       `json:"relation_id_2"`
+	GroupName    interface{} `json:"group_name"`
+	GroupAvatar  interface{} `json:"group_avatar"`
+	Description  interface{} `json:"description"`
+	Total        int64       `json:"total"`
+}
+
+func (q *Queries) GetGroupList(ctx context.Context, accountID int64) ([]*GetGroupListRow, error) {
+	rows, err := q.db.Query(ctx, getGroupList, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetGroupListRow{}
+	for rows.Next() {
+		var i GetGroupListRow
+		if err := rows.Scan(
+			&i.RelationID,
+			&i.NickName,
+			&i.IsNotDisturb,
+			&i.IsPin,
+			&i.PinTime,
+			&i.IsShow,
+			&i.LastShow,
+			&i.IsSelf,
+			&i.RelationID_2,
+			&i.GroupName,
+			&i.GroupAvatar,
+			&i.Description,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGroupMembers = `-- name: GetGroupMembers :many
 select account_id
 from setting
@@ -540,6 +618,98 @@ func (q *Queries) GetGroupPinSettingsOrderByPinTime(ctx context.Context, account
 			&i.PinTime,
 			&i.ID,
 			&i.GroupType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGroupSettingsByName = `-- name: GetGroupSettingsByName :many
+select s.relation_id, s.nick_name, s.is_not_disturb, s.is_pin, s.pin_time, s.is_show, s.last_show, s.is_self,
+       r.id                       as relation_id,
+       (r.group_type).name        as group_name,
+       (r.group_type).avatar      as group_avatar,
+       (r.group_type).description as description,
+       count(*) over ()           as total
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     relation r
+where r.id = (select s.relation_id
+              from setting
+              where relation_id = s.relation_id
+                and (setting.account_id = $1))
+  and (((r.group_type).name like ('%' || $4::varchar || '%')))
+order by (r.group_type).name
+limit $2 offset $3
+`
+
+type GetGroupSettingsByNameParams struct {
+	AccountID int64  `json:"account_id"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
+	Name      string `json:"name"`
+}
+
+type GetGroupSettingsByNameRow struct {
+	RelationID   int64       `json:"relation_id"`
+	NickName     string      `json:"nick_name"`
+	IsNotDisturb bool        `json:"is_not_disturb"`
+	IsPin        bool        `json:"is_pin"`
+	PinTime      time.Time   `json:"pin_time"`
+	IsShow       bool        `json:"is_show"`
+	LastShow     time.Time   `json:"last_show"`
+	IsSelf       bool        `json:"is_self"`
+	RelationID_2 int64       `json:"relation_id_2"`
+	GroupName    interface{} `json:"group_name"`
+	GroupAvatar  interface{} `json:"group_avatar"`
+	Description  interface{} `json:"description"`
+	Total        int64       `json:"total"`
+}
+
+func (q *Queries) GetGroupSettingsByName(ctx context.Context, arg *GetGroupSettingsByNameParams) ([]*GetGroupSettingsByNameRow, error) {
+	rows, err := q.db.Query(ctx, getGroupSettingsByName,
+		arg.AccountID,
+		arg.Limit,
+		arg.Offset,
+		arg.Name,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetGroupSettingsByNameRow{}
+	for rows.Next() {
+		var i GetGroupSettingsByNameRow
+		if err := rows.Scan(
+			&i.RelationID,
+			&i.NickName,
+			&i.IsNotDisturb,
+			&i.IsPin,
+			&i.PinTime,
+			&i.IsShow,
+			&i.LastShow,
+			&i.IsSelf,
+			&i.RelationID_2,
+			&i.GroupName,
+			&i.GroupAvatar,
+			&i.Description,
+			&i.Total,
 		); err != nil {
 			return nil, err
 		}

@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/0RAJA/Rutils/pkg/app"
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
+	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/logic"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
@@ -171,5 +172,50 @@ func (mGroup) QuitGroup(c *gin.Context) {
 		return
 	}
 	result, mErr := logic.Group.MGroup.QuitGroup(c, params.RelationID, params.AccountID)
+	rly.Reply(mErr, result)
+}
+
+// GroupList 1
+// @Tags     group
+// @Summary  获取群列表
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
+// @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router   /api/group/quit [get]
+func (mGroup) GroupList(c *gin.Context) {
+	rly := app.NewResponse(c)
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	result, mErr := logic.Group.MGroup.GroupList(c, content.ID)
+	rly.Reply(mErr, result)
+}
+
+// GetGroupByName
+// @Tags     group
+// @Summary  通过群名称模糊查找群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
+// @Param    data           query     request.GetGroupByName                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router   /api/group/quit [post]
+func (mGroup) GetGroupByName(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := request.GetGroupByName{}
+	if err := c.ShouldBindQuery(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	limit, offset := global.Page.GetPageSizeAndOffset(c.Request)
+	result, mErr := logic.Group.MGroup.GetGroupByName(c, content.ID, limit, offset, params.Name)
 	rly.Reply(mErr, result)
 }

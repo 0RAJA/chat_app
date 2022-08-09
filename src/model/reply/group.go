@@ -1,5 +1,7 @@
 package reply
 
+import "github.com/0RAJA/chat_app/src/model"
+
 type CreateGroup struct {
 	Name        string `json:"name"`
 	AccountID   int64  `json:"account_id"`
@@ -18,4 +20,8 @@ type UpdateGroup struct {
 type InviteAccount struct {
 }
 type QuitGroup struct {
+}
+type GetGroup struct {
+	List  []model.SettingGroup
+	Total int64
 }

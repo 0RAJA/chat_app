@@ -188,10 +188,38 @@ where a.id = (select account_id
               from setting
               where relation_id = s.relation_id
                 and (account_id != $1 or is_self = true))
-  and ((a.name like (@name::varchar || '%')) or (nick_name like (@name::varchar || '%')))
+  and ((a.name like (%@name::varchar % || '%')) or (nick_name like (@name::varchar || '%')))
 order by s.pin_time
 limit $2 offset $3;
 
+-- name: GetGroupSettingsByName :many
+select s.*,
+       r.id                       as relation_id,
+       (r.group_type).name        as group_name,
+       (r.group_type).avatar      as group_avatar,
+       (r.group_type).description as description,
+       count(*) over ()           as total
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     relation r
+where r.id = (select s.relation_id
+              from setting
+              where relation_id = s.relation_id
+                and (setting.account_id = $1))
+  and (((r.group_type).name like ('%' || @name::varchar || '%')))
+order by (r.group_type).name
+limit $2 offset $3;
 -- name: TransferIsSelfTrue :exec
 update setting
 set is_leader = true
@@ -235,3 +263,30 @@ where relation_id = $1;
 select DISTINCT account_id
 from setting
 where relation_id = $1;
+
+-- name: GetGroupList :many
+select s.*,
+       r.id                       as relation_id,
+       (r.group_type).name        as group_name,
+       (r.group_type).avatar      as group_avatar,
+       (r.group_type).description as description,
+       count(*) over ()           as total
+from (select relation_id,
+             nick_name,
+             is_not_disturb,
+             is_pin,
+             pin_time,
+             is_show,
+             last_show,
+             is_self
+      from setting,
+           relation
+      where setting.account_id = $1
+        and setting.relation_id = relation.id
+        and relation.relation_type = 'group') as s,
+     relation r
+where r.id = (select s.relation_id
+              from setting
+              where relation_id = s.relation_id
+                and (setting.account_id = $1))
+order by s.last_show;

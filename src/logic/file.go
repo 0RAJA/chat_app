@@ -225,3 +225,18 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 	}
 	return reply.UploadAvatar{Url: url}, nil
 }
+func (file) GetFileDetailsByID(c *gin.Context, fileID int64) (reply.File, errcode.Err) {
+	result, err := dao.Group.DB.GetFileDetailsByID(c, fileID)
+	if err != nil {
+		return reply.File{}, errcode.ErrServer
+	}
+	return reply.File{
+		FileID:    result.ID,
+		FileName:  result.FileName,
+		FileType:  string(result.FileType),
+		FileSize:  result.FileSize,
+		Url:       result.Url,
+		AccountID: result.AccountID.Int64,
+		CreateAt:  result.CreateAt,
+	}, nil
+}
