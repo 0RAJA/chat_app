@@ -19,9 +19,9 @@ jobs:
       - name: check out code into the go module directory
         uses: actions/checkout@v2
 
-      - name: install tools
-        run: make init
+      - name: golang-cli_install
+        run: make golang-cli_install
 
       # 测试
-      - name: format
-        run: make format
+      - name: lint
+        run: golangci-lint run
