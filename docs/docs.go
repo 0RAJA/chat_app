@@ -1851,7 +1851,7 @@ const docTemplate = `{
                 "tags": [
                     "setting"
                 ],
-                "summary": "通过姓名模糊查询好友或群组",
+                "summary": "通过姓名模糊查询好友(好友姓名或者昵称)",
                 "parameters": [
                     {
                         "type": "string",
