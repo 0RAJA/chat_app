@@ -2075,7 +2075,7 @@ paths:
                 data:
                   $ref: '#/definitions/reply.GetFriendsByName'
               type: object
-      summary: 通过姓名模糊查询好友或群组
+      summary: 通过姓名模糊查询好友(好友姓名或者昵称)
       tags:
       - setting
   /api/setting/pins:
