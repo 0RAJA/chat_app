@@ -229,15 +229,15 @@ func (message) RevokeMsg(c *gin.Context) {
 }
 
 // CreateFileMsg
-// @Tags      upload
+// @Tags      message
 // @Summary   发布文件消息
 // @Security  BasicAuth
 // @accept    multipart/form-data
 // @Produce   application/json
 // @Param     Authorization  header    string  true   "Bearer 账户令牌"
 // @Param     file           formData  file    true   "文件"
-// @Param     relation_id    body      int64   true   "关系id"
-// @Param     rly_msg_id     body      int64   false  "回复消息id"
+// @Param     relation_id    formData  int64   true   "关系id"
+// @Param     rly_msg_id     formData  int64   false  "回复消息id"
 // @Success   200            {object}  common.State{reply.CreateFileMsg}
 // @Router    /api/msg/file [post]
 func (message) CreateFileMsg(c *gin.Context) {

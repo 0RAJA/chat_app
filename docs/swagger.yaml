@@ -1607,16 +1607,14 @@ paths:
         required: true
         type: file
       - description: 关系id
-        in: body
+        in: formData
         name: relation_id
         required: true
-        schema:
-          type: integer
+        type: integer
       - description: 回复消息id
-        in: body
+        in: formData
         name: rly_msg_id
-        schema:
-          type: integer
+        type: integer
       produces:
       - application/json
       responses:
@@ -1628,7 +1626,7 @@ paths:
       - BasicAuth: []
       summary: 发布文件消息
       tags:
-      - upload
+      - message
   /api/msg/info/top:
     get:
       consumes:
