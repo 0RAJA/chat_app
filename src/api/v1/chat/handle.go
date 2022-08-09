@@ -13,6 +13,8 @@ import (
 type handle struct {
 }
 
+// OnConnect
+// 当客户端连接时触发
 func (handle) OnConnect(s socketio.Conn) error {
 	token, err := MustAccount(s.RemoteHeader())
 	if err != nil {
@@ -27,6 +29,8 @@ func (handle) OnConnect(s socketio.Conn) error {
 	return nil
 }
 
+// OnError
+// 当发生错误时触发
 func (handle) OnError(s socketio.Conn, e error) {
 	if s == nil {
 		return
@@ -40,6 +44,8 @@ func (handle) OnError(s socketio.Conn, e error) {
 	s.Emit("error", common.NewState(merr))
 }
 
+// OnDisconnect
+// 当客户端断开连接时触发
 func (handle) OnDisconnect(s socketio.Conn, _ string) {
 	token, ok := s.Context().(*model.Token)
 	if !ok {

@@ -5,7 +5,7 @@ import (
 	"github.com/0RAJA/chat_app/src/chat"
 	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/model"
-	chat2 "github.com/0RAJA/chat_app/src/model/chat/client"
+	"github.com/0RAJA/chat_app/src/model/chat/client"
 	"github.com/0RAJA/chat_app/src/model/common"
 	socketio "github.com/googollee/go-socket.io"
 )
@@ -14,12 +14,15 @@ import (
 type message struct {
 }
 
+// SendMsg 发送消息
+// 参数: client.HandleSendMsgParams
+// 返回: client.HandleSendMsgRly
 func (message) SendMsg(s socketio.Conn, msg string) string {
 	token, merr := CheckConnCtxToken(s.Context())
 	if merr != nil {
 		return common.NewState(merr).JsonStr()
 	}
-	params := &chat2.HandleSendMsgParams{}
+	params := &client.HandleSendMsgParams{}
 	if err := common.Decode(msg, params); err != nil {
 		return common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).JsonStr()
 	}
@@ -35,12 +38,15 @@ func (message) SendMsg(s socketio.Conn, msg string) string {
 	return common.NewState(merr, result).JsonStr()
 }
 
+// ReadMsg 已读消息
+// 参数: client.HandleReadMsgParams
+// 返回: 无
 func (message) ReadMsg(s socketio.Conn, msg string) string {
 	token, merr := CheckConnCtxToken(s.Context())
 	if merr != nil {
 		return common.NewState(merr).JsonStr()
 	}
-	params := &chat2.HandleReadMsgParams{}
+	params := &client.HandleReadMsgParams{}
 	if err := common.Decode(msg, params); err != nil {
 		return common.NewState(errcode.ErrParamsNotValid.WithDetails(err.Error())).JsonStr()
 	}

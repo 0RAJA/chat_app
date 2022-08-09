@@ -12,7 +12,7 @@ type HandleSendMsgParams struct {
 }
 
 type HandleSendMsgRly struct {
-	MsgID int64
+	MsgID int64 // 消息ID
 }
 
 type HandleReadMsgParams struct {
