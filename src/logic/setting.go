@@ -65,11 +65,15 @@ func (setting) GetFriends(c *gin.Context, accountID int64) (reply.GetFriends, er
 }
 
 func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.Err) {
-	result := make([]*model.SettingPin, 0, 20)
 	friendData, err := dao.Group.DB.GetFriendPinSettingsOrderByPinTime(c, accountID)
 	if err != nil {
 		return reply.GetPins{List: []*model.SettingPin{}}, errcode.ErrServer
 	}
+	groupData, err := dao.Group.DB.GetGroupPinSettingsOrderByPinTime(c, accountID)
+	if err != nil {
+		return reply.GetPins{List: []*model.SettingPin{}}, errcode.ErrServer
+	}
+	result := make([]*model.SettingPin, 0, len(friendData)+len(groupData))
 	for _, v := range friendData {
 		friendInfo := &model.SettingFriendInfo{
 			AccountID: v.AccountID,
@@ -86,10 +90,6 @@ func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.
 			GroupInfo:  nil,
 			FriendInfo: friendInfo,
 		})
-	}
-	groupData, err := dao.Group.DB.GetGroupPinSettingsOrderByPinTime(c, accountID)
-	if err != nil {
-		return reply.GetPins{List: []*model.SettingPin{}}, errcode.ErrServer
 	}
 	for _, v := range groupData {
 		groupType := strings.Split(v.GroupType.String, ",")
@@ -114,12 +114,16 @@ func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.
 }
 
 func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcode.Err) {
-	result := make([]*model.Setting, 0, 20)
-	data, err := dao.Group.DB.GetFriendShowSettingsOrderByShowTime(c, accountID)
+	friendData, err := dao.Group.DB.GetFriendShowSettingsOrderByShowTime(c, accountID)
 	if err != nil {
 		return reply.GetShows{List: []*model.Setting{}}, errcode.ErrServer
 	}
-	for _, v := range data {
+	groupData, err := dao.Group.DB.GetGroupShowSettingsOrderByShowTime(c, accountID)
+	if err != nil {
+		return reply.GetShows{List: []*model.Setting{}}, errcode.ErrServer
+	}
+	result := make([]*model.Setting, 0, len(friendData)+len(groupData))
+	for _, v := range friendData {
 		friendInfo := &model.SettingFriendInfo{
 			AccountID: v.AccountID,
 			Name:      v.NickName,
@@ -139,10 +143,6 @@ func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcod
 			GroupInfo:  nil,
 			FriendInfo: friendInfo,
 		})
-	}
-	groupData, err := dao.Group.DB.GetGroupShowSettingsOrderByShowTime(c, accountID)
-	if err != nil {
-		return reply.GetShows{List: []*model.Setting{}}, errcode.ErrServer
 	}
 	for _, v := range groupData {
 		groupType := strings.Split(v.GroupType.String, ",")

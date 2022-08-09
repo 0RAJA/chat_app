@@ -39,7 +39,7 @@ func TestQueries_AddGroupRelationAccount(t *testing.T) {
 				require.NoError(t, err)
 				require.Empty(t, accounts)
 				groupIdx := utils.RandomInt(0, groupNum)
-				require.NoError(t, dao.Group.Redis.DelRelation(context.Background(), groupIdx))
+				require.NoError(t, dao.Group.Redis.DelRelations(context.Background(), groupIdx))
 				accounts, err = dao.Group.Redis.GetAccountsByRelationID(context.Background(), groupIdx)
 				require.NoError(t, err)
 				require.Empty(t, accounts)

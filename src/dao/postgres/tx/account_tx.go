@@ -22,7 +22,7 @@ func (store *SqlStore) CreateAccountWithTx(c context.Context, rdb *query.Queries
 		var accountNum int32
 		// 检查数量
 		err = tool.DoThat(err, func() error {
-			accountNum, err = queries.CountAccountByUserIDWithLock(c, arg.UserID)
+			accountNum, err = queries.CountAccountByUserID(c, arg.UserID)
 			return err
 		})
 		if accountNum >= maxAccountNum {
@@ -70,21 +70,22 @@ func (store *SqlStore) DeleteAccountWithTx(c context.Context, rdb *query.Queries
 			return ErrAccountGroupLeader
 		}
 		// 删除好友
-		var relationIDs []int64
+		var friendRelationIDs []int64
 		err = tool.DoThat(err, func() error {
-			relationIDs, err = queries.DeleteFriendRelationsByAccountID(c, accountID)
+			friendRelationIDs, err = queries.DeleteFriendRelationsByAccountID(c, accountID)
 			return err
 		})
 		// 删除群
+		var groupRelationIDs []int64
 		err = tool.DoThat(err, func() error {
-			data, err := queries.DeleteSettingsByAccountID(c, accountID)
-			relationIDs = append(relationIDs, data...)
+			groupRelationIDs, err = queries.DeleteSettingsByAccountID(c, accountID)
 			return err
 		})
 		// 删除账户
 		err = tool.DoThat(err, func() error { return queries.DeleteAccount(c, accountID) })
 		// 从redis中删除对应的关系
-		err = tool.DoThat(err, func() error { return rdb.DelAccountFromRelations(c, accountID, relationIDs...) })
+		err = tool.DoThat(err, func() error { return rdb.DelRelations(c, friendRelationIDs...) })
+		err = tool.DoThat(err, func() error { return rdb.DelAccountFromRelations(c, accountID, groupRelationIDs...) })
 		return err
 	})
 }

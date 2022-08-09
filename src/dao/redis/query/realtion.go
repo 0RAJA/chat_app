@@ -28,9 +28,17 @@ func (q *Queries) ReloadRelationIDs(c context.Context, groupMap map[int64][]int6
 	return err
 }
 
-// DelRelation 删除一个群聊名单
-func (q *Queries) DelRelation(c context.Context, relationID int64) error {
-	return q.rdb.Del(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID))).Err()
+// DelRelations 删除部分群聊名单
+func (q *Queries) DelRelations(c context.Context, relationIDs ...int64) error {
+	if len(relationIDs) == 0 {
+		return nil
+	}
+	pipe := q.rdb.TxPipeline()
+	for _, relationID := range relationIDs {
+		pipe.Del(c, utils.LinkStr(KeyGroup, utils.IDToSting(relationID)))
+	}
+	_, err := pipe.Exec(c)
+	return err
 }
 
 // AddRelationAccount 向群聊名单中增加人员

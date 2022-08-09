@@ -104,7 +104,7 @@ func (user) DeleteUser(c *gin.Context, userID int64) errcode.Err {
 	if merr != nil {
 		return merr
 	}
-	accountNum, err := dao.Group.DB.CountAccountByUserIDWithLock(c, userID)
+	accountNum, err := dao.Group.DB.CountAccountByUserID(c, userID)
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
