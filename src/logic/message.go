@@ -13,6 +13,7 @@ import (
 	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 )
@@ -339,7 +340,7 @@ func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTopParams) err
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO:推送置顶通知
+	// TODO:推送top通知
 	return nil
 }
 
@@ -386,6 +387,7 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 	}
 	var isRly bool
 	var rlyID int64
+	var rlyMsg *reply.RlyMsg
 	if params.RlyMsgID > 0 {
 		rlyInfo, merr := GetMsgInfoByID(c, params.RlyMsgID)
 		if merr != nil {
@@ -396,6 +398,18 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		}
 		isRly = true
 		rlyID = params.RlyMsgID
+		rlyMsgExtend, err := model.JsonToExpand(rlyInfo.MsgExtend)
+		if err != nil {
+			global.Logger.Error(err.Error())
+			return nil, errcode.ErrServer
+		}
+		rlyMsg = &reply.RlyMsg{
+			MsgID:      rlyInfo.ID,
+			MsgType:    rlyInfo.MsgType,
+			MsgContent: rlyInfo.MsgContent,
+			MsgExtend:  rlyMsgExtend,
+			IsRevoke:   rlyInfo.IsRevoke,
+		}
 	}
 	extend, _ := model.ExpandToJson(nil)
 	result, err := dao.Group.DB.CreateMsg(c, &db.CreateMsgParams{
@@ -406,12 +420,24 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		FileID:     sql.NullInt64{Int64: fileInfo.ID, Valid: true},
 		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
 		RlyMsgID:   sql.NullInt64{Int64: rlyID, Valid: isRly},
-		RelationID: 0,
+		RelationID: params.RelationID,
 	})
 	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return nil, errcode.ErrServer
 	}
+	// 推送消息
+	global.Worker.SendTask(task.PublishMsg(reply.MsgInfo{
+		ID:         result.ID,
+		NotifyType: string(db.MsgnotifytypeCommon),
+		MsgType:    string(model.MsgTypeFile),
+		MsgContent: fileInfo.Url,
+		Extend:     nil,
+		FileID:     fileInfo.ID,
+		AccountID:  params.AccountID,
+		RelationID: params.RelationID,
+		CreateAt:   result.CreateAt,
+	}, rlyMsg))
 	return &reply.CreateFileMsg{
 		ID:         result.ID,
 		MsgContent: result.MsgContent,
