@@ -6,8 +6,8 @@ require github.com/swaggo/swag v1.8.3
 
 require (
 	github.com/0RAJA/Rutils v1.3.9
-	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
 	github.com/gin-gonic/gin v1.8.1
+	github.com/go-playground/validator/v10 v10.10.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/googollee/go-socket.io v1.6.2
 	github.com/jackc/pgconn v1.12.1
@@ -26,6 +26,7 @@ require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/aead/chacha20poly1305 v0.0.0-20170617001512-233f39982aeb // indirect
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
+	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -38,7 +39,6 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/gomodule/redigo v1.8.4 // indirect

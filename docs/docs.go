@@ -2380,7 +2380,7 @@ const docTemplate = `{
                 }
             }
         },
-        "common.Token": {
+        "common.AccessToken": {
             "type": "object",
             "properties": {
                 "expired_at": {
@@ -2665,7 +2665,7 @@ const docTemplate = `{
             "properties": {
                 "account_token": {
                     "description": "账号Token",
-                    "$ref": "#/definitions/common.Token"
+                    "$ref": "#/definitions/common.AccessToken"
                 },
                 "avatar": {
                     "description": "头像",
@@ -2780,7 +2780,7 @@ const docTemplate = `{
             "properties": {
                 "account_token": {
                     "description": "账号Token",
-                    "$ref": "#/definitions/common.Token"
+                    "$ref": "#/definitions/common.AccessToken"
                 }
             }
         },
@@ -3001,7 +3001,7 @@ const docTemplate = `{
                 },
                 "user_token": {
                     "description": "用户令牌",
-                    "$ref": "#/definitions/common.Token"
+                    "$ref": "#/definitions/common.AccessToken"
                 }
             }
         },
@@ -3177,7 +3177,7 @@ const docTemplate = `{
                 },
                 "user_token": {
                     "description": "用户令牌",
-                    "$ref": "#/definitions/common.Token"
+                    "$ref": "#/definitions/common.AccessToken"
                 }
             }
         },

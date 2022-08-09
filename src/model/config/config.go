@@ -21,7 +21,7 @@ type Private struct {
 	Postgresql Postgresql `yaml:"Postgresql"`
 	Redis      Redis      `yaml:"Redis"`
 	Email      Email      `yaml:"Email"`
-	Token      Token      `yaml:"Token"`
+	Token      Token      `yaml:"AccessToken"`
 	AliyunOSS  AliyunOSS  `yaml:"AliyunOSS"`
 }
 

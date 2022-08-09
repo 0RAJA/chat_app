@@ -154,6 +154,7 @@ func (user) UpdateUserEmail(c *gin.Context, userID int64, newEmail, code string)
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		reTry(fmt.Sprintf("updateEmail:%s,%s", userInfo.Email, newEmail), func() error { return dao.Group.Redis.UpdateEmail(c, userInfo.Email, newEmail) })
 	}
+	// TODO: 推送更改邮箱通知
 	return nil
 }
 
