@@ -15,7 +15,7 @@ linters:
     - gosimple
     - deadcode
     #    - structcheck
-    #    - unused
+    - unused
     - errcheck
 service:
   golangci-lint-version: 1.45.2
