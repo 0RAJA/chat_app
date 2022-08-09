@@ -97,7 +97,7 @@ func GetFileType(file *multipart.FileHeader) (string, errcode.Err) {
 	if err != nil {
 		return "", errcode.ErrServer
 	}
-	fSrc := make([]byte, 0, 10)
+	fSrc := make([]byte, 10)
 	_, err = io.ReadFull(f, fSrc)
 	if err != nil {
 		return "", errcode.ErrServer
