@@ -158,7 +158,6 @@ func (user) UpdateUserEmail(c *gin.Context, userID int64, newEmail, code string)
 }
 
 func (user) UpdateUserPassword(c *gin.Context, userID int64, code, newPwd string) errcode.Err {
-	// 检查旧密码是否匹配
 	userInfo, merr := getUserInfoByID(c, userID)
 	if merr != nil {
 		return merr
