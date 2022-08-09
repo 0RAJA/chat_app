@@ -18,7 +18,7 @@ import (
 // 成功: 从header中解析出token和content并进行校验返回*model.Token,nil
 // 失败: 返回 myerr.AuthenticationFailed,myerr.UserNotFound,errcode.ErrServer
 func MustAccount(header http.Header) (*model.Token, errcode.Err) {
-	payload, merr := mid.ParseHeader(header)
+	payload, accessToken, merr := mid.ParseHeader(header)
 	if merr != nil {
 		return nil, merr
 	}
@@ -38,8 +38,9 @@ func MustAccount(header http.Header) (*model.Token, errcode.Err) {
 		return nil, myerr.UserNotFound
 	}
 	return &model.Token{
-		Payload: payload,
-		Content: content,
+		AccessToken: accessToken,
+		Payload:     payload,
+		Content:     content,
 	}, nil
 }
 

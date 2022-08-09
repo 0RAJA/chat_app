@@ -18,6 +18,7 @@ type Content struct {
 	ID   int64     `json:"id"`
 }
 
+// NewTokenContent 新建一种类型的token
 func NewTokenContent(t TokenType, ID int64) *Content {
 	return &Content{Type: t, ID: ID}
 }
@@ -35,6 +36,7 @@ func (c *Content) Unmarshal(data []byte) error {
 
 // Token 结合token.Payload和Token
 type Token struct {
-	Payload *token.Payload
-	Content *Content
+	AccessToken string
+	Payload     *token.Payload
+	Content     *Content
 }

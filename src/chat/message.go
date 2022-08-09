@@ -77,16 +77,18 @@ func (message) SendMsg(c context.Context, params *model.HandleSendMsg) (*client.
 		return nil, errcode.ErrServer
 	}
 	// 推送消息
-	global.Worker.SendTask(task.PublishMsg(reply.MsgInfo{
-		ID:         result.ID,
-		NotifyType: string(db.MsgnotifytypeCommon),
-		MsgType:    string(model.MsgTypeText),
-		MsgContent: params.MsgContent,
-		Extend:     params.MsgExtend,
-		AccountID:  params.AccountID,
-		RelationID: params.RelationID,
-		CreateAt:   result.CreateAt,
-	}, rlyMsg))
+	global.Worker.SendTask(task.PublishMsg(
+		params.AccessToken,
+		reply.MsgInfo{
+			ID:         result.ID,
+			NotifyType: string(db.MsgnotifytypeCommon),
+			MsgType:    string(model.MsgTypeText),
+			MsgContent: params.MsgContent,
+			Extend:     params.MsgExtend,
+			AccountID:  params.AccountID,
+			RelationID: params.RelationID,
+			CreateAt:   result.CreateAt,
+		}, rlyMsg))
 	return &client.HandleSendMsgRly{MsgID: result.ID}, nil
 }
 
@@ -123,6 +125,11 @@ func (message) ReadMsg(c context.Context, params *model.HandleReadMsg) errcode.E
 		return errcode.ErrServer
 	}
 	// 推送消息已经被读取
-	global.Worker.SendTask(task.PublishReadMsg(params.AccountID, msgInfo.AccountID.Int64, params.MsgID))
+	global.Worker.SendTask(task.PublishReadMsg(
+		params.AccessToken,
+		params.AccountID,
+		msgInfo.AccountID.Int64,
+		params.MsgID,
+	))
 	return nil
 }

@@ -24,6 +24,6 @@ func (ws) Init(router *gin.RouterGroup) {
 }
 
 func chatMessage(server *socketio.Server) {
-	server.OnEvent("/", chat2.EventClientSendMsg, v1.Group.Chat.Message.SendMsg)
-	server.OnEvent("/", chat2.EventClientReadMsg, v1.Group.Chat.Message.ReadMsg)
+	server.OnEvent("/", chat2.ClientSendMsg, v1.Group.Chat.Message.SendMsg)
+	server.OnEvent("/", chat2.ClientReadMsg, v1.Group.Chat.Message.ReadMsg)
 }
