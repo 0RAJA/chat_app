@@ -14,32 +14,40 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ParseHeader 获取并解析header中token
-func ParseHeader(header http.Header) (*token.Payload, errcode.Err) {
+// GetToken 从当前头部获取token
+func GetToken(header http.Header) (string, errcode.Err) {
 	authorizationHeader := header.Get(global.PvSettings.Token.AuthorizationKey)
 	if len(authorizationHeader) == 0 {
-		return nil, myerr.AuthNotExist
+		return "", myerr.AuthNotExist
 	}
 	fields := strings.SplitN(authorizationHeader, " ", 2)
 	if len(fields) != 2 || strings.ToLower(fields[0]) != global.PvSettings.Token.AuthorizationType {
-		return nil, myerr.AuthenticationFailed
+		return "", myerr.AuthenticationFailed
 	}
-	accessToken := fields[1]
+	return fields[1], nil
+}
+
+// ParseHeader 获取并解析header中token
+// 返回 payload,token,err
+func ParseHeader(header http.Header) (*token.Payload, string, errcode.Err) {
+	accessToken, merr := GetToken(header)
+	if merr != nil {
+		return nil, "", merr
+	}
 	payload, err := global.Maker.VerifyToken(accessToken)
 	if err != nil {
 		if err.Error() == "超时错误" {
-			return nil, myerr.AuthOverTime
+			return nil, "", myerr.AuthOverTime
 		}
-		return nil, myerr.AuthenticationFailed
+		return nil, "", myerr.AuthenticationFailed
 	}
-	return payload, nil
-
+	return payload, accessToken, nil
 }
 
 // Auth 鉴权中间件,用于解析并写入token
 func Auth() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		payload, merr := ParseHeader(c.Request.Header)
+		payload, _, merr := ParseHeader(c.Request.Header)
 		if merr != nil {
 			c.Next()
 			return

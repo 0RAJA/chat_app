@@ -194,6 +194,7 @@ func (setting) DeleteFriend(c *gin.Context, accountID, relationID int64) errcode
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
+	// TODO: 推送删除通知
 	return nil
 }
 
@@ -217,6 +218,7 @@ func (setting) UpdateNickName(c *gin.Context, accountID, relationID int64, nickN
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
+		// TODO: 推送更改昵称通知
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -244,6 +246,7 @@ func (setting) UpdateSettingPin(c *gin.Context, accountID, relationID int64, isP
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
+		// TODO: 推送更改置顶通知
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -271,6 +274,7 @@ func (setting) UpdateSettingDisturb(c *gin.Context, accountID, relationID int64,
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
+		// TODO: 推送更改免打扰通知
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -298,6 +302,7 @@ func (setting) UpdateSettingShow(c *gin.Context, accountID, relationID int64, is
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
+		// TODO: 推送更改是否展示通知
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)

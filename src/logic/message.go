@@ -426,18 +426,22 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return nil, errcode.ErrServer
 	}
+	// 获取token
+	accessToken, _ := mid.GetToken(c.Request.Header)
 	// 推送消息
-	global.Worker.SendTask(task.PublishMsg(reply.MsgInfo{
-		ID:         result.ID,
-		NotifyType: string(db.MsgnotifytypeCommon),
-		MsgType:    string(model.MsgTypeFile),
-		MsgContent: fileInfo.Url,
-		Extend:     nil,
-		FileID:     fileInfo.ID,
-		AccountID:  params.AccountID,
-		RelationID: params.RelationID,
-		CreateAt:   result.CreateAt,
-	}, rlyMsg))
+	global.Worker.SendTask(task.PublishMsg(
+		accessToken,
+		reply.MsgInfo{
+			ID:         result.ID,
+			NotifyType: string(db.MsgnotifytypeCommon),
+			MsgType:    string(model.MsgTypeFile),
+			MsgContent: fileInfo.Url,
+			Extend:     nil,
+			FileID:     fileInfo.ID,
+			AccountID:  params.AccountID,
+			RelationID: params.RelationID,
+			CreateAt:   result.CreateAt,
+		}, rlyMsg))
 	return &reply.CreateFileMsg{
 		ID:         result.ID,
 		MsgContent: result.MsgContent,

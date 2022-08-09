@@ -7,6 +7,7 @@ import (
 	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/common"
+	"github.com/0RAJA/chat_app/src/task"
 	socketio "github.com/googollee/go-socket.io"
 )
 
@@ -21,11 +22,10 @@ func (handle) OnConnect(s socketio.Conn) error {
 		return err
 	}
 	s.SetContext(token)
-	// TODO: 通知其他账户
 	// 加入在线群组
-	global.Worker.SendTask(func() {
-		global.ChatMap.Link(s, token.Content.ID)
-	})
+	global.ChatMap.Link(s, token.Content.ID)
+	// 通知其他设备
+	global.Worker.SendTask(task.AccountLogin(token.AccessToken, s.RemoteAddr().String(), token.Content.ID))
 	return nil
 }
 

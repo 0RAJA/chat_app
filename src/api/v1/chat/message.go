@@ -29,11 +29,12 @@ func (message) SendMsg(s socketio.Conn, msg string) string {
 	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
 	result, merr := chat.Group.Message.SendMsg(c, &model.HandleSendMsg{
-		RelationID: params.RelationID,
-		AccountID:  token.Content.ID,
-		MsgContent: params.MsgContent,
-		MsgExtend:  params.MsgExtend,
-		RlyMsgID:   params.RlyMsgID,
+		AccessToken: token.AccessToken,
+		RelationID:  params.RelationID,
+		AccountID:   token.Content.ID,
+		MsgContent:  params.MsgContent,
+		MsgExtend:   params.MsgExtend,
+		RlyMsgID:    params.RlyMsgID,
 	})
 	return common.NewState(merr, result).JsonStr()
 }
@@ -53,8 +54,9 @@ func (message) ReadMsg(s socketio.Conn, msg string) string {
 	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
 	merr = chat.Group.Message.ReadMsg(c, &model.HandleReadMsg{
-		MsgID:     params.MsgID,
-		AccountID: token.Content.ID,
+		AccessToken: token.AccessToken,
+		MsgID:       params.MsgID,
+		AccountID:   token.Content.ID,
 	})
 	return common.NewState(merr).JsonStr()
 }
