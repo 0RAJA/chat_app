@@ -152,9 +152,9 @@ func (setting) UpdateSettingPin(c *gin.Context) {
 // @Summary  更改好友或群组免打扰选项
 // @accept   application/json
 // @Produce  application/json
-// @Param    Authorization  header    string                        true  "Bearer 账户令牌"
+// @Param    Authorization  header    string                     true  "Bearer 账户令牌"
 // @Param    data           body      request.UpdateSettingDisturb  true  "关系ID，免打扰状态"
-// @Success  200            {object}  common.State{}                "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在"
+// @Success  200            {object}  common.State{}             "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在"
 // @Router   /api/setting/update/disturb [put]
 func (setting) UpdateSettingDisturb(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -169,6 +169,31 @@ func (setting) UpdateSettingDisturb(c *gin.Context) {
 		return
 	}
 	err := logic.Group.Setting.UpdateSettingDisturb(c, content.ID, params.RelationID, *params.IsNotDisturb)
+	rly.Reply(err)
+}
+
+// UpdateSettingShow
+// @Tags     setting
+// @Summary  更改好友或群组是否展示选项
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                        true  "Bearer 账户令牌"
+// @Param    data           body      request.UpdateSettingShow  true  "关系ID，展示状态"
+// @Success  200            {object}  common.State{}                "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2010:账号不存在 4002:关系不存在"
+// @Router   /api/setting/update/show [put]
+func (setting) UpdateSettingShow(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := &request.UpdateSettingShow{}
+	if err := c.ShouldBindJSON(params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	err := logic.Group.Setting.UpdateSettingShow(c, content.ID, params.RelationID, *params.IsShow)
 	rly.Reply(err)
 }
 

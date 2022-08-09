@@ -41,6 +41,12 @@ set is_leader = $3
 where account_id = $1
   and relation_id = $2;
 
+-- name: UpdateSettingShow :exec
+update setting
+set is_show = $3
+where account_id = $1
+  and relation_id = $2;
+
 -- name: GetSettingByID :one
 select *
 from setting
