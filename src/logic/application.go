@@ -51,6 +51,7 @@ func (application) Create(c *gin.Context, account1ID, account2ID int64, applyMsg
 	err = dao.Group.DB.CreateApplicationTx(c, &db.CreateApplicationParams{Account1ID: account1ID, Account2ID: account2ID, ApplyMsg: applyMsg})
 	switch err {
 	case nil:
+		// TODO: 推送好友申请信息
 		return nil
 	case tx.ErrApplicationExists:
 		return myerr.ApplicationExists
@@ -96,6 +97,7 @@ func (application) Accept(c *gin.Context, account1ID, account2ID int64) errcode.
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
+	// TODO: 推送好友申请信息
 	return nil
 }
 
@@ -116,6 +118,7 @@ func (application) Refuse(c *gin.Context, account1ID, account2ID int64, refuseMs
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
+	// TODO: 推送好友申请信息
 	return nil
 }
 

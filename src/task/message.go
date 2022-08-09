@@ -8,7 +8,9 @@ import (
 	"github.com/0RAJA/chat_app/src/model/reply"
 )
 
-// PublishMsg 推送消息和执行拓展内容
+// 有关消息的推送任务
+
+// PublishMsg 推送消息事件和执行拓展内容
 // 参数: 消息和回复消息
 func PublishMsg(msgInfo reply.MsgInfo, rlyMsg *reply.RlyMsg) func() {
 	return func() {
@@ -26,7 +28,7 @@ func PublishMsg(msgInfo reply.MsgInfo, rlyMsg *reply.RlyMsg) func() {
 	}
 }
 
-// PublishReadMsg 推送阅读消息
+// PublishReadMsg 推送阅读消息事件
 // 参数: 读者ID，消息发起者ID，消息ID
 func PublishReadMsg(readerAccountID, accountID, msgID int64) func() {
 	return func() {

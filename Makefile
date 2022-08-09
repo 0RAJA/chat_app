@@ -32,7 +32,7 @@ golang-cli_install: # 安装golang-cli工具，用于静态检查代码质量
 swag_install: # 安装swag工具，用于生成swagger文档
 	go install github.com/swaggo/swag/cmd/swag@v1.8.0
 swag: # swag生成文档
-	swag fmt && swag init
+	swag fmt --d src/ && swag init -d src/
 pull: # 拉取并变基代码
 	git fetch origin master && git rebase origin/master
 init: migrate_install goimports_install golang-cli_install swag_install # 安装工具包
@@ -41,6 +41,6 @@ docker_build: # 构建docker镜像
 docker_run: # docker运行镜像
 	docker run -d --name chat_app --network chat_net -p 8080:8080 chat:app
 run: # 运行server
-	go build -o bin/main main.go && ./bin/main
+	go build -o bin/chat src/main.go && ./bin/chat
 run_back: # 后台运行
-	go build -o bin/main main.go && nohup ./bin/main > nohup.out &
+	go build -o bin/chat src/main.go && nohup ./bin/chat > nohup.out &

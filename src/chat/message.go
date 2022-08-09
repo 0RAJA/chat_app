@@ -32,30 +32,30 @@ func (message) SendMsg(c context.Context, params *model.HandleSendMsg) (*client.
 	var rlyMsg *reply.RlyMsg
 	// 判断回复消息
 	if params.RlyMsgID > 0 {
-		msgInfo, merr := logic.GetMsgInfoByID(c, params.RlyMsgID)
+		rlyInfo, merr := logic.GetMsgInfoByID(c, params.RlyMsgID)
 		if merr != nil {
 			return nil, merr
 		}
 		// 不能回复别的群的消息
-		if msgInfo.RelationID != params.RelationID {
+		if rlyInfo.RelationID != params.RelationID {
 			return nil, myerr.RlyMsgNotOneRelation
 		}
 		// 不能回复已经撤回的消息
-		if msgInfo.IsRevoke {
+		if rlyInfo.IsRevoke {
 			return nil, myerr.RlyMsgHasRevoked
 		}
 		rlyMsgID = params.RlyMsgID
-		rlyMsgExtend, err := model.JsonToExpand(msgInfo.MsgExtend)
+		rlyMsgExtend, err := model.JsonToExpand(rlyInfo.MsgExtend)
 		if err != nil {
 			global.Logger.Error(err.Error())
 			return nil, errcode.ErrServer
 		}
 		rlyMsg = &reply.RlyMsg{
-			MsgID:      msgInfo.ID,
-			MsgType:    msgInfo.MsgType,
-			MsgContent: msgInfo.MsgContent,
+			MsgID:      rlyInfo.ID,
+			MsgType:    rlyInfo.MsgType,
+			MsgContent: rlyInfo.MsgContent,
 			MsgExtend:  rlyMsgExtend,
-			IsRevoke:   msgInfo.IsRevoke,
+			IsRevoke:   rlyInfo.IsRevoke,
 		}
 	}
 	msgExtend, err := model.ExpandToJson(params.MsgExtend)
