@@ -21,5 +21,6 @@ type HandleSendMsgRly struct {
 }
 
 type HandleReadMsgParams struct {
-	MsgID int64 `json:"msg_id" validate:"required,gte=1"` // 消息ID
+	MsgIDs     []int64 `json:"msg_ids" validate:"required,gte=1,lte=20"` // 消息ID
+	RelationID int64   `json:"relation_id" validate:"required,gte=1"`    // 这些消息所属的关系ID
 }

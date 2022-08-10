@@ -306,9 +306,8 @@ select m1.id,
        m1.create_at,
        count(*) over () as total
 from message m1
-         join setting s on m1.relation_id = s.relation_id and s.account_id = $2
-where m1.relation_id = $1
-  and (not m1.is_revoke)
+         join setting s on m1.relation_id = $1 and m1.relation_id = s.relation_id and s.account_id = $2
+where (not m1.is_revoke)
   and m1.msg_content_tsv @@ plainto_tsquery($5::varchar)
 order by m1.create_at desc
 limit $3 offset $4
@@ -743,21 +742,39 @@ func (q *Queries) UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) err
 	return err
 }
 
-const updateMsgReads = `-- name: UpdateMsgReads :exec
-update message
+const updateMsgReads = `-- name: UpdateMsgReads :many
+update message m
 set read_ids = array_append(read_ids, $2::bigint)
-where id = $1
+where id = any ($3::bigint[])
   and $2::bigint != ANY (read_ids)
+  and relation_id = $1
+returning id
 `
 
 type UpdateMsgReadsParams struct {
-	ID        int64 `json:"id"`
-	Accountid int64 `json:"accountid"`
+	RelationID int64   `json:"relation_id"`
+	Accountid  int64   `json:"accountid"`
+	Msgids     []int64 `json:"msgids"`
 }
 
-func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error {
-	_, err := q.db.Exec(ctx, updateMsgReads, arg.ID, arg.Accountid)
-	return err
+func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]int64, error) {
+	rows, err := q.db.Query(ctx, updateMsgReads, arg.RelationID, arg.Accountid, arg.Msgids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateMsgRevoke = `-- name: UpdateMsgRevoke :exec

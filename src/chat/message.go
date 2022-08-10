@@ -93,43 +93,29 @@ func (message) SendMsg(c context.Context, params *model.HandleSendMsg) (*client.
 }
 
 func (message) ReadMsg(c context.Context, params *model.HandleReadMsg) errcode.Err {
-	msgInfo, merr := logic.GetMsgInfoByID(c, params.MsgID)
-	if merr != nil {
-		return merr
-	}
 	// 判断权限
-	ok, merr := logic.ExistsSetting(context.Background(), params.AccountID, msgInfo.RelationID)
+	ok, merr := logic.ExistsSetting(context.Background(), params.ReaderID, params.RelationID)
 	if merr != nil {
 		return merr
 	}
 	if !ok {
 		return myerr.AuthPermissionsInsufficient
 	}
-	ok, err := dao.Group.DB.HasReadMsg(c, &db.HasReadMsgParams{
-		MsgID:     params.MsgID,
-		AccountID: params.AccountID,
+	msgIDs, err := dao.Group.DB.UpdateMsgReads(c, &db.UpdateMsgReadsParams{
+		Msgids:     params.MsgIDs,
+		RelationID: params.RelationID,
+		Accountid:  params.ReaderID,
 	})
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return errcode.ErrServer
 	}
-	// 不能重复读
-	if ok {
-		return myerr.MsgAlreadyRead
-	}
-	if err := dao.Group.DB.UpdateMsgReads(c, &db.UpdateMsgReadsParams{
-		ID:        params.MsgID,
-		Accountid: params.AccountID,
-	}); err != nil {
-		global.Logger.Error(err.Error())
-		return errcode.ErrServer
-	}
 	// 推送消息已经被读取
-	global.Worker.SendTask(task.PublishReadMsg(
+	global.Worker.SendTask(task.ReadMsg(
 		params.AccessToken,
-		params.AccountID,
-		msgInfo.AccountID.Int64,
-		params.MsgID,
+		params.RelationID,
+		params.ReaderID,
+		msgIDs,
 	))
 	return nil
 }

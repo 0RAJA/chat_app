@@ -9,6 +9,7 @@ import (
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 )
@@ -51,7 +52,8 @@ func (application) Create(c *gin.Context, account1ID, account2ID int64, applyMsg
 	err = dao.Group.DB.CreateApplicationTx(c, &db.CreateApplicationParams{Account1ID: account1ID, Account2ID: account2ID, ApplyMsg: applyMsg})
 	switch err {
 	case nil:
-		// TODO: 推送好友申请信息
+		// 提示对方有新的申请信息
+		global.Worker.SendTask(task.Application(account2ID))
 		return nil
 	case tx.ErrApplicationExists:
 		return myerr.ApplicationExists

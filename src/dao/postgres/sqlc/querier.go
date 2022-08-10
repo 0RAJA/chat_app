@@ -69,8 +69,8 @@ type Querier interface {
 	GetGroupMembers(ctx context.Context, relationID int64) ([]int64, error)
 	GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) ([]*GetGroupNotifyByIDRow, error)
 	GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error)
-	GetGroupSettingsByName(ctx context.Context, arg *GetGroupSettingsByNameParams) ([]*GetGroupSettingsByNameRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
+	GetGroupSettingsByName(ctx context.Context, arg *GetGroupSettingsByNameParams) ([]*GetGroupSettingsByNameRow, error)
 	GetGroupShowSettingsOrderByShowTime(ctx context.Context, accountID int64) ([]*GetGroupShowSettingsOrderByShowTimeRow, error)
 	GetMsgByID(ctx context.Context, id int64) (*GetMsgByIDRow, error)
 	GetMsgsByContent(ctx context.Context, arg *GetMsgsByContentParams) ([]*GetMsgsByContentRow, error)
@@ -91,7 +91,7 @@ type Querier interface {
 	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*UpdateGroupNotifyRow, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
 	UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) error
-	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error
+	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]int64, error)
 	UpdateMsgRevoke(ctx context.Context, arg *UpdateMsgRevokeParams) error
 	UpdateMsgTopFalseByMsgID(ctx context.Context, id int64) error
 	UpdateMsgTopFalseByRelationID(ctx context.Context, relationID int64) error

@@ -21,7 +21,7 @@ type file struct {
 // @Param    file  formData  request.PublishFile                   true  "文件"
 // @Success  200   {object}  common.State{data=reply.PublishFile}  "1001:参数有误 1003:系统错误 8001:存储失败"
 // @Router   /api/file/publish [post]
-//func (file) Publish(c *gin.Context) {
+// func (file) Publish(c *gin.Context) {
 //	rly := app.NewResponse(c)
 //	params := request.PublishFile{}
 //	if err := c.ShouldBind(&params); err != nil {
@@ -38,11 +38,11 @@ type file struct {
 //	result, mErr := logic.PublishFile(c, model.PublishFile{
 //		File:       params.File,
 //		RelationID: params.RelationID,
-//		AccountID:  params.AccountID,
+//		ReaderID:  params.ReaderID,
 //	})
 //
 //	rly.Reply(mErr, result)
-//}
+// }
 
 // DeleteFile
 // @Tags     file
@@ -51,7 +51,7 @@ type file struct {
 // @Param    data  body      request.DeleteFile                   true  "文件ID"
 // @Success  200   {object}  common.State{data=reply.DeleteFile}  "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
 // @Router   /api/file/delete [post]
-//func (file) DeleteFile(c *gin.Context) {
+// func (file) DeleteFile(c *gin.Context) {
 //	rly := app.NewResponse(c)
 //	params := request.DeleteFile{}
 //	if err := c.ShouldBindQuery(&params); err != nil {
@@ -61,7 +61,7 @@ type file struct {
 //	result, mErr := logic.Group.File.DeleteFile(c, params.FileID)
 //
 //	rly.Reply(mErr, result)
-//}
+// }
 
 // GetRelationFile
 // @Tags     file

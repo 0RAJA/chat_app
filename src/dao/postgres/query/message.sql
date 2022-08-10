@@ -13,11 +13,13 @@ update message
 set is_revoke = $2
 where id = $1;
 
--- name: UpdateMsgReads :exec
-update message
-set read_ids = array_append(read_ids, @AccountID::bigint)
-where id = $1
-  and @AccountID::bigint != ANY (read_ids);
+-- name: UpdateMsgReads :many
+update message m
+set read_ids = array_append(read_ids, @accountID::bigint)
+where id = any (@msgIDs::bigint[])
+  and @accountID::bigint != ANY (read_ids)
+  and relation_id = $1
+returning id;
 
 -- name: GetMsgsByRelationIDAndTime :many
 select m1.id,

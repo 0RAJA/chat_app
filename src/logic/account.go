@@ -13,6 +13,7 @@ import (
 	"github.com/0RAJA/chat_app/src/model/common"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 )
@@ -126,6 +127,9 @@ func (account) UpdateAccount(c *gin.Context, accountID int64, name, gender, sign
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	// 推送更新信息
+	global.Worker.SendTask(task.UpdateAccount(accessToken, accountID, name, gender, signature))
 	return nil
 }
 
