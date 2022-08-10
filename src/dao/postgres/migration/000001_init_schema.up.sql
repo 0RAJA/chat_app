@@ -135,14 +135,18 @@ create table message
     check (notify_type = 'common' or (notify_type = 'system' and account_id is null)),                   -- 系统消息时发送账号id为null
     check ( msg_type = 'text' or (msg_type = 'file' and file_id is not null))                            -- 文件消息时文件id不为null
 );
+
+-- 消息分词
+update message
+set msg_content_tsv = to_tsvector('public.chinese', msg_content);
+
 create index msg_create_at on message (create_at);
 -- 分词索引
 create index message_msg_content_tsv on message using gin (to_tsvector('chinese', msg_content));
 
 -- 触发器更新 message_msg_content_tsv
 CREATE TRIGGER message_msg_content_tsv
-    BEFORE INSERT OR
-        UPDATE
+    AFTER INSERT OR UPDATE
     ON message
     FOR EACH ROW
 EXECUTE PROCEDURE
@@ -203,7 +207,7 @@ execute procedure pin_timestamp();
 create
     or replace function cs_timestamp(
 ) returns trigger as
-              $$
+$$
 begin
     new.update_at
         = now();

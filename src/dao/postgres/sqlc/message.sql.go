@@ -306,8 +306,9 @@ select m1.id,
        m1.create_at,
        count(*) over () as total
 from message m1
-         join setting s on m1.relation_id = $1 and m1.relation_id = s.relation_id and s.account_id = $2
-where (not m1.is_revoke)
+         join setting s on m1.relation_id = s.relation_id and s.account_id = $2
+where m1.relation_id = $1
+  and (not m1.is_revoke)
   and m1.msg_content_tsv @@ plainto_tsquery($5::varchar)
 order by m1.create_at desc
 limit $3 offset $4

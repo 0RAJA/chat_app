@@ -43,7 +43,7 @@ type MsgInfoWithRly struct {
 // MsgInfoWithRlyAndHasRead 完整的消息详情 包含回复消息 包含是否已读
 type MsgInfoWithRlyAndHasRead struct {
 	MsgInfoWithRly
-	HasRead bool `json:"has_read"`
+	HasRead bool `json:"has_read"` // 是否已读
 }
 
 type GetMsgsByRelationIDAndTime struct {
