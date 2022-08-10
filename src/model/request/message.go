@@ -8,7 +8,7 @@ import (
 
 type GetMsgsByRelationIDAndTime struct {
 	RelationID int64 `form:"relation_id" binding:"required,gte=1"` // 关系ID
-	LastTime   int32 `form:"last_time" binding:"required,gte=1"`   // 拉取消息的最晚时间(精确到秒)
+	LastTime   int32 `form:"last_time" binding:"required,gte=1"`   // 拉取消息的最晚时间戳(精确到秒)
 	common.Pager
 }
 
@@ -52,4 +52,15 @@ type CreateFileMsg struct {
 	RelationID int64                 `form:"relation_id" binding:"required,gte=1"` // 关系ID
 	File       *multipart.FileHeader `form:"file" binding:"required"`              // 文件
 	RlyMsgID   int64                 `form:"rly_msg_id"`                           // 回复消息ID
+}
+
+type GetMsgsByContent struct {
+	Content    string `form:"content" binding:"required"` // 需要查询的内容
+	RelationID int64  `form:"relation_id"`                // 关系ID
+	common.Pager
+}
+
+type FeedMsgsByAccountIDAndTime struct {
+	LastTime int32 `form:"last_time" binding:"required,gte=1"` // 拉取消息的最晚时间戳(精确到秒)
+	common.Pager
 }

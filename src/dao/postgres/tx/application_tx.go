@@ -42,6 +42,21 @@ func (store *SqlStore) AcceptApplicationTx(c context.Context, rdb *query.Queries
 				IsLeader:   false,
 			})
 		})
+		// TODO: 成为好友的第一个消息
+		// 新建一个消息
+		// err = tool.DoThat(err, func() error {
+		// 	_, err := queries.CreateMsg(c, &db.CreateMsgParams{
+		// 		NotifyType: "",
+		// 		MsgType:    "",
+		// 		MsgContent: "",
+		// 		MsgExtend:  pgtype.JSON{},
+		// 		FileID:     sql.NullInt64{},
+		// 		AccountID:  sql.NullInt64{},
+		// 		RlyMsgID:   sql.NullInt64{},
+		// 		RelationID: 0,
+		// 	})
+		// 	return err
+		// })
 		// 添加关系到redis
 		err = tool.DoThat(err, func() error { return rdb.AddRelationAccount(c, relationID, account1.ID, account2.ID) })
 		return err

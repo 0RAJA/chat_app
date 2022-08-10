@@ -1180,7 +1180,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/common.State"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.CreateFileMsg"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -1217,7 +1229,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在",
+                        "description": "完整的消息详情,但不存在则为null",
                         "schema": {
                             "allOf": [
                                 {
@@ -1228,6 +1240,137 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/reply.GetTopMsgByRelationID"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/msg/list/content": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "通过内容模糊查询指定或者所有关系中的消息，按照时间先后顺序倒序排列，不会查询撤回的消息(指定关系ID\u003c=0则查询所有关系中的消息)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "需要查询的内容",
+                        "name": "content",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "第几页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "关系ID",
+                        "name": "relationID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "简略信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetMsgsByContent"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/msg/list/feed": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "获取所有关系指定时间戳之后的信息，获取的消息按照发布时间先后排序, 同时包含是否已读的标识",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "拉取消息的最晚时间戳(精确到秒)",
+                        "name": "lastTime",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "第几页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "完整的消息详情 包含回复消息 包含是否已读",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.FeedMsgsByAccountIDAndTime"
                                         }
                                     }
                                 }
@@ -1280,7 +1423,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在",
+                        "description": "完整的消息详情",
                         "schema": {
                             "allOf": [
                                 {
@@ -1351,7 +1494,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在",
+                        "description": "完整的消息详情",
                         "schema": {
                             "allOf": [
                                 {
@@ -1382,7 +1525,7 @@ const docTemplate = `{
                 "tags": [
                     "message"
                 ],
-                "summary": "通过最晚时间戳获取指定关系的信息，获取的消息按照发布时间先后排序",
+                "summary": "获取指定关系指定时间戳之前的信息，获取的消息按照发布时间先后排序",
                 "parameters": [
                     {
                         "type": "string",
@@ -1394,7 +1537,7 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "拉取消息的最晚时间(精确到秒)",
+                        "description": "拉取消息的最晚时间戳(精确到秒)",
                         "name": "lastTime",
                         "in": "query",
                         "required": true
@@ -1422,7 +1565,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在",
+                        "description": "完整的消息详情 包含回复消息",
                         "schema": {
                             "allOf": [
                                 {
@@ -1954,7 +2097,7 @@ const docTemplate = `{
                 "tags": [
                     "setting"
                 ],
-                "summary": "获取当前账户首页显示的好友和群组列表(TODO: 待完善)",
+                "summary": "获取当前账户首页显示的好友和群组列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -2380,7 +2523,7 @@ const docTemplate = `{
                 }
             }
         },
-        "common.AccessToken": {
+        "common.Token": {
             "type": "object",
             "properties": {
                 "expired_at": {
@@ -2660,12 +2803,53 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.BriefMsgInfo": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "description": "账号ID 发送者ID",
+                    "type": "integer"
+                },
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "file_id": {
+                    "description": "文件ID 当消息类型为file时\u003e0",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "消息ID",
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "description": "消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充",
+                    "type": "string"
+                },
+                "msg_extend": {
+                    "description": "消息扩展信息 可能为null",
+                    "$ref": "#/definitions/model.MsgExtend"
+                },
+                "msg_type": {
+                    "description": "消息类型 [text,file]",
+                    "type": "string"
+                },
+                "notify_type": {
+                    "description": "通知类型 [system,common]",
+                    "type": "string"
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer"
+                }
+            }
+        },
         "reply.CreateAccount": {
             "type": "object",
             "properties": {
                 "account_token": {
                     "description": "账号Token",
-                    "$ref": "#/definitions/common.AccessToken"
+                    "$ref": "#/definitions/common.Token"
                 },
                 "avatar": {
                     "description": "头像",
@@ -2677,6 +2861,27 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "名称",
+                    "type": "string"
+                }
+            }
+        },
+        "reply.CreateFileMsg": {
+            "type": "object",
+            "properties": {
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "file_id": {
+                    "description": "文件ID",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "消息ID",
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "description": "消息内容 文件则为url,",
                     "type": "string"
                 }
             }
@@ -2713,6 +2918,20 @@ const docTemplate = `{
                 "exist": {
                     "description": "是否已经存在",
                     "type": "boolean"
+                }
+            }
+        },
+        "reply.FeedMsgsByAccountIDAndTime": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/reply.MsgInfoWithRlyAndHasRead"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -2780,7 +2999,7 @@ const docTemplate = `{
             "properties": {
                 "account_token": {
                     "description": "账号Token",
-                    "$ref": "#/definitions/common.AccessToken"
+                    "$ref": "#/definitions/common.Token"
                 }
             }
         },
@@ -2837,6 +3056,20 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.SettingFriend"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reply.GetMsgsByContent": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/reply.BriefMsgInfo"
                     }
                 },
                 "total": {
@@ -3001,7 +3234,7 @@ const docTemplate = `{
                 },
                 "user_token": {
                     "description": "用户令牌",
-                    "$ref": "#/definitions/common.AccessToken"
+                    "$ref": "#/definitions/common.Token"
                 }
             }
         },
@@ -3145,6 +3378,81 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.MsgInfoWithRlyAndHasRead": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "description": "账号ID 发送者ID",
+                    "type": "integer"
+                },
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "file_id": {
+                    "description": "文件ID 当消息类型为file时\u003e0",
+                    "type": "integer"
+                },
+                "has_read": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "description": "消息ID",
+                    "type": "integer"
+                },
+                "is_pin": {
+                    "description": "是否pin",
+                    "type": "boolean"
+                },
+                "is_revoke": {
+                    "description": "是否撤回",
+                    "type": "boolean"
+                },
+                "is_top": {
+                    "description": "是否置顶",
+                    "type": "boolean"
+                },
+                "msg_content": {
+                    "description": "消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充",
+                    "type": "string"
+                },
+                "msg_extend": {
+                    "description": "消息扩展信息 可能为null",
+                    "$ref": "#/definitions/model.MsgExtend"
+                },
+                "msg_type": {
+                    "description": "消息类型 [text,file]",
+                    "type": "string"
+                },
+                "notify_type": {
+                    "description": "通知类型 [system,common]",
+                    "type": "string"
+                },
+                "pin_time": {
+                    "description": "pin时间",
+                    "type": "string"
+                },
+                "read_ids": {
+                    "description": "已读的账号ID 当请求者不为发送者时为空",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "relation_id": {
+                    "description": "关系ID",
+                    "type": "integer"
+                },
+                "reply_count": {
+                    "description": "回复数",
+                    "type": "integer"
+                },
+                "rly_msg": {
+                    "description": "回复消息详情 可能为null",
+                    "$ref": "#/definitions/reply.RlyMsg"
+                }
+            }
+        },
         "reply.PublishFile": {
             "type": "object",
             "properties": {
@@ -3177,7 +3485,7 @@ const docTemplate = `{
                 },
                 "user_token": {
                     "description": "用户令牌",
-                    "$ref": "#/definitions/common.AccessToken"
+                    "$ref": "#/definitions/common.Token"
                 }
             }
         },

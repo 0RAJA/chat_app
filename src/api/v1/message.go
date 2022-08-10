@@ -19,12 +19,12 @@ type message struct {
 
 // GetMsgsByRelationIDAndTime
 // @Tags     message
-// @Summary  通过最晚时间戳获取指定关系的信息，获取的消息按照发布时间先后排序
+// @Summary  获取指定关系指定时间戳之前的信息，获取的消息按照发布时间先后排序
 // @accept   application/json
 // @Produce  application/json
 // @Param    Authorization  header    string                                               true  "Bearer 账户令牌"
 // @Param    data           query     request.GetMsgsByRelationIDAndTime                   true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.GetMsgsByRelationIDAndTime}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在"
+// @Success  200            {object}  common.State{data=reply.GetMsgsByRelationIDAndTime}  "完整的消息详情 包含回复消息"
 // @Router   /api/msg/list/time [get]
 func (message) GetMsgsByRelationIDAndTime(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -39,12 +39,43 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, err := logic.Group.Message.GetMsgsByRelationIDAndTime(c, model.GetMsgsByRelationIDAndTimeParams{
+	result, err := logic.Group.Message.GetMsgsByRelationIDAndTime(c, model.GetMsgsByRelationIDAndTime{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 		LastTime:   time.Unix(int64(params.LastTime), 0),
 		Limit:      limit,
 		Offset:     offset,
+	})
+	rly.ReplyList(err, result.Total, result.List)
+}
+
+// FeedMsgsByAccountIDAndTime
+// @Tags     message
+// @Summary  获取所有关系指定时间戳之后的信息，获取的消息按照发布时间先后排序, 同时包含是否已读的标识
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                               true  "Bearer 账户令牌"
+// @Param    data           query     request.FeedMsgsByAccountIDAndTime                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.FeedMsgsByAccountIDAndTime}  "完整的消息详情 包含回复消息 包含是否已读"
+// @Router   /api/msg/list/feed [get]
+func (message) FeedMsgsByAccountIDAndTime(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := request.FeedMsgsByAccountIDAndTime{}
+	if err := c.ShouldBindQuery(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	limit, offset := global.Page.GetPageSizeAndOffset(c.Request)
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	result, err := logic.Group.Message.FeedMsgsByAccountIDAndTime(c, model.FeedMsgsByAccountIDAndTime{
+		AccountID: content.ID,
+		LastTime:  time.Unix(int64(params.LastTime), 0),
+		Limit:     limit,
+		Offset:    offset,
 	})
 	rly.ReplyList(err, result.Total, result.List)
 }
@@ -56,7 +87,7 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                                           true  "Bearer 账户令牌"
 // @Param    data           query     request.GetPinMsgsByRelationID                   true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.GetPinMsgsByRelationID}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在"
+// @Success  200            {object}  common.State{data=reply.GetPinMsgsByRelationID}  "完整的消息详情"
 // @Router   /api/msg/list/pin [get]
 func (message) GetPinMsgsByRelationID(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -71,7 +102,7 @@ func (message) GetPinMsgsByRelationID(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, err := logic.Group.Message.GetPinMsgsByRelationID(c, model.GetPinMsgsByRelationIDParams{
+	result, err := logic.Group.Message.GetPinMsgsByRelationID(c, model.GetPinMsgsByRelationID{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 		Limit:      limit,
@@ -87,7 +118,7 @@ func (message) GetPinMsgsByRelationID(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                                          true  "Bearer 账户令牌"
 // @Param    data           query     request.GetRlyMsgsInfoByMsgID                   true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.GetRlyMsgsInfoByMsgID}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在"
+// @Success  200            {object}  common.State{data=reply.GetRlyMsgsInfoByMsgID}  "完整的消息详情"
 // @Router   /api/msg/list/rly [get]
 func (message) GetRlyMsgsInfoByMsgID(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -102,7 +133,7 @@ func (message) GetRlyMsgsInfoByMsgID(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, err := logic.Group.Message.GetRlyMsgsInfoByMsgID(c, model.GetRlyMsgsInfoByMsgIDParams{
+	result, err := logic.Group.Message.GetRlyMsgsInfoByMsgID(c, model.GetRlyMsgsInfoByMsgID{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 		RlyMsgID:   params.RlyMsgID,
@@ -119,7 +150,7 @@ func (message) GetRlyMsgsInfoByMsgID(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                                          true  "Bearer 账户令牌"
 // @Param    data           query     request.GetTopMsgByRelationID                   true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.GetTopMsgByRelationID}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在"
+// @Success  200            {object}  common.State{data=reply.GetTopMsgByRelationID}  "完整的消息详情,但不存在则为null"
 // @Router   /api/msg/info/top [get]
 func (message) GetTopMsgByRelationID(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -133,7 +164,7 @@ func (message) GetTopMsgByRelationID(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, err := logic.Group.Message.GetTopMsgByRelationID(c, model.GetTopMsgByRelationIDParams{
+	result, err := logic.Group.Message.GetTopMsgByRelationID(c, model.GetTopMsgByRelationID{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 	})
@@ -161,7 +192,7 @@ func (message) UpdateMsgPin(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	err := logic.Group.Message.UpdateMsgPin(c, model.UpdateMsgPinParams{
+	err := logic.Group.Message.UpdateMsgPin(c, model.UpdateMsgPin{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 		MsgID:      params.ID,
@@ -191,7 +222,7 @@ func (message) UpdateMsgTop(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	err := logic.Group.Message.UpdateMsgTop(c, model.UpdateMsgTopParams{
+	err := logic.Group.Message.UpdateMsgTop(c, model.UpdateMsgTop{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 		MsgID:      params.ID,
@@ -221,7 +252,7 @@ func (message) RevokeMsg(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	err := logic.Group.Message.RevokeMsg(c, model.RevokeMsgParams{
+	err := logic.Group.Message.RevokeMsg(c, model.RevokeMsg{
 		AccountID: content.ID,
 		MsgID:     params.ID,
 	})
@@ -234,11 +265,11 @@ func (message) RevokeMsg(c *gin.Context) {
 // @Security  BasicAuth
 // @accept    multipart/form-data
 // @Produce   application/json
-// @Param     Authorization  header    string  true   "Bearer 账户令牌"
-// @Param     file           formData  file    true   "文件"
-// @Param     relation_id    formData  int64   true   "关系id"
-// @Param     rly_msg_id     formData  int64   false  "回复消息id"
-// @Success   200            {object}  common.State{reply.CreateFileMsg}
+// @Param     Authorization  header    string                                  true   "Bearer 账户令牌"
+// @Param     file           formData  file                                    true   "文件"
+// @Param     relation_id    formData  int64                                   true   "关系id"
+// @Param     rly_msg_id     formData  int64                                   false  "回复消息id"
+// @Success   200            {object}  common.State{data=reply.CreateFileMsg}  ""
 // @Router    /api/msg/file [post]
 func (message) CreateFileMsg(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -252,11 +283,43 @@ func (message) CreateFileMsg(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, err := logic.Group.Message.CreateFileMsg(c, model.CreateFileMsgParams{
+	result, err := logic.Group.Message.CreateFileMsg(c, model.CreateFileMsg{
 		AccountID:  content.ID,
 		RelationID: params.RelationID,
 		RlyMsgID:   params.RlyMsgID,
 		File:       params.File,
 	})
 	rly.Reply(err, result)
+}
+
+// GetMsgsByContent
+// @Tags     message
+// @Summary  通过内容模糊查询指定或者所有关系中的消息，按照时间先后顺序倒序排列，不会查询撤回的消息(指定关系ID<=0则查询所有关系中的消息)
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                     true  "Bearer 账户令牌"
+// @Param    data           query     request.GetMsgsByContent                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.GetMsgsByContent}  "简略信息"
+// @Router   /api/msg/list/content [get]
+func (message) GetMsgsByContent(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := request.GetMsgsByContent{}
+	if err := c.ShouldBindQuery(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	limit, offset := global.Page.GetPageSizeAndOffset(c.Request)
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	result, err := logic.Group.Message.GetMsgsByContent(c, model.GetMsgsByContent{
+		AccountID:  content.ID,
+		RelationID: params.RelationID,
+		Limit:      limit,
+		Offset:     offset,
+		Content:    params.Content,
+	})
+	rly.ReplyList(err, result.Total, result.List)
 }

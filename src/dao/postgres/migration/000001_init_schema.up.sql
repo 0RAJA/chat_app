@@ -141,8 +141,7 @@ create index message_msg_content_tsv on message using gin (to_tsvector('chinese'
 
 -- 触发器更新 message_msg_content_tsv
 CREATE TRIGGER message_msg_content_tsv
-    BEFORE INSERT OR
-        UPDATE
+    BEFORE INSERT OR UPDATE of msg_content
     ON message
     FOR EACH ROW
 EXECUTE PROCEDURE
@@ -203,7 +202,7 @@ execute procedure pin_timestamp();
 create
     or replace function cs_timestamp(
 ) returns trigger as
-              $$
+$$
 begin
     new.update_at
         = now();

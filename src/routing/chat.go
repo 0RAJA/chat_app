@@ -12,15 +12,17 @@ type ws struct {
 
 func (ws) Init(router *gin.RouterGroup) {
 	server := socketio.NewServer(nil)
+	{
+		server.OnConnect("/", v1.Group.Chat.Handle.OnConnect)
+		server.OnError("/", v1.Group.Chat.Handle.OnError)
+		server.OnDisconnect("/", v1.Group.Chat.Handle.OnDisconnect)
+	}
+	chatMessage(server)
 	wg := router.Group("socket.io")
 	{
 		wg.GET("*any", gin.WrapH(server))
 		wg.POST("*any", gin.WrapH(server))
 	}
-	server.OnConnect("/", v1.Group.Chat.Handle.OnConnect)
-	server.OnError("/", v1.Group.Chat.Handle.OnError)
-	server.OnDisconnect("/", v1.Group.Chat.Handle.OnDisconnect)
-	chatMessage(server)
 }
 
 func chatMessage(server *socketio.Server) {

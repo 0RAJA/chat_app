@@ -60,6 +60,103 @@ func (q *Queries) CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateM
 	return &i, err
 }
 
+const feedMsgsByAccountIDAndTime = `-- name: FeedMsgsByAccountIDAndTime :many
+select m1.id,
+       m1.notify_type,
+       m1.msg_type,
+       m1.msg_content,
+       m1.msg_extend,
+       m1.file_id,
+       m1.account_id,
+       m1.rly_msg_id,
+       m1.relation_id,
+       m1.create_at,
+       m1.is_revoke,
+       m1.is_top,
+       m1.is_pin,
+       m1.pin_time,
+       m1.read_ids,
+       count(*) over ()                                                                                  as total,
+       (select count(id) from message where rly_msg_id = m1.id and message.relation_id = m1.relation_id) as reply_count,
+       ($4::bigint = m1.account_id or $4::bigint = any (m1.read_ids))::boolean           as has_read
+from message m1
+         join setting s on m1.relation_id = s.relation_id and s.account_id = $4::bigint
+where m1.create_at > $1
+limit $2 offset $3
+`
+
+type FeedMsgsByAccountIDAndTimeParams struct {
+	CreateAt  time.Time `json:"create_at"`
+	Limit     int32     `json:"limit"`
+	Offset    int32     `json:"offset"`
+	Accountid int64     `json:"accountid"`
+}
+
+type FeedMsgsByAccountIDAndTimeRow struct {
+	ID         int64         `json:"id"`
+	NotifyType Msgnotifytype `json:"notify_type"`
+	MsgType    string        `json:"msg_type"`
+	MsgContent string        `json:"msg_content"`
+	MsgExtend  pgtype.JSON   `json:"msg_extend"`
+	FileID     sql.NullInt64 `json:"file_id"`
+	AccountID  sql.NullInt64 `json:"account_id"`
+	RlyMsgID   sql.NullInt64 `json:"rly_msg_id"`
+	RelationID int64         `json:"relation_id"`
+	CreateAt   time.Time     `json:"create_at"`
+	IsRevoke   bool          `json:"is_revoke"`
+	IsTop      bool          `json:"is_top"`
+	IsPin      bool          `json:"is_pin"`
+	PinTime    time.Time     `json:"pin_time"`
+	ReadIds    []int64       `json:"read_ids"`
+	Total      int64         `json:"total"`
+	ReplyCount int64         `json:"reply_count"`
+	HasRead    bool          `json:"has_read"`
+}
+
+func (q *Queries) FeedMsgsByAccountIDAndTime(ctx context.Context, arg *FeedMsgsByAccountIDAndTimeParams) ([]*FeedMsgsByAccountIDAndTimeRow, error) {
+	rows, err := q.db.Query(ctx, feedMsgsByAccountIDAndTime,
+		arg.CreateAt,
+		arg.Limit,
+		arg.Offset,
+		arg.Accountid,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*FeedMsgsByAccountIDAndTimeRow{}
+	for rows.Next() {
+		var i FeedMsgsByAccountIDAndTimeRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.NotifyType,
+			&i.MsgType,
+			&i.MsgContent,
+			&i.MsgExtend,
+			&i.FileID,
+			&i.AccountID,
+			&i.RlyMsgID,
+			&i.RelationID,
+			&i.CreateAt,
+			&i.IsRevoke,
+			&i.IsTop,
+			&i.IsPin,
+			&i.PinTime,
+			&i.ReadIds,
+			&i.Total,
+			&i.ReplyCount,
+			&i.HasRead,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getMsgByID = `-- name: GetMsgByID :one
 select id,
        notify_type,
@@ -120,6 +217,158 @@ func (q *Queries) GetMsgByID(ctx context.Context, id int64) (*GetMsgByIDRow, err
 		&i.ReadIds,
 	)
 	return &i, err
+}
+
+const getMsgsByContent = `-- name: GetMsgsByContent :many
+select m1.id,
+       m1.notify_type,
+       m1.msg_type,
+       m1.msg_content,
+       m1.msg_extend,
+       m1.file_id,
+       m1.account_id,
+       m1.relation_id,
+       m1.create_at,
+       count(*) over () as total
+from message m1
+         join setting s on m1.relation_id = s.relation_id and s.account_id = $1
+where (not m1.is_revoke)
+  and m1.msg_content_tsv @@ plainto_tsquery($4::varchar)
+order by m1.create_at desc
+limit $2 offset $3
+`
+
+type GetMsgsByContentParams struct {
+	AccountID int64  `json:"account_id"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
+	Content   string `json:"content"`
+}
+
+type GetMsgsByContentRow struct {
+	ID         int64         `json:"id"`
+	NotifyType Msgnotifytype `json:"notify_type"`
+	MsgType    string        `json:"msg_type"`
+	MsgContent string        `json:"msg_content"`
+	MsgExtend  pgtype.JSON   `json:"msg_extend"`
+	FileID     sql.NullInt64 `json:"file_id"`
+	AccountID  sql.NullInt64 `json:"account_id"`
+	RelationID int64         `json:"relation_id"`
+	CreateAt   time.Time     `json:"create_at"`
+	Total      int64         `json:"total"`
+}
+
+func (q *Queries) GetMsgsByContent(ctx context.Context, arg *GetMsgsByContentParams) ([]*GetMsgsByContentRow, error) {
+	rows, err := q.db.Query(ctx, getMsgsByContent,
+		arg.AccountID,
+		arg.Limit,
+		arg.Offset,
+		arg.Content,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetMsgsByContentRow{}
+	for rows.Next() {
+		var i GetMsgsByContentRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.NotifyType,
+			&i.MsgType,
+			&i.MsgContent,
+			&i.MsgExtend,
+			&i.FileID,
+			&i.AccountID,
+			&i.RelationID,
+			&i.CreateAt,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMsgsByContentAndRelation = `-- name: GetMsgsByContentAndRelation :many
+select m1.id,
+       m1.notify_type,
+       m1.msg_type,
+       m1.msg_content,
+       m1.msg_extend,
+       m1.file_id,
+       m1.account_id,
+       m1.relation_id,
+       m1.create_at,
+       count(*) over () as total
+from message m1
+         join setting s on m1.relation_id = $1 and m1.relation_id = s.relation_id and s.account_id = $2
+where (not m1.is_revoke)
+  and m1.msg_content_tsv @@ plainto_tsquery($5::varchar)
+order by m1.create_at desc
+limit $3 offset $4
+`
+
+type GetMsgsByContentAndRelationParams struct {
+	RelationID int64  `json:"relation_id"`
+	AccountID  int64  `json:"account_id"`
+	Limit      int32  `json:"limit"`
+	Offset     int32  `json:"offset"`
+	Content    string `json:"content"`
+}
+
+type GetMsgsByContentAndRelationRow struct {
+	ID         int64         `json:"id"`
+	NotifyType Msgnotifytype `json:"notify_type"`
+	MsgType    string        `json:"msg_type"`
+	MsgContent string        `json:"msg_content"`
+	MsgExtend  pgtype.JSON   `json:"msg_extend"`
+	FileID     sql.NullInt64 `json:"file_id"`
+	AccountID  sql.NullInt64 `json:"account_id"`
+	RelationID int64         `json:"relation_id"`
+	CreateAt   time.Time     `json:"create_at"`
+	Total      int64         `json:"total"`
+}
+
+func (q *Queries) GetMsgsByContentAndRelation(ctx context.Context, arg *GetMsgsByContentAndRelationParams) ([]*GetMsgsByContentAndRelationRow, error) {
+	rows, err := q.db.Query(ctx, getMsgsByContentAndRelation,
+		arg.RelationID,
+		arg.AccountID,
+		arg.Limit,
+		arg.Offset,
+		arg.Content,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetMsgsByContentAndRelationRow{}
+	for rows.Next() {
+		var i GetMsgsByContentAndRelationRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.NotifyType,
+			&i.MsgType,
+			&i.MsgContent,
+			&i.MsgExtend,
+			&i.FileID,
+			&i.AccountID,
+			&i.RelationID,
+			&i.CreateAt,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getMsgsByRelationIDAndTime = `-- name: GetMsgsByRelationIDAndTime :many
@@ -493,21 +742,39 @@ func (q *Queries) UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) err
 	return err
 }
 
-const updateMsgReads = `-- name: UpdateMsgReads :exec
-update message
+const updateMsgReads = `-- name: UpdateMsgReads :many
+update message m
 set read_ids = array_append(read_ids, $2::bigint)
-where id = $1
+where id = any ($3::bigint[])
   and $2::bigint != ANY (read_ids)
+  and relation_id = $1
+returning id
 `
 
 type UpdateMsgReadsParams struct {
-	ID        int64 `json:"id"`
-	Accountid int64 `json:"accountid"`
+	RelationID int64   `json:"relation_id"`
+	Accountid  int64   `json:"accountid"`
+	Msgids     []int64 `json:"msgids"`
 }
 
-func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) error {
-	_, err := q.db.Exec(ctx, updateMsgReads, arg.ID, arg.Accountid)
-	return err
+func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]int64, error) {
+	rows, err := q.db.Query(ctx, updateMsgReads, arg.RelationID, arg.Accountid, arg.Msgids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateMsgRevoke = `-- name: UpdateMsgRevoke :exec

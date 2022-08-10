@@ -10,7 +10,8 @@ type HandleSendMsg struct {
 }
 
 type HandleReadMsg struct {
-	AccessToken string // AccessToken
-	MsgID       int64  // 消息ID
-	AccountID   int64  // 账户ID
+	AccessToken string  // AccessToken
+	MsgIDs      []int64 // 消息IDs
+	RelationID  int64   // 这些消息所处的关系ID
+	ReaderID    int64   // 读者账户ID
 }

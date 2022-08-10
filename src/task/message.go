@@ -32,14 +32,24 @@ func PublishMsg(accessToken string, msgInfo reply.MsgInfo, rlyMsg *reply.RlyMsg)
 	}
 }
 
-// PublishReadMsg 推送阅读消息事件
+// ReadMsg 推送阅读消息事件
 // 参数: 读者ID，消息发起者ID，消息ID
-func PublishReadMsg(accessToken string, readerAccountID, accountID, msgID int64) func() {
+func ReadMsg(accessToken string, relationID, readerID int64, msgIDs []int64) func() {
 	return func() {
-		global.ChatMap.Send(accountID, chat.ServerReadMsg, server.ReadMsg{
-			EnToken:   utils.EncodeMD5(accessToken),
-			MsgID:     msgID,
-			AccountID: readerAccountID,
+		if len(msgIDs) == 0 {
+			return
+		}
+		ctx, cancel := global.DefaultContextWithTimeOut()
+		defer cancel()
+		accountIDs, err := dao.Group.Redis.GetAccountsByRelationID(ctx, relationID)
+		if err != nil {
+			global.Logger.Error(err.Error())
+			return
+		}
+		global.ChatMap.SendMany(accountIDs, chat.ServerReadMsg, server.ReadMsg{
+			EnToken:  utils.EncodeMD5(accessToken),
+			MsgIDs:   msgIDs,
+			ReaderID: readerID,
 		})
 	}
 }

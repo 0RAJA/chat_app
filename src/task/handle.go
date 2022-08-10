@@ -15,3 +15,12 @@ func AccountLogin(accessToken, address string, accountID int64) func() {
 		})
 	}
 }
+
+func AccountLogout(accessToken, address string, accountID int64) func() {
+	return func() {
+		global.ChatMap.Send(accountID, chat.ServerAccountLogout, server.AccountLogout{
+			EnToken: utils.EncodeMD5(accessToken),
+			Address: address,
+		})
+	}
+}

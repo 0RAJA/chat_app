@@ -6,7 +6,6 @@ import (
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/global"
 	"github.com/0RAJA/chat_app/src/model"
-	"github.com/0RAJA/chat_app/src/model/common"
 	"github.com/0RAJA/chat_app/src/task"
 	socketio "github.com/googollee/go-socket.io"
 )
@@ -32,16 +31,10 @@ func (handle) OnConnect(s socketio.Conn) error {
 // OnError
 // 当发生错误时触发
 func (handle) OnError(s socketio.Conn, e error) {
-	if s == nil {
-		return
-	}
 	var merr errcode.Err
 	if !errors.As(e, &merr) {
-		global.Logger.Error(e.Error())
-		merr = errcode.ErrServer
+		global.Logger.Warn(e.Error())
 	}
-	// TODO: 发送错误描述
-	s.Emit("error", common.NewState(merr))
 }
 
 // OnDisconnect
@@ -51,7 +44,8 @@ func (handle) OnDisconnect(s socketio.Conn, _ string) {
 	if !ok {
 		return
 	}
-	// TODO: 通知其他账户
 	// 从在线中退出
 	global.ChatMap.Leave(s, token.Content.ID)
+	// 通知其他设备
+	global.Worker.SendTask(task.AccountLogout(token.AccessToken, s.RemoteAddr().String(), token.Content.ID))
 }

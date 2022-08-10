@@ -212,6 +212,36 @@ definitions:
         description: 更新时间
         type: string
     type: object
+  reply.BriefMsgInfo:
+    properties:
+      account_id:
+        description: 账号ID 发送者ID
+        type: integer
+      create_at:
+        description: 创建时间
+        type: string
+      file_id:
+        description: 文件ID 当消息类型为file时>0
+        type: integer
+      id:
+        description: 消息ID
+        type: integer
+      msg_content:
+        description: 消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充
+        type: string
+      msg_extend:
+        $ref: '#/definitions/model.MsgExtend'
+        description: 消息扩展信息 可能为null
+      msg_type:
+        description: 消息类型 [text,file]
+        type: string
+      notify_type:
+        description: 通知类型 [system,common]
+        type: string
+      relation_id:
+        description: 关系ID
+        type: integer
+    type: object
   reply.CreateAccount:
     properties:
       account_token:
@@ -225,6 +255,21 @@ definitions:
         type: integer
       name:
         description: 名称
+        type: string
+    type: object
+  reply.CreateFileMsg:
+    properties:
+      create_at:
+        description: 创建时间
+        type: string
+      file_id:
+        description: 文件ID
+        type: integer
+      id:
+        description: 消息ID
+        type: integer
+      msg_content:
+        description: 消息内容 文件则为url,
         type: string
     type: object
   reply.CreateGroup:
@@ -249,6 +294,15 @@ definitions:
       exist:
         description: 是否已经存在
         type: boolean
+    type: object
+  reply.FeedMsgsByAccountIDAndTime:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/reply.MsgInfoWithRlyAndHasRead'
+        type: array
+      total:
+        type: integer
     type: object
   reply.File:
     properties:
@@ -333,6 +387,15 @@ definitions:
       list:
         items:
           $ref: '#/definitions/model.SettingFriend'
+        type: array
+      total:
+        type: integer
+    type: object
+  reply.GetMsgsByContent:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/reply.BriefMsgInfo'
         type: array
       total:
         type: integer
@@ -503,6 +566,61 @@ definitions:
       file_id:
         description: 文件ID 当消息类型为file时>0
         type: integer
+      id:
+        description: 消息ID
+        type: integer
+      is_pin:
+        description: 是否pin
+        type: boolean
+      is_revoke:
+        description: 是否撤回
+        type: boolean
+      is_top:
+        description: 是否置顶
+        type: boolean
+      msg_content:
+        description: 消息内容 文件则为url，文本则为文本内容，由拓展信息进行补充
+        type: string
+      msg_extend:
+        $ref: '#/definitions/model.MsgExtend'
+        description: 消息扩展信息 可能为null
+      msg_type:
+        description: 消息类型 [text,file]
+        type: string
+      notify_type:
+        description: 通知类型 [system,common]
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      read_ids:
+        description: 已读的账号ID 当请求者不为发送者时为空
+        items:
+          type: integer
+        type: array
+      relation_id:
+        description: 关系ID
+        type: integer
+      reply_count:
+        description: 回复数
+        type: integer
+      rly_msg:
+        $ref: '#/definitions/reply.RlyMsg'
+        description: 回复消息详情 可能为null
+    type: object
+  reply.MsgInfoWithRlyAndHasRead:
+    properties:
+      account_id:
+        description: 账号ID 发送者ID
+        type: integer
+      create_at:
+        description: 创建时间
+        type: string
+      file_id:
+        description: 文件ID 当消息类型为file时>0
+        type: integer
+      has_read:
+        type: boolean
       id:
         description: 消息ID
         type: integer
@@ -1634,7 +1752,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/common.State'
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.CreateFileMsg'
+              type: object
       security:
       - BasicAuth: []
       summary: 发布文件消息
@@ -1660,7 +1783,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          description: 完整的消息详情,但不存在则为null
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -1669,6 +1792,87 @@ paths:
                   $ref: '#/definitions/reply.GetTopMsgByRelationID'
               type: object
       summary: 获取指定关系的置顶消息，如果不存在则为null
+      tags:
+      - message
+  /api/msg/list/content:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 需要查询的内容
+        in: query
+        name: content
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      - description: 关系ID
+        in: query
+        name: relationID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 简略信息
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetMsgsByContent'
+              type: object
+      summary: 通过内容模糊查询指定或者所有关系中的消息，按照时间先后顺序倒序排列，不会查询撤回的消息(指定关系ID<=0则查询所有关系中的消息)
+      tags:
+      - message
+  /api/msg/list/feed:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 拉取消息的最晚时间戳(精确到秒)
+        in: query
+        minimum: 1
+        name: lastTime
+        required: true
+        type: integer
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 完整的消息详情 包含回复消息 包含是否已读
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.FeedMsgsByAccountIDAndTime'
+              type: object
+      summary: 获取所有关系指定时间戳之后的信息，获取的消息按照发布时间先后排序, 同时包含是否已读的标识
       tags:
       - message
   /api/msg/list/pin:
@@ -1699,7 +1903,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          description: 完整的消息详情
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -1744,7 +1948,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          description: 完整的消息详情
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -1765,7 +1969,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: 拉取消息的最晚时间(精确到秒)
+      - description: 拉取消息的最晚时间戳(精确到秒)
         in: query
         minimum: 1
         name: lastTime
@@ -1789,7 +1993,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 2010:账号不存在
+          description: 完整的消息详情 包含回复消息
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -1797,7 +2001,7 @@ paths:
                 data:
                   $ref: '#/definitions/reply.GetMsgsByRelationIDAndTime'
               type: object
-      summary: 通过最晚时间戳获取指定关系的信息，获取的消息按照发布时间先后排序
+      summary: 获取指定关系指定时间戳之前的信息，获取的消息按照发布时间先后排序
       tags:
       - message
   /api/msg/update/pin:
@@ -2138,7 +2342,7 @@ paths:
                 data:
                   $ref: '#/definitions/reply.GetShows'
               type: object
-      summary: '获取当前账户首页显示的好友和群组列表(TODO: 待完善)'
+      summary: 获取当前账户首页显示的好友和群组列表
       tags:
       - setting
   /api/setting/update/disturb:

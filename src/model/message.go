@@ -45,47 +45,59 @@ type MsgExtend struct {
 	Remind []Remind `json:"remind"` // @的描述信息
 }
 
-type GetMsgsByRelationIDAndTimeParams struct {
+type GetMsgsByRelationIDAndTime struct {
 	AccountID, RelationID int64
 	LastTime              time.Time
 	Limit, Offset         int32
 }
 
-type GetPinMsgsByRelationIDParams struct {
+type GetPinMsgsByRelationID struct {
 	AccountID, RelationID int64
 	Limit, Offset         int32
 }
 
-type GetRlyMsgsInfoByMsgIDParams struct {
+type GetRlyMsgsInfoByMsgID struct {
 	AccountID, RelationID, RlyMsgID int64
 	Limit, Offset                   int32
 }
 
-type GetTopMsgByRelationIDParams struct {
+type GetTopMsgByRelationID struct {
 	AccountID, RelationID int64
 }
 
-type UpdateMsgPinParams struct {
+type UpdateMsgPin struct {
 	AccountID, RelationID, MsgID int64
 	IsPin                        bool
 }
 
-type UpdateMsgTopParams struct {
+type UpdateMsgTop struct {
 	AccountID, RelationID, MsgID int64
 	IsTop                        bool
 }
 
-type RevokeMsgParams struct {
+type RevokeMsg struct {
 	AccountID, MsgID int64
 }
 
-type CreateFileMsgParams struct {
+type CreateFileMsg struct {
 	AccountID, RelationID, RlyMsgID int64
 	File                            *multipart.FileHeader
 }
 
-type CreateMsgParams struct {
+type CreateMsg struct {
 	AccountID, RelationID, FileID, RlyMsgID int64
 	NotifyType, MsgType, MsgContent         string
 	MsgExtend                               *MsgExtend
+}
+
+type GetMsgsByContent struct {
+	RelationID, AccountID int64
+	Limit, Offset         int32
+	Content               string
+}
+
+type FeedMsgsByAccountIDAndTime struct {
+	AccountID     int64
+	Limit, Offset int32
+	LastTime      time.Time
 }

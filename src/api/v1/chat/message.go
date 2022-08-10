@@ -55,8 +55,9 @@ func (message) ReadMsg(s socketio.Conn, msg string) string {
 	defer cancel()
 	merr = chat.Group.Message.ReadMsg(c, &model.HandleReadMsg{
 		AccessToken: token.AccessToken,
-		MsgID:       params.MsgID,
-		AccountID:   token.Content.ID,
+		RelationID:  params.RelationID,
+		MsgIDs:      params.MsgIDs,
+		ReaderID:    token.Content.ID,
 	})
 	return common.NewState(merr).JsonStr()
 }
