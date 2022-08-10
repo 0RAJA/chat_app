@@ -16,8 +16,10 @@ func (message) Init(router *gin.RouterGroup) {
 		list := mg.Group("list")
 		{
 			list.GET("time", v1.Group.Message.GetMsgsByRelationIDAndTime)
+			list.GET("feed", v1.Group.Message.FeedMsgsByAccountIDAndTime)
 			list.GET("pin", v1.Group.Message.GetPinMsgsByRelationID)
 			list.GET("rly", v1.Group.Message.GetRlyMsgsInfoByMsgID)
+			list.GET("content", v1.Group.Message.GetMsgsByContent)
 		}
 		info := mg.Group("info")
 		{

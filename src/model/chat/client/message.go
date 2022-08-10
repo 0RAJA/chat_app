@@ -1,8 +1,12 @@
 package client
 
 import (
+	"time"
+
 	"github.com/0RAJA/chat_app/src/model"
 )
+
+// chat 中 client 端有关消息请求的结构
 
 type HandleSendMsgParams struct {
 	RelationID int64            `json:"relation_id" validate:"required,gte=1"` // 关系ID
@@ -12,7 +16,8 @@ type HandleSendMsgParams struct {
 }
 
 type HandleSendMsgRly struct {
-	MsgID int64 // 消息ID
+	MsgID    int64     `json:"msg_id"`    // 消息ID
+	CreateAt time.Time `json:"create_at"` // 创建时间
 }
 
 type HandleReadMsgParams struct {

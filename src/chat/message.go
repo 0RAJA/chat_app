@@ -89,7 +89,7 @@ func (message) SendMsg(c context.Context, params *model.HandleSendMsg) (*client.
 			RelationID: params.RelationID,
 			CreateAt:   result.CreateAt,
 		}, rlyMsg))
-	return &client.HandleSendMsgRly{MsgID: result.ID}, nil
+	return &client.HandleSendMsgRly{MsgID: result.ID, CreateAt: result.CreateAt}, nil
 }
 
 func (message) ReadMsg(c context.Context, params *model.HandleReadMsg) errcode.Err {

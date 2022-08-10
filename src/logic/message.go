@@ -16,6 +16,7 @@ import (
 	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
+	"go.uber.org/zap"
 )
 
 type message struct {
@@ -37,7 +38,7 @@ func GetMsgInfoByID(c context.Context, msgID int64) (*db.GetMsgByIDRow, errcode.
 	return result, nil
 }
 
-func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsByRelationIDAndTimeParams) (reply.GetMsgsByRelationIDAndTime, errcode.Err) {
+func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsByRelationIDAndTime) (reply.GetMsgsByRelationIDAndTime, errcode.Err) {
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return reply.GetMsgsByRelationIDAndTime{}, merr
@@ -66,8 +67,8 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 			content = v.MsgContent
 			extend, err = model.JsonToExpand(v.MsgExtend)
 			if err != nil {
-				global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
-				return reply.GetMsgsByRelationIDAndTime{}, errcode.ErrServer
+				global.Logger.Error(err.Error(), zap.Any("msgExtend", v.MsgExtend))
+				continue
 			}
 		}
 		var readIDs []int64
@@ -86,8 +87,8 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 				rlyContent = rlyMsgInfo.MsgContent
 				rlyExtend, err = model.JsonToExpand(rlyMsgInfo.MsgExtend)
 				if err != nil {
-					global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
-					return reply.GetMsgsByRelationIDAndTime{}, errcode.ErrServer
+					global.Logger.Error(err.Error(), zap.Any("rlyMsgExtend", rlyMsgInfo.MsgExtend))
+					continue
 				}
 			}
 			rlyMsg = &reply.RlyMsg{
@@ -122,7 +123,88 @@ func (message) GetMsgsByRelationIDAndTime(c *gin.Context, params model.GetMsgsBy
 	return reply.GetMsgsByRelationIDAndTime{List: result, Total: data[0].Total}, nil
 }
 
-func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByRelationIDParams) (reply.GetPinMsgsByRelationID, errcode.Err) {
+func (message) FeedMsgsByAccountIDAndTime(c *gin.Context, params model.FeedMsgsByAccountIDAndTime) (reply.FeedMsgsByAccountIDAndTime, errcode.Err) {
+	data, err := dao.Group.DB.FeedMsgsByAccountIDAndTime(c, &db.FeedMsgsByAccountIDAndTimeParams{
+		Accountid: params.AccountID,
+		CreateAt:  params.LastTime,
+		Limit:     params.Limit,
+		Offset:    params.Offset,
+	})
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return reply.FeedMsgsByAccountIDAndTime{}, errcode.ErrServer
+	}
+	if len(data) == 0 {
+		return reply.FeedMsgsByAccountIDAndTime{List: []*reply.MsgInfoWithRlyAndHasRead{}}, nil
+	}
+	result := make([]*reply.MsgInfoWithRlyAndHasRead, 0, len(data))
+	for _, v := range data {
+		var content string
+		var extend *model.MsgExtend
+		if !v.IsRevoke {
+			content = v.MsgContent
+			extend, err = model.JsonToExpand(v.MsgExtend)
+			if err != nil {
+				global.Logger.Error(err.Error(), zap.Any("msgExtend", v.MsgExtend))
+				continue
+			}
+		}
+		var readIDs []int64
+		if params.AccountID == v.AccountID.Int64 {
+			readIDs = v.ReadIds
+		}
+		var rlyMsg *reply.RlyMsg
+		if v.RlyMsgID.Valid {
+			rlyMsgInfo, merr := GetMsgInfoByID(c, v.RlyMsgID.Int64)
+			if merr != nil {
+				continue
+			}
+			var rlyContent string
+			var rlyExtend *model.MsgExtend
+			if !rlyMsgInfo.IsRevoke {
+				rlyContent = rlyMsgInfo.MsgContent
+				rlyExtend, err = model.JsonToExpand(rlyMsgInfo.MsgExtend)
+				if err != nil {
+					global.Logger.Error(err.Error(), zap.Any("rlyMsgExtend", rlyMsgInfo.MsgExtend))
+					continue
+				}
+			}
+			rlyMsg = &reply.RlyMsg{
+				MsgID:      v.RlyMsgID.Int64,
+				MsgType:    rlyMsgInfo.MsgType,
+				MsgContent: rlyContent,
+				MsgExtend:  rlyExtend,
+				IsRevoke:   rlyMsgInfo.IsRevoke,
+			}
+		}
+		result = append(result, &reply.MsgInfoWithRlyAndHasRead{
+			MsgInfoWithRly: reply.MsgInfoWithRly{
+				MsgInfo: reply.MsgInfo{
+					ID:         v.ID,
+					NotifyType: string(v.NotifyType),
+					MsgType:    v.MsgType,
+					MsgContent: content,
+					Extend:     extend,
+					FileID:     v.FileID.Int64,
+					AccountID:  v.AccountID.Int64,
+					RelationID: v.RelationID,
+					CreateAt:   v.CreateAt,
+					IsRevoke:   v.IsRevoke,
+					IsTop:      v.IsTop,
+					IsPin:      v.IsPin,
+					PinTime:    v.PinTime,
+					ReadIds:    readIDs,
+					ReplyCount: v.ReplyCount,
+				},
+				RlyMsg: rlyMsg,
+			},
+			HasRead: v.HasRead,
+		})
+	}
+	return reply.FeedMsgsByAccountIDAndTime{List: result, Total: data[0].Total}, nil
+}
+
+func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByRelationID) (reply.GetPinMsgsByRelationID, errcode.Err) {
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return reply.GetPinMsgsByRelationID{}, merr
@@ -179,7 +261,7 @@ func (message) GetPinMsgsByRelationID(c *gin.Context, params model.GetPinMsgsByR
 	return reply.GetPinMsgsByRelationID{List: result, Total: data[0].Total}, nil
 }
 
-func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfoByMsgIDParams) (reply.GetRlyMsgsInfoByMsgID, errcode.Err) {
+func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfoByMsgID) (reply.GetRlyMsgsInfoByMsgID, errcode.Err) {
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return reply.GetRlyMsgsInfoByMsgID{}, merr
@@ -237,7 +319,7 @@ func (message) GetRlyMsgsInfoByMsgID(c *gin.Context, params model.GetRlyMsgsInfo
 	return reply.GetRlyMsgsInfoByMsgID{List: result, Total: data[0].Total}, nil
 }
 
-func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRelationIDParams) (*reply.GetTopMsgByRelationID, errcode.Err) {
+func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRelationID) (*reply.GetTopMsgByRelationID, errcode.Err) {
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return nil, merr
@@ -259,7 +341,7 @@ func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRel
 		content = data.MsgContent
 		extend, err = model.JsonToExpand(data.MsgExtend)
 		if err != nil {
-			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			global.Logger.Error(err.Error(), zap.Any("msgExtend", data.MsgExtend))
 			return nil, errcode.ErrServer
 		}
 	}
@@ -288,7 +370,7 @@ func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRel
 	}, nil
 }
 
-func (message) UpdateMsgPin(c *gin.Context, params model.UpdateMsgPinParams) errcode.Err {
+func (message) UpdateMsgPin(c *gin.Context, params model.UpdateMsgPin) errcode.Err {
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return merr
@@ -315,7 +397,7 @@ func (message) UpdateMsgPin(c *gin.Context, params model.UpdateMsgPinParams) err
 	return nil
 }
 
-func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTopParams) errcode.Err {
+func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTop) errcode.Err {
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
 		return merr
@@ -344,7 +426,7 @@ func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTopParams) err
 	return nil
 }
 
-func (message) RevokeMsg(c *gin.Context, params model.RevokeMsgParams) errcode.Err {
+func (message) RevokeMsg(c *gin.Context, params model.RevokeMsg) errcode.Err {
 	msgInfo, merr := GetMsgInfoByID(c, params.MsgID)
 	if merr != nil {
 		return merr
@@ -367,7 +449,7 @@ func (message) RevokeMsg(c *gin.Context, params model.RevokeMsgParams) errcode.E
 	return nil
 }
 
-func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (*reply.CreateFileMsg, errcode.Err) {
+func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsg) (*reply.CreateFileMsg, errcode.Err) {
 	// 检查权限
 	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
 	if merr != nil {
@@ -400,7 +482,7 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		rlyID = params.RlyMsgID
 		rlyMsgExtend, err := model.JsonToExpand(rlyInfo.MsgExtend)
 		if err != nil {
-			global.Logger.Error(err.Error())
+			global.Logger.Error(err.Error(), zap.Any("rlyMsgExtend", rlyInfo.MsgExtend))
 			return nil, errcode.ErrServer
 		}
 		rlyMsg = &reply.RlyMsg{
@@ -448,4 +530,83 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsgParams) (
 		FileID:     result.FileID.Int64,
 		CreateAt:   result.CreateAt,
 	}, nil
+}
+
+func (message) GetMsgsByContent(c *gin.Context, params model.GetMsgsByContent) (reply.GetMsgsByContent, errcode.Err) {
+	if params.RelationID > 0 {
+		return getMsgsByContentAndRelation(c, db.GetMsgsByContentAndRelationParams(params))
+	}
+	data, err := dao.Group.DB.GetMsgsByContent(c, &db.GetMsgsByContentParams{
+		AccountID: params.AccountID,
+		Limit:     params.Limit,
+		Offset:    params.Offset,
+		Content:   params.Content,
+	})
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return reply.GetMsgsByContent{}, errcode.ErrServer
+	}
+	if len(data) == 0 {
+		return reply.GetMsgsByContent{List: []*reply.BriefMsgInfo{}}, nil
+	}
+	result := make([]*reply.BriefMsgInfo, 0, len(data))
+	for _, v := range data {
+		extend, err := model.JsonToExpand(v.MsgExtend)
+		if err != nil {
+			global.Logger.Error(err.Error(), zap.Any("msgExtend", v.MsgExtend))
+			continue
+		}
+		result = append(result, &reply.BriefMsgInfo{
+			ID:         v.ID,
+			NotifyType: string(v.NotifyType),
+			MsgType:    v.MsgType,
+			MsgContent: v.MsgContent,
+			Extend:     extend,
+			FileID:     v.FileID.Int64,
+			AccountID:  v.AccountID.Int64,
+			RelationID: v.RelationID,
+			CreateAt:   v.CreateAt,
+		})
+	}
+	return reply.GetMsgsByContent{List: result, Total: data[0].Total}, nil
+}
+
+// 从指定关系中模糊查询指定内容的消息
+func getMsgsByContentAndRelation(c *gin.Context, params db.GetMsgsByContentAndRelationParams) (reply.GetMsgsByContent, errcode.Err) {
+	// 检查权限
+	ok, merr := ExistsSetting(c, params.AccountID, params.RelationID)
+	if merr != nil {
+		return reply.GetMsgsByContent{}, merr
+	}
+	if !ok {
+		return reply.GetMsgsByContent{}, myerr.AuthPermissionsInsufficient
+	}
+	data, err := dao.Group.DB.GetMsgsByContentAndRelation(c, &params)
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return reply.GetMsgsByContent{}, errcode.ErrServer
+	}
+	if len(data) == 0 {
+		return reply.GetMsgsByContent{List: []*reply.BriefMsgInfo{}}, nil
+	}
+	result := make([]*reply.BriefMsgInfo, 0, len(data))
+	for _, v := range data {
+		extend, err := model.JsonToExpand(v.MsgExtend)
+		if err != nil {
+			global.Logger.Error(err.Error(), zap.Any("msgExtend", v.MsgExtend))
+			continue
+		}
+		result = append(result, &reply.BriefMsgInfo{
+			ID:         v.ID,
+			NotifyType: string(v.NotifyType),
+			MsgType:    v.MsgType,
+			MsgContent: v.MsgContent,
+			Extend:     extend,
+			FileID:     v.FileID.Int64,
+			AccountID:  v.AccountID.Int64,
+			RelationID: v.RelationID,
+			CreateAt:   v.CreateAt,
+		})
+	}
+	return reply.GetMsgsByContent{List: result, Total: data[0].Total}, nil
 }

@@ -4,6 +4,8 @@ import (
 	"github.com/0RAJA/chat_app/src/model/reply"
 )
 
+// chat 中 server 端有关消息请求的结构
+
 type SendMsg struct {
 	EnToken string `json:"en_token"` // 加密后的Token
 	reply.MsgInfoWithRly
