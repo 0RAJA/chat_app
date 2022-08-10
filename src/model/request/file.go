@@ -13,6 +13,9 @@ type PublishFile struct {
 type DeleteFile struct {
 	FileID int64 `json:"file_id" form:"file_id" binding:"required"`
 }
+type GetFile struct {
+	FileID int64 `json:"file_id" form:"file_id" binding:"required"`
+}
 
 type GetRelationFile struct {
 	RelationID int64 `json:"relation_id"  form:"relation_id" binding:"required"`

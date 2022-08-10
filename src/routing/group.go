@@ -17,6 +17,7 @@ func (mGroup) Init(router *gin.RouterGroup) {
 		gg.POST("dissolve", v1.Group.MGroup.DissolveGroup)
 		gg.POST("update", v1.Group.MGroup.UpdateGroup)
 		gg.POST("invite", v1.Group.MGroup.InviteAccount)
+		gg.GET("list", v1.Group.MGroup.GroupList)
 		gg.POST("quit", v1.Group.MGroup.QuitGroup)
 	}
 

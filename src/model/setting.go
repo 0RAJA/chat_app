@@ -51,3 +51,8 @@ type SettingFriend struct {
 	SettingInfo
 	FriendInfo *SettingFriendInfo `json:"friend_info"` // 好友信息
 }
+
+type SettingGroup struct {
+	SettingInfo
+	GroupInfo *SettingGroupInfo `json:"group_info"`
+}

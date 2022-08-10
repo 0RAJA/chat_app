@@ -64,7 +64,9 @@ func (q *Queries) DeleteFileByID(ctx context.Context, id int64) error {
 }
 
 const getAllRelationsOnFile = `-- name: GetAllRelationsOnFile :many
-select relation_id from file group by relation_id
+select relation_id
+from file
+group by relation_id
 `
 
 func (q *Queries) GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error) {
@@ -143,7 +145,9 @@ func (q *Queries) GetFileByRelationID(ctx context.Context, relationID sql.NullIn
 }
 
 const getFileByRelationIDIsNUll = `-- name: GetFileByRelationIDIsNUll :many
-select id,key from file where relation_id is null
+select id, key
+from file
+where relation_id is null
 `
 
 type GetFileByRelationIDIsNUllRow struct {
@@ -169,6 +173,29 @@ func (q *Queries) GetFileByRelationIDIsNUll(ctx context.Context) ([]*GetFileByRe
 		return nil, err
 	}
 	return items, nil
+}
+
+const getFileDetailsByID = `-- name: GetFileDetailsByID :one
+select id, file_name, file_type, file_size, key, url, relation_id, account_id, create_at
+from file
+where id = $1
+`
+
+func (q *Queries) GetFileDetailsByID(ctx context.Context, id int64) (*File, error) {
+	row := q.db.QueryRow(ctx, getFileDetailsByID, id)
+	var i File
+	err := row.Scan(
+		&i.ID,
+		&i.FileName,
+		&i.FileType,
+		&i.FileSize,
+		&i.Key,
+		&i.Url,
+		&i.RelationID,
+		&i.AccountID,
+		&i.CreateAt,
+	)
+	return &i, err
 }
 
 const getFileKeyByID = `-- name: GetFileKeyByID :one

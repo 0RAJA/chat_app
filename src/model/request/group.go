@@ -1,5 +1,7 @@
 package request
 
+import "github.com/0RAJA/chat_app/src/model/common"
+
 type CreateGroup struct {
 	Name        string `json:"name" form:"name" binding:"required"`
 	AccountID   int64  `json:"account_id" form:"account_id" binding:"required"`
@@ -29,4 +31,8 @@ type InviteAccount struct {
 type QuitGroup struct {
 	AccountID  int64 `json:"account_id,omitempty" form:"account_id" binding:"required"`
 	RelationID int64 `json:"relation_id,omitempty" form:"relation_id" binding:"required"`
+}
+type GetGroupByName struct {
+	Name string `json:"name" form:"name" binding:"required"`
+	common.Pager
 }

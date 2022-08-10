@@ -37,7 +37,16 @@ set url= $1
 where relation_id = $2;
 
 -- name: GetAllRelationsOnFile :many
-select relation_id from file group by relation_id;
+select relation_id
+from file
+group by relation_id;
 
 -- name: GetFileByRelationIDIsNUll :many
-select id,key from file where relation_id is null ;
+select id, key
+from file
+where relation_id is null;
+
+-- name: GetFileDetailsByID :one
+select *
+from file
+where id = $1;
