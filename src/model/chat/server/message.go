@@ -16,3 +16,18 @@ type ReadMsg struct {
 	MsgIDs   []int64 `json:"msg_ids"`   // 已读消息IDs
 	ReaderID int64   `json:"reader_id"` // 读者账号ID
 }
+
+type MsgType string
+
+const (
+	MsgPin    MsgType = "pin"    // 置顶消息
+	MsgTop    MsgType = "top"    // 置顶消息
+	MsgRevoke MsgType = "revoke" // 撤回消息
+)
+
+type UpdateMsgState struct {
+	EnToken string  `json:"en_token"` // 加密后的Token
+	MsgType MsgType `json:"msg_type"` // 消息类型 [pin,top,revoke]
+	MsgID   int64   `json:"msg_id"`   // 消息ID
+	State   bool    `json:"state"`    // 状态设置
+}

@@ -35,3 +35,8 @@ from "user";
 
 -- name: ExistsUserByID :one
 select exists(select 1 from "user" where id = $1);
+
+-- name: GetAccountIDsByUserID :many
+select id
+from account
+where user_id = $1;

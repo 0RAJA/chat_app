@@ -10,8 +10,10 @@ import (
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
+	"github.com/0RAJA/chat_app/src/model/chat/server"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 )
@@ -194,7 +196,9 @@ func (setting) DeleteFriend(c *gin.Context, accountID, relationID int64) errcode
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO: 推送删除通知
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	// 推送删除通知
+	global.Worker.SendTask(task.DeleteRelation(accessToken, accountID, relationID))
 	return nil
 }
 
@@ -218,7 +222,9 @@ func (setting) UpdateNickName(c *gin.Context, accountID, relationID int64, nickN
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
-		// TODO: 推送更改昵称通知
+		accessToken, _ := mid.GetToken(c.Request.Header)
+		// 推送更改昵称通知
+		global.Worker.SendTask(task.UpdateNickName(accessToken, accountID, relationID, nickName))
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -246,7 +252,9 @@ func (setting) UpdateSettingPin(c *gin.Context, accountID, relationID int64, isP
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
-		// TODO: 推送更改置顶通知
+		accessToken, _ := mid.GetToken(c.Request.Header)
+		// 推送更改置顶通知
+		global.Worker.SendTask(task.UpdateSettingState(accessToken, server.SettingPin, accountID, relationID, isPin))
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -274,7 +282,9 @@ func (setting) UpdateSettingDisturb(c *gin.Context, accountID, relationID int64,
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
-		// TODO: 推送更改免打扰通知
+		// 推送更改免打扰通知
+		accessToken, _ := mid.GetToken(c.Request.Header)
+		global.Worker.SendTask(task.UpdateSettingState(accessToken, server.SettingNotDisturb, accountID, relationID, isNotDisturb))
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
@@ -302,7 +312,9 @@ func (setting) UpdateSettingShow(c *gin.Context, accountID, relationID int64, is
 			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 			return errcode.ErrServer
 		}
-		// TODO: 推送更改是否展示通知
+		// 推送更改是否展示通知
+		accessToken, _ := mid.GetToken(c.Request.Header)
+		global.Worker.SendTask(task.UpdateSettingState(accessToken, server.SettingShow, accountID, relationID, isShow))
 		return nil
 	default:
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)

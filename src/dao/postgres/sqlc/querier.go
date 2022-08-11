@@ -45,6 +45,7 @@ type Querier interface {
 	FeedMsgsByAccountIDAndTime(ctx context.Context, arg *FeedMsgsByAccountIDAndTimeParams) ([]*FeedMsgsByAccountIDAndTimeRow, error)
 	GetAccountByID(ctx context.Context, arg *GetAccountByIDParams) (*GetAccountByIDRow, error)
 	GetAccountIDsByRelationID(ctx context.Context, relationID int64) ([]int64, error)
+	GetAccountIDsByUserID(ctx context.Context, userID int64) ([]int64, error)
 	GetAccountsByName(ctx context.Context, arg *GetAccountsByNameParams) ([]*GetAccountsByNameRow, error)
 	GetAccountsByUserID(ctx context.Context, userID int64) ([]*GetAccountsByUserIDRow, error)
 	GetAllEmails(ctx context.Context) ([]string, error)

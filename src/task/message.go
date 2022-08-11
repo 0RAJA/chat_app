@@ -53,3 +53,21 @@ func ReadMsg(accessToken string, relationID, readerID int64, msgIDs []int64) fun
 		})
 	}
 }
+
+func UpdateMsgState(accessToken string, relationID, msgID int64, msgType server.MsgType, state bool) func() {
+	return func() {
+		ctx, cancel := global.DefaultContextWithTimeOut()
+		defer cancel()
+		accountIDs, err := dao.Group.Redis.GetAccountsByRelationID(ctx, relationID)
+		if err != nil {
+			global.Logger.Error(err.Error())
+			return
+		}
+		global.ChatMap.SendMany(accountIDs, chat.ServerUpdateMsgState, server.UpdateMsgState{
+			EnToken: utils.EncodeMD5(accessToken),
+			MsgType: msgType,
+			MsgID:   msgID,
+			State:   state,
+		})
+	}
+}
