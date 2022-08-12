@@ -3,7 +3,7 @@ Server: # 服务配置
   Address: :8080 # 监听端口
   ReadTimeout: 5s
   WriteTimeout: 5s
-  DefaultContextTimeout: 30s #默认超时时间
+  DefaultContextTimeout: 10s #默认超时时间
 App: # App配置文件
   Name: chat  # App名称
   Version: 1.0.0 # 版本号

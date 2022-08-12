@@ -7,14 +7,16 @@ import (
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/routing"
 	"github.com/gin-gonic/gin"
+	socketio "github.com/googollee/go-socket.io"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func NewRouter() *gin.Engine {
+func NewRouter() (*gin.Engine, *socketio.Server) {
 	r := gin.New()
-	r.Use(mid.Cors(), mid.GinLogger(), mid.Recovery(true), mid.LogBody(), mid.Auth())
-	root := r.Group("api")
+	r.Use(mid.Cors(), mid.GinLogger(), mid.Recovery(true))
+	gen := r.Group("/")
+	root := gen.Group("api", mid.LogBody(), mid.Auth())
 	{
 		root.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		root.GET("ping", func(c *gin.Context) {
@@ -32,7 +34,6 @@ func NewRouter() *gin.Engine {
 		rg.Setting.Init(root)
 		rg.Message.Init(root)
 		rg.MGroup.Init(root)
-		rg.Chat.Init(root)
 	}
-	return r
+	return r, routing.Group.Chat.Init(gen)
 }

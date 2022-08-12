@@ -29,11 +29,7 @@ func GetToken(header http.Header) (string, errcode.Err) {
 
 // ParseHeader 获取并解析header中token
 // 返回 payload,token,err
-func ParseHeader(header http.Header) (*token.Payload, string, errcode.Err) {
-	accessToken, merr := GetToken(header)
-	if merr != nil {
-		return nil, "", merr
-	}
+func ParseHeader(accessToken string) (*token.Payload, string, errcode.Err) {
 	payload, err := global.Maker.VerifyToken(accessToken)
 	if err != nil {
 		if err.Error() == "超时错误" {
@@ -47,7 +43,12 @@ func ParseHeader(header http.Header) (*token.Payload, string, errcode.Err) {
 // Auth 鉴权中间件,用于解析并写入token
 func Auth() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		payload, _, merr := ParseHeader(c.Request.Header)
+		accessToken, merr := GetToken(c.Request.Header)
+		if merr != nil {
+			c.Next()
+			return
+		}
+		payload, _, merr := ParseHeader(accessToken)
 		if merr != nil {
 			c.Next()
 			return
