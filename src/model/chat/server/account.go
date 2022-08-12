@@ -6,3 +6,8 @@ type UpdateAccount struct {
 	Gender    string `json:"gender"`    // 性别
 	Signature string `json:"signature"` // 签名
 }
+
+type UpdateEmail struct {
+	EnToken string `json:"en_token"`
+	Email   string `json:"email"`
+}

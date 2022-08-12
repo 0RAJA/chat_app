@@ -95,11 +95,20 @@ func (application) Accept(c *gin.Context, account1ID, account2ID int64) errcode.
 	if merr != nil {
 		return merr
 	}
-	if err := dao.Group.DB.AcceptApplicationTx(c, dao.Group.Redis, account1Info, account2Info); err != nil {
+	msgInfo, err := dao.Group.DB.AcceptApplicationTx(c, dao.Group.Redis, account1Info, account2Info)
+	if err != nil {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO: 推送好友申请信息
+	// 推送信息
+	global.Worker.SendTask(task.PublishMsg("", reply.MsgInfo{
+		ID:         msgInfo.ID,
+		NotifyType: string(msgInfo.NotifyType),
+		MsgType:    msgInfo.MsgType,
+		MsgContent: msgInfo.MsgContent,
+		RelationID: msgInfo.RelationID,
+		CreateAt:   msgInfo.CreateAt,
+	}, nil))
 	return nil
 }
 
@@ -120,7 +129,6 @@ func (application) Refuse(c *gin.Context, account1ID, account2ID int64, refuseMs
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO: 推送好友申请信息
 	return nil
 }
 

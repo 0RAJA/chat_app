@@ -14,6 +14,7 @@ import (
 	"github.com/0RAJA/chat_app/src/model/common"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 )
@@ -154,7 +155,9 @@ func (user) UpdateUserEmail(c *gin.Context, userID int64, newEmail, code string)
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		reTry(fmt.Sprintf("updateEmail:%s,%s", userInfo.Email, newEmail), func() error { return dao.Group.Redis.UpdateEmail(c, userInfo.Email, newEmail) })
 	}
-	// TODO: 推送更改邮箱通知
+	// 推送更改邮箱通知
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.UpdateEmail(accessToken, userID, newEmail))
 	return nil
 }
 

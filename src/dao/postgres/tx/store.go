@@ -13,8 +13,8 @@ import (
 type TXer interface {
 	// CreateApplicationTx 先判断是否存在申请，不存在则创建申请
 	CreateApplicationTx(c context.Context, arg *db.CreateApplicationParams) error
-	// AcceptApplicationTx account1接受account2申请并建立好友关系和双方的关系设置并添加到redis
-	AcceptApplicationTx(c context.Context, rdb *query.Queries, account1, account2 *db.GetAccountByIDRow) error
+	// AcceptApplicationTx account1接受account2申请并建立好友关系和双方的关系设置同时发送消息通知并添加到redis
+	AcceptApplicationTx(c context.Context, rdb *query.Queries, account1, account2 *db.GetAccountByIDRow) (*db.Message, error)
 	// CreateAccountWithTx 创建账户并建立和自己的关系
 	CreateAccountWithTx(c context.Context, rdb *query.Queries, maxAccountNum int32, arg *db.CreateAccountParams) error
 	// DeleteAccountWithTx 删除账户并删除与之相关的好友关系

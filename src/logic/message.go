@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
@@ -11,10 +12,13 @@ import (
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
+	"github.com/0RAJA/chat_app/src/model/chat/server"
+	"github.com/0RAJA/chat_app/src/model/format"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"go.uber.org/zap"
 )
@@ -353,7 +357,7 @@ func (message) GetTopMsgByRelationID(c *gin.Context, params model.GetTopMsgByRel
 		MsgInfo: reply.MsgInfo{
 			ID:         data.ID,
 			NotifyType: string(data.NotifyType),
-			MsgType:    string(data.MsgType),
+			MsgType:    data.MsgType,
 			MsgContent: content,
 			Extend:     extend,
 			FileID:     data.FileID.Int64,
@@ -393,7 +397,9 @@ func (message) UpdateMsgPin(c *gin.Context, params model.UpdateMsgPin) errcode.E
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO:推送pin通知
+	// 推送pin通知
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.UpdateMsgState(accessToken, params.RelationID, params.MsgID, server.MsgPin, params.IsPin))
 	return nil
 }
 
@@ -422,7 +428,40 @@ func (message) UpdateMsgTop(c *gin.Context, params model.UpdateMsgTop) errcode.E
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
-	// TODO:推送top通知
+	var msgFormat = format.TopMessage
+	if !params.IsTop {
+		msgFormat = format.UnTopMessage
+	}
+	// 推送top通知
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.UpdateMsgState(accessToken, params.RelationID, params.MsgID, server.MsgTop, params.IsTop))
+	// 创建并推送top消息
+	f := func() error {
+		arg := &db.CreateMsgParams{
+			NotifyType: db.MsgnotifytypeSystem,
+			MsgType:    string(model.MsgTypeText),
+			MsgContent: fmt.Sprintf(msgFormat, params.AccountID),
+			MsgExtend:  pgtype.JSON{Status: pgtype.Null},
+			RelationID: params.RelationID,
+		}
+		msgRly, err := dao.Group.DB.CreateMsg(c, arg)
+		if err != nil {
+			return err
+		}
+		global.Worker.SendTask(task.PublishMsg(accessToken, reply.MsgInfo{
+			ID:         msgRly.ID,
+			NotifyType: string(arg.NotifyType),
+			MsgType:    arg.MsgType,
+			MsgContent: arg.MsgContent,
+			RelationID: arg.RelationID,
+			CreateAt:   msgRly.CreateAt,
+		}, nil))
+		return nil
+	}
+	if err := f(); err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		reTry("UpdateMsgTop", f)
+	}
 	return nil
 }
 
@@ -443,8 +482,38 @@ func (message) RevokeMsg(c *gin.Context, params model.RevokeMsg) errcode.Err {
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return errcode.ErrServer
 	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.UpdateMsgState(accessToken, msgInfo.RelationID, params.MsgID, server.MsgRevoke, true))
 	if msgInfo.IsTop {
-		// TODO: 推送取消置顶通知
+		// 推送top通知
+		global.Worker.SendTask(task.UpdateMsgState(accessToken, msgInfo.RelationID, params.MsgID, server.MsgTop, false))
+		// 创建并推送top消息
+		f := func() error {
+			arg := &db.CreateMsgParams{
+				NotifyType: db.MsgnotifytypeSystem,
+				MsgType:    string(model.MsgTypeText),
+				MsgContent: fmt.Sprintf(format.UnTopMessage, params.AccountID),
+				MsgExtend:  pgtype.JSON{Status: pgtype.Null},
+				RelationID: msgInfo.RelationID,
+			}
+			msgRly, err := dao.Group.DB.CreateMsg(c, arg)
+			if err != nil {
+				return err
+			}
+			global.Worker.SendTask(task.PublishMsg(accessToken, reply.MsgInfo{
+				ID:         msgRly.ID,
+				NotifyType: string(arg.NotifyType),
+				MsgType:    arg.MsgType,
+				MsgContent: arg.MsgContent,
+				RelationID: arg.RelationID,
+				CreateAt:   msgRly.CreateAt,
+			}, nil))
+			return nil
+		}
+		if err := f(); err != nil {
+			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			reTry("UpdateMsgTop", f)
+		}
 	}
 	return nil
 }

@@ -65,6 +65,32 @@ func (q *Queries) ExistsUserByID(ctx context.Context, id int64) (bool, error) {
 	return exists, err
 }
 
+const getAccountIDsByUserID = `-- name: GetAccountIDsByUserID :many
+select id
+from account
+where user_id = $1
+`
+
+func (q *Queries) GetAccountIDsByUserID(ctx context.Context, userID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getAccountIDsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllEmails = `-- name: GetAllEmails :many
 select email
 from "user"
