@@ -18,9 +18,9 @@ type message struct {
 // 参数: client.HandleSendMsgParams
 // 返回: client.HandleSendMsgRly
 func (message) SendMsg(s socketio.Conn, msg string) string {
-	token, merr := CheckConnCtxToken(s.Context())
-	if merr != nil {
-		return common.NewState(merr).JsonStr()
+	token, ok := CheckAuth(s)
+	if !ok {
+		return ""
 	}
 	params := &client.HandleSendMsgParams{}
 	if err := common.Decode(msg, params); err != nil {
@@ -43,9 +43,9 @@ func (message) SendMsg(s socketio.Conn, msg string) string {
 // 参数: client.HandleReadMsgParams
 // 返回: 无
 func (message) ReadMsg(s socketio.Conn, msg string) string {
-	token, merr := CheckConnCtxToken(s.Context())
-	if merr != nil {
-		return common.NewState(merr).JsonStr()
+	token, ok := CheckAuth(s)
+	if !ok {
+		return ""
 	}
 	params := &client.HandleReadMsgParams{}
 	if err := common.Decode(msg, params); err != nil {
@@ -53,7 +53,7 @@ func (message) ReadMsg(s socketio.Conn, msg string) string {
 	}
 	c, cancel := global.DefaultContextWithTimeOut()
 	defer cancel()
-	merr = chat.Group.Message.ReadMsg(c, &model.HandleReadMsg{
+	merr := chat.Group.Message.ReadMsg(c, &model.HandleReadMsg{
 		AccessToken: token.AccessToken,
 		RelationID:  params.RelationID,
 		MsgIDs:      params.MsgIDs,

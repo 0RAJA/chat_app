@@ -10,22 +10,23 @@ import (
 type ws struct {
 }
 
-func (ws) Init(router *gin.RouterGroup) {
+func (ws) Init(router *gin.RouterGroup) *socketio.Server {
 	server := socketio.NewServer(nil)
 	{
 		server.OnConnect("/", v1.Group.Chat.Handle.OnConnect)
 		server.OnError("/", v1.Group.Chat.Handle.OnError)
 		server.OnDisconnect("/", v1.Group.Chat.Handle.OnDisconnect)
 	}
-	chatMessage(server)
-	wg := router.Group("socket.io")
-	{
-		wg.GET("*any", gin.WrapH(server))
-		wg.POST("*any", gin.WrapH(server))
-	}
+	chatHandle(server)
+	router.GET("socket.io/*any", gin.WrapH(server))
+	router.POST("socket.io/*any", gin.WrapH(server))
+	return server
 }
 
-func chatMessage(server *socketio.Server) {
-	server.OnEvent("/", chat2.ClientSendMsg, v1.Group.Chat.Message.SendMsg)
-	server.OnEvent("/", chat2.ClientReadMsg, v1.Group.Chat.Message.ReadMsg)
+func chatHandle(server *socketio.Server) {
+	event := "/chat"
+	server.OnEvent(event, chat2.ClientSendMsg, v1.Group.Chat.Message.SendMsg)
+	server.OnEvent(event, chat2.ClientReadMsg, v1.Group.Chat.Message.ReadMsg)
+	server.OnEvent(event, chat2.ClientTest, v1.Group.Chat.Handle.Test)
+	server.OnEvent(event, chat2.ClientAuth, v1.Group.Chat.Handle.Auth)
 }

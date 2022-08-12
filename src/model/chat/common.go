@@ -15,10 +15,13 @@ const (
 	ServerUpdateSettingState = "update_setting_state" // 更新关系状态
 	ServerUpdateEmail        = "update_email"         // 更新邮箱
 	ServerUpdateMsgState     = "update_msg_state"     // 更新消息状态
+	ServerError              = "error"                // 错误
 )
 
 // 客户端事件
 const (
 	ClientSendMsg = "send_msg" // 发送消息
 	ClientReadMsg = "read_msg" // 已读消息
+	ClientTest    = "test"     // 测试
+	ClientAuth    = "auth"     // 认证
 )

@@ -2,7 +2,6 @@ package chat
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
@@ -10,15 +9,18 @@ import (
 	"github.com/0RAJA/chat_app/src/global"
 	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
+	"github.com/0RAJA/chat_app/src/model/chat"
+	"github.com/0RAJA/chat_app/src/model/common"
 	"github.com/0RAJA/chat_app/src/myerr"
+	socketio "github.com/googollee/go-socket.io"
 )
 
-// MustAccount 从header中获取并解析token并判断是否是账户，返回token
-// 参数: header
-// 成功: 从header中解析出token和content并进行校验返回*model.Token,nil
+// MustAccount 解析token并判断是否是账户，返回token
+// 参数: accessToken
+// 成功: 解析token的content并进行校验返回*model.Token,nil
 // 失败: 返回 myerr.AuthenticationFailed,myerr.UserNotFound,errcode.ErrServer
-func MustAccount(header http.Header) (*model.Token, errcode.Err) {
-	payload, accessToken, merr := mid.ParseHeader(header)
+func MustAccount(accessToken string) (*model.Token, errcode.Err) {
+	payload, _, merr := mid.ParseHeader(accessToken)
 	if merr != nil {
 		return nil, merr
 	}
@@ -57,4 +59,15 @@ func CheckConnCtxToken(v interface{}) (*model.Token, errcode.Err) {
 		return nil, myerr.AuthOverTime
 	}
 	return token, nil
+}
+
+// CheckAuth 检查token是否有效，有效返回token，否则断开链接
+func CheckAuth(s socketio.Conn) (*model.Token, bool) {
+	token, merr := CheckConnCtxToken(s.Context())
+	if merr != nil {
+		s.Emit(chat.ServerError, common.NewState(merr))
+		_ = s.Close()
+		return nil, false
+	}
+	return token, true
 }

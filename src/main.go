@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ import (
 //go:generate go mod tidy
 
 func init() {
-	log.SetFlags(log.Ltime | log.Lshortfile)
+	log.SetFlags(log.Ltime | log.Llongfile)
 }
 
 // @title        chat
@@ -39,7 +40,7 @@ func main() {
 	if global.PbSettings.Server.RunMode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	r := router.NewRouter() // 注册路由
+	r, ws := router.NewRouter() // 注册路由
 	s := &http.Server{
 		Addr:           global.PbSettings.Server.Address,
 		Handler:        r,
@@ -50,10 +51,16 @@ func main() {
 	global.Logger.Info("Server started!")
 	fmt.Println("AppName:", global.PbSettings.App.Name, "Version:", global.PbSettings.App.Version, "Address:", global.PbSettings.Server.Address, "RunMode:", global.PbSettings.Server.RunMode)
 	errChan := make(chan error, 1)
+	defer close(errChan)
 	go func() {
-		defer close(errChan)
 		err := s.ListenAndServe()
 		if err != nil {
+			errChan <- err
+		}
+	}()
+	go func() {
+		defer ws.Close()
+		if err := ws.Serve(); err != nil {
 			errChan <- err
 		}
 	}()
@@ -69,7 +76,9 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), global.PbSettings.Server.DefaultContextTimeout)
 		defer cancel()
 		if err := s.Shutdown(ctx); err != nil { // 优雅退出
-			global.Logger.Info("Server forced to ShutDown,Err:" + err.Error())
+			if !errors.Is(err, context.DeadlineExceeded) {
+				global.Logger.Error("Server forced to ShutDown,Err:" + err.Error())
+			}
 		}
 	}
 	global.Logger.Info("Server exited!")

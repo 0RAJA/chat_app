@@ -30,6 +30,7 @@ func Cors() gin.HandlerFunc {
 			c.JSON(http.StatusOK, "options ok")
 			return
 		}
+
 		c.Next()
 	}
 }
