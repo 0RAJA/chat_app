@@ -18,7 +18,7 @@ type handle struct {
 // OnConnect
 // 当客户端连接时触发
 func (handle) OnConnect(s socketio.Conn) error {
-	log.Println("connect", s.RemoteAddr(), s.ID())
+	log.Println("connected:", s.RemoteAddr().String())
 	return nil
 }
 
