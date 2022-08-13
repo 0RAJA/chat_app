@@ -68,7 +68,7 @@ type file struct {
 // @Summary  获取关系文件列表
 // @accept   application/json
 // @Param    Authorization  header    string                              true  "Bearer 账户令牌"
-// @Param    data  body      request.GetRelationFile          true  "关系ID"
+// @Param    data  query      request.GetRelationFile          true  "关系ID"
 // @Success  200   {object}  common.State{data=[]reply.File}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
 // @Router   /api/file/getall [post]
 func (file) GetRelationFile(c *gin.Context) {
@@ -93,9 +93,9 @@ func (file) GetRelationFile(c *gin.Context) {
 // @Summary  更新群头像活用户头像
 // @accept   multipart/form-data
 // @Param    file  formData  file                                  true  "文件"
-// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
+// @Param    Authorization  header    string                        true  "Bearer 账户令牌"
 // @Param    data  body      request.UploadAvatar                  true  "文件及账号信息"
-// @Success  200   {object}  common.State{data=reply.PublishFile}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
+// @Success  200   {object}  common.State{data=reply.UploadAvatar}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
 // @Router   /api/file/avatar [post]
 func (file) UploadAvatar(c *gin.Context) {
 	rly := app.NewResponse(c)

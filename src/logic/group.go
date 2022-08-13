@@ -5,10 +5,12 @@ import (
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
+	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/myerr"
+	"github.com/0RAJA/chat_app/src/task"
 	"github.com/gin-gonic/gin"
 )
 
@@ -61,6 +63,8 @@ func (mGroup) TransferGroup(c *gin.Context, relationID int64, fID int64, tID int
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.TransferGroup(accessToken, tID, relationID))
 	return reply.TransferGroup{}, nil
 }
 func (mGroup) DissolveGroup(c *gin.Context, relationId int64, accountID int64) (result reply.DissolveGroup, mErr errcode.Err) {
@@ -80,6 +84,8 @@ func (mGroup) DissolveGroup(c *gin.Context, relationId int64, accountID int64) (
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.DissolveGroup(accessToken, relationId))
 	return result, nil
 }
 func (mGroup) UpdateGroup(c *gin.Context, params request.UpdateGroup, accountID int64) (result reply.UpdateGroup, mErr errcode.Err) {
@@ -133,6 +139,8 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.InviteAccount(accessToken, relationID, tID))
 	return result, nil
 }
 func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (result reply.QuitGroup, mErr errcode.Err) {
@@ -153,6 +161,8 @@ func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (resu
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.QuitGroup(accessToken, relationID, accountID))
 	return result, nil
 }
 
