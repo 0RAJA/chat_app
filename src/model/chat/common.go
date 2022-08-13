@@ -2,7 +2,7 @@ package chat
 
 // chat 中事件的关键字,以Server开头的事件为服务端发送的事件，以Client开头的事件为客户端发送的事件
 
-// 服务端事件
+// 服务端推送的事件
 const (
 	ServerSendMsg            = "send_msg"             // 推送消息
 	ServerReadMsg            = "read_msg"             // 已读消息
@@ -18,7 +18,7 @@ const (
 	ServerError              = "error"                // 错误
 )
 
-// 客户端事件
+// 客户端推送的事件
 const (
 	ClientSendMsg = "send_msg" // 发送消息
 	ClientReadMsg = "read_msg" // 已读消息
