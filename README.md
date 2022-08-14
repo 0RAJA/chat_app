@@ -5,17 +5,17 @@
 2. `make init` 安装项目依赖的工具
 3. `make docker_net` 创建docker网络
 4. 根据自己的项目地址进行`postgres_zr_init`和`redis_init`初始化数据库
-5. 通过`make migrate_up`迁移数据库表
-6. 之后可以通过`make run`启动服务
+5. `make build` 构建项目
+6. `make docker_run` 启动项目
 
 请在`config/app`下新建`private.yml`配置文件,格式为:
 
 ```yaml
 Postgresql: # Postgresql配置
   DriverName: postgresql # 驱动名
-  SourceName: "postgres://root:123456@localhost:5432/chat?sslmode=disable&pool_max_conns=10"
+  SourceName: "postgres://root:123456@chat_postgres_zr:5432/chat?sslmode=disable&pool_max_conns=10"
 Redis: # Redis配置
-  Address: "localhost:6379"
+  Address: "chat_redis_62:6379"
   DB: 0
   Password: 123456
   PoolSize: 100 #连接池
@@ -43,3 +43,23 @@ AliyunOSS: # OSS配置
   BucketUrl: "***"
   BasePath: "chat/"
 ```
+
+功能(通过RESTFUL API接口和socket.io实现):
+
+1. 一个用户(email唯一)拥有多个账号，并进行切换，同时支持多设备同时在线，消息进行同步推送
+2. 账号之间可以进行好友申请，好友申请后需要等待对方同意，同意后成为好友
+3. 好友之间可以发送普通消息或文本，消息可以被撤回，可以pin，可以置顶，可以查看已读未读，可以根据关键字搜索消息。
+4. 群和好友在主页可以设置pin状态，是否显示，免打扰状态 ，群和好友可以设置备注，备注可以被搜索
+5. 通过ws处理消息通信和已读操作，同时对各类操作或通知进行主动推送
+
+优点:
+
+1. 可以支持多设备同时在线，消息进行同步推送
+2. 接口文档清晰，方便开发者调用
+3. 代码结构规范，便于维护和拓展
+4. 使用docker进行部署，支持多种环境部署
+
+缺点:
+1. 功能仍不完善，仍有改善空间
+2. 数据库表设计仍存在不合理之处，需要后期进行调整，例如已读回执的存储需要进行调整
+3. 服务需要进行拆分，例如IM服务可以单独部署，与主服务之间通过RPC进行通信
