@@ -15,6 +15,12 @@ const (
 	ServerUpdateSettingState = "update_setting_state" // 更新关系状态
 	ServerUpdateEmail        = "update_email"         // 更新邮箱
 	ServerUpdateMsgState     = "update_msg_state"     // 更新消息状态
+	ServerGroupTransferred   = "group_transferred"    // 群被转让
+	ServerGroupDissolved     = "group_dissolved"      // 群被解散
+	ServerInviteAccount      = "group_new_account"    // 新人进群
+	ServerQuitGroup          = "group_quit_account"   // 新人进群
+	ServerCreateNotify       = "create_notify"        // 创建群通知
+	ServerUpdateNotify       = "update_notify"        // 更新群通知
 	ServerError              = "error"                // 错误
 )
 

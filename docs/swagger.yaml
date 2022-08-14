@@ -117,6 +117,35 @@ definitions:
         description: 好友姓名
         type: string
     type: object
+  model.SettingGroup:
+    properties:
+      group_info:
+        $ref: '#/definitions/model.SettingGroupInfo'
+      is_not_disturb:
+        description: 是否免打扰
+        type: boolean
+      is_pin:
+        description: 是否pin
+        type: boolean
+      is_show:
+        description: 是否显示
+        type: boolean
+      last_show:
+        description: 最后显示时间
+        type: string
+      nick_name:
+        description: 昵称(群组时为在群中昵称，好友时为好友昵称, 空表示未设置)
+        type: string
+      pin_time:
+        description: pin时间
+        type: string
+      relation_id:
+        description: 关系ID
+        type: integer
+      relation_type:
+        description: 关系类型['group','friend']
+        type: string
+    type: object
   model.SettingGroupInfo:
     properties:
       avatar:
@@ -285,8 +314,6 @@ definitions:
       relation_id:
         type: integer
     type: object
-  reply.DeleteFile:
-    type: object
   reply.DissolveGroup:
     type: object
   reply.ExistEmail:
@@ -391,6 +418,15 @@ definitions:
       total:
         type: integer
     type: object
+  reply.GetGroup:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.SettingGroup'
+        type: array
+      total:
+        type: integer
+    type: object
   reply.GetMsgsByContent:
     properties:
       list:
@@ -419,6 +455,8 @@ definitions:
         type: integer
       msg_content:
         type: string
+      msg_expand:
+        $ref: '#/definitions/model.MsgExtend'
       read_ids:
         items:
           type: integer
@@ -478,6 +516,8 @@ definitions:
         type: integer
       msg_content:
         type: string
+      msg_expand:
+        $ref: '#/definitions/model.MsgExtend'
       read_ids:
         items:
           type: integer
@@ -620,6 +660,7 @@ definitions:
         description: 文件ID 当消息类型为file时>0
         type: integer
       has_read:
+        description: 是否已读
         type: boolean
       id:
         description: 消息ID
@@ -663,19 +704,6 @@ definitions:
         $ref: '#/definitions/reply.RlyMsg'
         description: 回复消息详情 可能为null
     type: object
-  reply.PublishFile:
-    properties:
-      create_at:
-        type: string
-      file_size:
-        type: integer
-      file_type:
-        type: string
-      id:
-        type: integer
-      url:
-        type: string
-    type: object
   reply.QuitGroup:
     type: object
   reply.Register:
@@ -718,6 +746,11 @@ definitions:
     - name
     type: object
   reply.UpdateNotify:
+    type: object
+  reply.UploadAvatar:
+    properties:
+      url:
+        type: string
     type: object
   reply.UserInfo:
     properties:
@@ -796,25 +829,11 @@ definitions:
     required:
     - account_id
     type: object
-  request.DeleteFile:
-    properties:
-      file_id:
-        type: integer
-    required:
-    - file_id
-    type: object
   request.DeleteFriend:
     properties:
       relation_id:
         description: 关系ID
         minimum: 1
-        type: integer
-    required:
-    - relation_id
-    type: object
-  request.GetRelationFile:
-    properties:
-      relation_id:
         type: integer
     required:
     - relation_id
@@ -1445,6 +1464,11 @@ paths:
         name: file
         required: true
         type: file
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 文件及账号信息
         in: body
         name: data
@@ -1453,39 +1477,15 @@ paths:
           $ref: '#/definitions/request.UploadAvatar'
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 8001:存储失败
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
             - properties:
                 data:
-                  $ref: '#/definitions/reply.PublishFile'
+                  $ref: '#/definitions/reply.UploadAvatar'
               type: object
       summary: 更新群头像活用户头像
-      tags:
-      - file
-  /api/file/delete:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: 文件ID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.DeleteFile'
-      responses:
-        "200":
-          description: 1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败
-          schema:
-            allOf:
-            - $ref: '#/definitions/common.State'
-            - properties:
-                data:
-                  $ref: '#/definitions/reply.DeleteFile'
-              type: object
-      summary: 删除文件(测试用)
       tags:
       - file
   /api/file/getall:
@@ -1493,15 +1493,18 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 关系ID
-        in: body
-        name: data
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
         required: true
-        schema:
-          $ref: '#/definitions/request.GetRelationFile'
+        type: string
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 8001:存储失败
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -1614,6 +1617,30 @@ paths:
       tags:
       - group
   /api/group/quit:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetGroup'
+              type: object
+      summary: 获取群列表
+      tags:
+      - group
     post:
       consumes:
       - application/json
@@ -1624,27 +1651,30 @@ paths:
         required: true
         type: string
       - in: query
-        name: account_id
+        name: name
         required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
         type: integer
-      - in: query
-        name: relation_id
-        required: true
+      - description: 每页大小
+        in: query
+        name: page_size
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主
-            7003:非群员
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
             - properties:
                 data:
-                  $ref: '#/definitions/reply.QuitGroup'
+                  $ref: '#/definitions/reply.GetGroup'
               type: object
-      summary: 退群
+      summary: 通过群名称模糊查找群
       tags:
       - group
   /api/group/transfer:

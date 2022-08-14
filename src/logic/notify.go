@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/0RAJA/chat_app/src/model"
+	"github.com/0RAJA/chat_app/src/task"
+
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
@@ -33,7 +36,6 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.
 	if !t {
 		return result, myerr.NotGroupMember
 	}
-
 	r, err := dao.Group.DB.CreateGroupNotify(c, &db.CreateGroupNotifyParams{
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
@@ -46,16 +48,22 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return result, errcode.ErrServer
 	}
+	msgExpand, err := model.JsonToExpand(r.MsgExpand)
+	if err != nil {
+		global.Logger.Error(err.Error())
+		return result, errcode.ErrServer
+	}
 	result = reply.GroupNotify{
 		ID:         r.ID,
 		RelationID: r.RelationID.Int64,
 		MsgContent: r.MsgContent,
-		MsgExpand:  r.MsgExpand,
+		MsgExpand:  msgExpand,
 		AccountID:  r.AccountID.Int64,
 		CreateAt:   r.CreateAt,
 		ReadIds:    nil,
 	}
-
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.CreateNotify(accessToken, params.AccountID, params.RelationID, r.MsgContent, msgExpand))
 	return result, nil
 }
 
@@ -84,6 +92,13 @@ func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return result, errcode.ErrServer
 	}
+	msgExpand, err := model.JsonToExpand(pgtype.JSON{Status: pgtype.Status(2), Bytes: []byte(params.MsgExpand)})
+	if err != nil {
+		global.Logger.Error(err.Error())
+		return result, errcode.ErrServer
+	}
+	accessToken, _ := mid.GetToken(c.Request.Header)
+	global.Worker.SendTask(task.UpdateNotify(accessToken, params.AccountID, params.RelationID, params.MsgContent, msgExpand))
 	return result, nil
 }
 func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (result []reply.GetNotify, mErr errcode.Err) {
@@ -108,12 +123,18 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 		}
 		return result, errcode.ErrServer
 	}
+
 	for _, v := range r {
+		msgExpand, err := model.JsonToExpand(v.MsgExpand)
+		if err != nil {
+			global.Logger.Error(err.Error())
+			return nil, errcode.ErrServer
+		}
 		re := reply.GetNotify{
 			ID:         v.ID,
 			RelationID: v.RelationID.Int64,
 			MsgContent: v.MsgContent,
-			MsgExpand:  v.MsgExpand,
+			MsgExpand:  msgExpand,
 			AccountID:  v.AccountID.Int64,
 			CreateAt:   v.CreateAt,
 			ReadIds:    v.ReadIds,
