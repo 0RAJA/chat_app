@@ -40,7 +40,9 @@ docker_build: # 构建docker镜像
 	docker build -t chat:app .
 docker_run: # docker运行镜像
 	docker run -d --name chat_app --network chat_net -p 8080:8080 chat:app
-run: # 运行server
-	go build -o bin/chat src/main.go && ./bin/chat
-run_back: # 后台运行
-	go build -o bin/chat src/main.go && nohup ./bin/chat > nohup.out &
+build:
+	go build -ldflags="-s -w" -o bin/chat src/main.go
+run: build# 运行server
+	./bin/chat
+run_back: build# 后台运行
+	nohup ./bin/chat > nohup.out &
