@@ -32,7 +32,7 @@ services:
     entrypoint: [ "redis-server","/etc/redis/redis.conf" ]
 
   app:
-    image: chat:app # 之后可以替换成自己的镜像
+    image: 1647193241/chat:latest # 之后可以替换成自己的镜像
     container_name: chat_app
     privileged: true # 权限
     ports:
