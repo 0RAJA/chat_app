@@ -30,6 +30,5 @@ RUN chmod +x start.sh
 
 EXPOSE 8080
 
-
-ENTRYPOINT ["/app/start.sh"]
-CMD ["/app/chat","-path=/app/config"]
+#ENTRYPOINT ["/app/start.sh"]
+#CMD ["/app/chat","-path=/app/config"]
