@@ -52,6 +52,8 @@ func (m *Mark) SendMail(emailStr, code string) error {
 	// 发送邮件
 	err := sendEmail.SendMail([]string{emailStr}, fmt.Sprintf("%s:验证码:%s", m.config.AppName, code), `😘`)
 	if err != nil {
+		// 发送失败删除标记
+		m.userMark.Delete(emailStr)
 		return err
 	}
 	// 记录code
