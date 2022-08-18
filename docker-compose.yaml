@@ -1,0 +1,45 @@
+version: "3.8"
+volumes:
+  chat_postgres_zr_data:
+  chat_redis_data:
+  chat_app:
+services:
+  postgres:
+    image: chenxinaz/zhparser
+    container_name: chat_postgres_zr
+    privileged: true
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    ports:
+      - "5432:5432"
+    environment:
+      ALLOW_IP_RANGE: 0.0.0.0/0
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: chat
+    volumes:
+      - chat_postgres_zr_data:/var/lib/postgresql/data # 数据库
+      - /home/raja/workspace/go/src/chat/config/postgres/my_postgres.conf:/etc/postgresql/postgresql.conf # 配置文件
+
+  redis:
+    image: redis:6.2
+    container_name: chat_redis_62
+    privileged: true # 权限
+    ports:
+      - "7963:7963"
+    volumes:
+      - /home/raja/workspace/go/src/chat/config/redis:/etc/redis #配置文件
+      - chat_redis_data:/redis/data #数据库
+    entrypoint: [ "redis-server","/etc/redis/redis.conf" ]
+
+  app:
+    image: chat:app # 之后可以替换成自己的镜像
+    container_name: chat_app
+    privileged: true # 权限
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - chat_app:/app # 应用目录
+    entrypoint: [ "/app/wait-for.sh","chat_redis_62:7963","chat_postgres_zr:5432","--","/app/start.sh","/app/chat","-path=/app/config" ]
