@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api
 definitions:
   common.State:
     properties:
@@ -832,6 +832,32 @@ definitions:
     - account_id
     - apply_msg
     type: object
+  request.CreateGroup:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  request.CreateNotify:
+    properties:
+      account_id:
+        type: integer
+      msg_content:
+        type: string
+      msg_expand:
+        type: string
+      relation_id:
+        type: integer
+    required:
+    - account_id
+    - msg_content
+    - msg_expand
+    - relation_id
+    type: object
   request.DeleteAccount:
     properties:
       account_id:
@@ -859,6 +885,52 @@ definitions:
     required:
     - relation_id
     type: object
+  request.DissolveGroup:
+    properties:
+      relation_id:
+        type: integer
+    required:
+    - relation_id
+    type: object
+  request.GetFile:
+    properties:
+      file_id:
+        type: integer
+    required:
+    - file_id
+    type: object
+  request.GetGroupByName:
+    properties:
+      name:
+        type: string
+      page:
+        description: 第几页
+        type: integer
+      page_size:
+        description: 每页大小
+        type: integer
+    required:
+    - name
+    type: object
+  request.GetRelationFile:
+    properties:
+      relation_id:
+        type: integer
+    required:
+    - relation_id
+    type: object
+  request.InviteAccount:
+    properties:
+      account_id:
+        items:
+          type: integer
+        type: array
+      relation_id:
+        type: integer
+    required:
+    - account_id
+    - relation_id
+    type: object
   request.Login:
     properties:
       email:
@@ -873,6 +945,16 @@ definitions:
     required:
     - email
     - password
+    type: object
+  request.QuitGroup:
+    properties:
+      account_id:
+        type: integer
+      relation_id:
+        type: integer
+    required:
+    - account_id
+    - relation_id
     type: object
   request.Register:
     properties:
@@ -912,6 +994,16 @@ definitions:
     required:
     - email
     type: object
+  request.TransferGroup:
+    properties:
+      relation_id:
+        type: integer
+      to_account_id:
+        type: integer
+    required:
+    - relation_id
+    - to_account_id
+    type: object
   request.UpdateAccount:
     properties:
       gender:
@@ -935,6 +1027,19 @@ definitions:
     - gender
     - name
     - signature
+    type: object
+  request.UpdateGroup:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      relation_id:
+        type: integer
+    required:
+    - description
+    - name
+    - relation_id
     type: object
   request.UpdateMsgPin:
     properties:
@@ -985,6 +1090,25 @@ definitions:
         type: integer
     required:
     - nick_name
+    - relation_id
+    type: object
+  request.UpdateNotify:
+    properties:
+      account_id:
+        type: integer
+      id:
+        type: integer
+      msg_content:
+        type: string
+      msg_expand:
+        type: string
+      relation_id:
+        type: integer
+    required:
+    - account_id
+    - id
+    - msg_content
+    - msg_expand
     - relation_id
     type: object
   request.UpdateSettingDisturb:
@@ -1509,6 +1633,37 @@ paths:
       summary: 更新群头像活用户头像
       tags:
       - file
+  /api/file/details:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.GetFile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.File'
+              type: object
+      summary: 获取文件详情
+      tags:
+      - file
   /api/file/getall:
     post:
       consumes:
@@ -1519,10 +1674,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: relation_id
+      - description: 关系ID
+        in: body
+        name: data
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.GetRelationFile'
       responses:
         "200":
           description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败
@@ -1548,14 +1705,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: description
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: string
-      - in: query
-        name: name
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/request.CreateGroup'
       produces:
       - application/json
       responses:
@@ -1581,10 +1736,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: relation_id
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.DissolveGroup'
       produces:
       - application/json
       responses:
@@ -1610,16 +1767,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        items:
-          type: integer
-        name: account_id
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: array
-      - in: query
-        name: relation_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.InviteAccount'
       produces:
       - application/json
       responses:
@@ -1699,18 +1852,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: name
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: string
-      - description: 第几页
-        in: query
-        name: page
-        type: integer
-      - description: 每页大小
-        in: query
-        name: page_size
-        type: integer
+        schema:
+          $ref: '#/definitions/request.GetGroupByName'
       produces:
       - application/json
       responses:
@@ -1736,14 +1883,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: account_id
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: integer
-      - in: query
-        name: relation_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.QuitGroup'
       produces:
       - application/json
       responses:
@@ -1770,14 +1915,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: relation_id
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: integer
-      - in: query
-        name: to_account_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.TransferGroup'
       produces:
       - application/json
       responses:
@@ -1804,18 +1947,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: description
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: string
-      - in: query
-        name: name
-        required: true
-        type: string
-      - in: query
-        name: relation_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.UpdateGroup'
       produces:
       - application/json
       responses:
@@ -2204,22 +2341,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: account_id
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: integer
-      - in: query
-        name: msg_content
-        required: true
-        type: string
-      - in: query
-        name: msg_expand
-        required: true
-        type: string
-      - in: query
-        name: relation_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.CreateNotify'
       produces:
       - application/json
       responses:
@@ -2275,26 +2402,12 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: account_id
+      - description: 请求信息
+        in: body
+        name: data
         required: true
-        type: integer
-      - in: query
-        name: id
-        required: true
-        type: integer
-      - in: query
-        name: msg_content
-        required: true
-        type: string
-      - in: query
-        name: msg_expand
-        required: true
-        type: string
-      - in: query
-        name: relation_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.UpdateNotify'
       produces:
       - application/json
       responses:

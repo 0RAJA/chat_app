@@ -14,5 +14,6 @@ func (file) Init(router *gin.RouterGroup) {
 		//fg.POST("delete", v1.Group.File.DeleteFile) //测试用
 		fg.POST("getall", v1.Group.File.GetRelationFile)
 		fg.POST("avatar", v1.Group.File.UploadAvatar)
+		fg.POST("details", v1.Group.File.GetFileDetailsByID)
 	}
 }

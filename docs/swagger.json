@@ -10,7 +10,7 @@
         "version": "1.0"
     },
     "host": "chat.humraja.xyz",
-    "basePath": "/",
+    "basePath": "/api",
     "paths": {
         "/api/account/create": {
             "post": {
@@ -701,6 +701,58 @@
                 }
             }
         },
+        "/api/file/details": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "获取文件详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.GetFile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.File"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/file/getall": {
             "post": {
                 "consumes": [
@@ -719,10 +771,13 @@
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "关系ID",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.GetRelationFile"
+                        }
                     }
                 ],
                 "responses": {
@@ -771,16 +826,13 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "description",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateGroup"
+                        }
                     }
                 ],
                 "responses": {
@@ -826,10 +878,13 @@
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DissolveGroup"
+                        }
                     }
                 ],
                 "responses": {
@@ -875,19 +930,13 @@
                         "required": true
                     },
                     {
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        },
-                        "name": "account_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.InviteAccount"
+                        }
                     }
                 ],
                 "responses": {
@@ -1025,22 +1074,13 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "第几页",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "每页大小",
-                        "name": "page_size",
-                        "in": "query"
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.GetGroupByName"
+                        }
                     }
                 ],
                 "responses": {
@@ -1086,16 +1126,13 @@
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "account_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.QuitGroup"
+                        }
                     }
                 ],
                 "responses": {
@@ -1141,16 +1178,13 @@
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "to_account_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.TransferGroup"
+                        }
                     }
                 ],
                 "responses": {
@@ -1196,22 +1230,13 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "description",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateGroup"
+                        }
                     }
                 ],
                 "responses": {
@@ -1832,28 +1857,13 @@
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "account_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "msg_content",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "msg_expand",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateNotify"
+                        }
                     }
                 ],
                 "responses": {
@@ -1950,34 +1960,13 @@
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "account_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "msg_content",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "msg_expand",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "relation_id",
-                        "in": "query",
-                        "required": true
+                        "description": "请求信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateNotify"
+                        }
                     }
                 ],
                 "responses": {
@@ -3798,6 +3787,44 @@
                 }
             }
         },
+        "request.CreateGroup": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.CreateNotify": {
+            "type": "object",
+            "required": [
+                "account_id",
+                "msg_content",
+                "msg_expand",
+                "relation_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "type": "string"
+                },
+                "msg_expand": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.DeleteAccount": {
             "type": "object",
             "required": [
@@ -3837,6 +3864,76 @@
                 }
             }
         },
+        "request.DissolveGroup": {
+            "type": "object",
+            "required": [
+                "relation_id"
+            ],
+            "properties": {
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.GetFile": {
+            "type": "object",
+            "required": [
+                "file_id"
+            ],
+            "properties": {
+                "file_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.GetGroupByName": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "page": {
+                    "description": "第几页",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "description": "每页大小",
+                    "type": "integer"
+                }
+            }
+        },
+        "request.GetRelationFile": {
+            "type": "object",
+            "required": [
+                "relation_id"
+            ],
+            "properties": {
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.InviteAccount": {
+            "type": "object",
+            "required": [
+                "account_id",
+                "relation_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.Login": {
             "type": "object",
             "required": [
@@ -3854,6 +3951,21 @@
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 6
+                }
+            }
+        },
+        "request.QuitGroup": {
+            "type": "object",
+            "required": [
+                "account_id",
+                "relation_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "relation_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -3909,6 +4021,21 @@
                 }
             }
         },
+        "request.TransferGroup": {
+            "type": "object",
+            "required": [
+                "relation_id",
+                "to_account_id"
+            ],
+            "properties": {
+                "relation_id": {
+                    "type": "integer"
+                },
+                "to_account_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.UpdateAccount": {
             "type": "object",
             "required": [
@@ -3937,6 +4064,25 @@
                     "type": "string",
                     "maxLength": 200,
                     "minLength": 1
+                }
+            }
+        },
+        "request.UpdateGroup": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "relation_id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -4005,6 +4151,33 @@
                     "description": "关系ID",
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "request.UpdateNotify": {
+            "type": "object",
+            "required": [
+                "account_id",
+                "id",
+                "msg_content",
+                "msg_expand",
+                "relation_id"
+            ],
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "type": "string"
+                },
+                "msg_expand": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "integer"
                 }
             }
         },
