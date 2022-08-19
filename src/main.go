@@ -32,7 +32,7 @@ func init() {
 // @license.url
 
 // @host      chat.humraja.xyz
-// @BasePath  /api
+// @BasePath  /
 
 // @securityDefinitions.basic  BasicAuth
 func main() {

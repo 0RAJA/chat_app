@@ -47,7 +47,7 @@ type file struct {
 // DeleteFile
 // @Tags     file
 // @Summary  删除文件(测试用)
-// @accept   application/json
+// @accept             application/json
 // @Param    data  body      request.DeleteFile                   true  "文件ID"
 // @Success  200   {object}  common.State{data=reply.DeleteFile}  "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
 // @Router   /api/file/delete [post]
@@ -66,10 +66,10 @@ type file struct {
 // GetRelationFile
 // @Tags     file
 // @Summary  获取关系文件列表
-// @accept   application/json
-// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
-// @Param    data  query      request.GetRelationFile          true  "关系ID"
-// @Success  200   {object}  common.State{data=[]reply.File}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
+// @accept             application/json
+// @Param    Authorization  header    string                           true  "Bearer 账户令牌"
+// @Param    data           query     request.GetRelationFile          true  "关系ID"
+// @Success  200            {object}  common.State{data=[]reply.File}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
 // @Router   /api/file/getall [post]
 func (file) GetRelationFile(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -92,10 +92,10 @@ func (file) GetRelationFile(c *gin.Context) {
 // @Tags     file
 // @Summary  更新群头像活用户头像
 // @accept   multipart/form-data
-// @Param    file  formData  file                                  true  "文件"
-// @Param    Authorization  header    string                        true  "Bearer 账户令牌"
-// @Param    data  body      request.UploadAvatar                  true  "文件及账号信息"
-// @Success  200   {object}  common.State{data=reply.UploadAvatar}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
+// @Param    file           formData  file                                   true  "文件"
+// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
+// @Param    data           body      request.UploadAvatar                   true  "文件及账号信息"
+// @Success  200            {object}  common.State{data=reply.UploadAvatar}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
 // @Router   /api/file/avatar [post]
 func (file) UploadAvatar(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -118,14 +118,14 @@ func (file) UploadAvatar(c *gin.Context) {
 	rly.Reply(mErr, result)
 }
 
-// GetFileDetailsByID @Tags     group
-// @Summary  退群
+// GetFileDetailsByID  @Tags     group
+// @Summary            退群
 // @accept   application/json
-// @Produce  application/json
-// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
-// @Param    data           query     request.QuitGroup                   true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.QuitGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router   /api/group/quit [post]
+// @Produce            application/json
+// @Param              Authorization  header    string                              true  "Bearer 账户令牌"
+// @Param              data           query     request.QuitGroup                   true  "请求信息"
+// @Success            200            {object}  common.State{data=reply.QuitGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router             /api/group/quit [post]
 func (file) GetFileDetailsByID(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetFile{}
