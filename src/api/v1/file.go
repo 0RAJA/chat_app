@@ -15,12 +15,12 @@ type file struct {
 }
 
 // Publish
-// @Tags     file
-// @Summary  上传文件(测试用)
-// @accept   multipart/form-data
-// @Param    file  formData  request.PublishFile                   true  "文件"
-// @Success  200   {object}  common.State{data=reply.PublishFile}  "1001:参数有误 1003:系统错误 8001:存储失败"
-// @Router   /api/file/publish [post]
+// @Tags    file
+// @Summary 上传文件(测试用)
+// @accept  multipart/form-data
+// @Param   file formData request.PublishFile                  true "文件"
+// @Success 200  {object} common.State{data=reply.PublishFile} "1001:参数有误 1003:系统错误 8001:存储失败"
+// @Router  /api/file/publish [post]
 // func (file) Publish(c *gin.Context) {
 //	rly := app.NewResponse(c)
 //	params := request.PublishFile{}
@@ -45,12 +45,12 @@ type file struct {
 // }
 
 // DeleteFile
-// @Tags     file
-// @Summary  删除文件(测试用)
-// @accept             application/json
-// @Param    data  body      request.DeleteFile                   true  "文件ID"
-// @Success  200   {object}  common.State{data=reply.DeleteFile}  "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
-// @Router   /api/file/delete [post]
+// @Tags    file
+// @Summary 删除文件(测试用)
+// @accept  application/json
+// @Param   data body     request.DeleteFile                  true "文件ID"
+// @Success 200  {object} common.State{data=reply.DeleteFile} "1001:参数有误 1003:系统错误 8002:文件不存在 8003文件删除失败"
+// @Router  /api/file/delete [post]
 // func (file) DeleteFile(c *gin.Context) {
 //	rly := app.NewResponse(c)
 //	params := request.DeleteFile{}
@@ -64,17 +64,17 @@ type file struct {
 // }
 
 // GetRelationFile
-// @Tags     file
-// @Summary  获取关系文件列表
-// @accept             application/json
-// @Param    Authorization  header    string                           true  "Bearer 账户令牌"
-// @Param    data           query     request.GetRelationFile          true  "关系ID"
-// @Success  200            {object}  common.State{data=[]reply.File}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
-// @Router   /api/file/getall [post]
+// @Tags    file
+// @Summary 获取关系文件列表
+// @accept  application/json
+// @Param   Authorization header   string                          true "Bearer 账户令牌"
+// @Param   data          body     request.GetRelationFile         true "关系ID"
+// @Success 200           {object} common.State{data=[]reply.File} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
+// @Router  /api/file/getall [post]
 func (file) GetRelationFile(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetRelationFile{}
-	if err := c.ShouldBindQuery(&params); err != nil {
+	if err := c.ShouldBindJSON(&params); err != nil {
 		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -89,14 +89,14 @@ func (file) GetRelationFile(c *gin.Context) {
 }
 
 // UploadAvatar
-// @Tags     file
-// @Summary  更新群头像活用户头像
-// @accept   multipart/form-data
-// @Param    file           formData  file                                   true  "文件"
-// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
-// @Param    data           body      request.UploadAvatar                   true  "文件及账号信息"
-// @Success  200            {object}  common.State{data=reply.UploadAvatar}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
-// @Router   /api/file/avatar [post]
+// @Tags    file
+// @Summary 更新群头像活用户头像
+// @accept  multipart/form-data
+// @Param   file          formData file                                  true "文件"
+// @Param   Authorization header   string                                true "Bearer 账户令牌"
+// @Param   data          body     request.UploadAvatar                  true "文件及账号信息"
+// @Success 200           {object} common.State{data=reply.UploadAvatar} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"
+// @Router  /api/file/avatar [post]
 func (file) UploadAvatar(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.UploadAvatar{}
@@ -118,14 +118,15 @@ func (file) UploadAvatar(c *gin.Context) {
 	rly.Reply(mErr, result)
 }
 
-// GetFileDetailsByID  @Tags     group
-// @Summary            退群
-// @accept   application/json
-// @Produce            application/json
-// @Param              Authorization  header    string                              true  "Bearer 账户令牌"
-// @Param              data           query     request.QuitGroup                   true  "请求信息"
-// @Success            200            {object}  common.State{data=reply.QuitGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router             /api/group/quit [post]
+// GetFileDetailsByID
+// @Tags    file
+// @Summary 获取文件详情
+// @accept  application/json
+// @Produce application/json
+// @Param   Authorization header   string                        true "Bearer 账户令牌"
+// @Param   data          body     request.GetFile               true "请求信息"
+// @Success 200           {object} common.State{data=reply.File} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router  /api/file/details [post]
 func (file) GetFileDetailsByID(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetFile{}
