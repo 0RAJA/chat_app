@@ -133,14 +133,33 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID []int64, fID i
 	if !t {
 		return result, myerr.NotGroupMember
 	}
+	result.InviteMember = make([]int64, 0, len(tID))
 	for _, v := range tID {
-		err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, v, false)
-
-		if err != nil {
-			global.Logger.Error(err.Error())
-			return result, errcode.ErrServer
+		f1, e1 := dao.Group.DB.ExistsFriendSetting(c, &db.ExistsFriendSettingParams{
+			Account1ID: v,
+			Account2ID: fID,
+		})
+		if e1 != nil {
+			continue
 		}
+		f2, e2 := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+			AccountID:  v,
+			RelationID: relationID,
+		})
+		if e2 != nil {
+			continue
+		}
+		if f1 && !f2 {
+			err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, v, false)
+			if err != nil {
+				global.Logger.Error(err.Error())
+				return result, errcode.ErrServer
+			}
+			result.InviteMember = append(result.InviteMember, v)
+		}
+
 	}
+
 	accessToken, _ := mid.GetToken(c.Request.Header)
 	for _, v := range tID {
 		global.Worker.SendTask(task.InviteAccount(accessToken, relationID, v))

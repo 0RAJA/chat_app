@@ -17,6 +17,7 @@ type Querier interface {
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64, error)
+	CreateManySetting(ctx context.Context, arg []*CreateManySettingParams) (int64, error)
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateMsgRow, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)

@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+type CreateManySettingParams struct {
+	AccountID  int64 `json:"account_id"`
+	RelationID int64 `json:"relation_id"`
+}
+
 const createSetting = `-- name: CreateSetting :exec
 insert into setting (account_id, relation_id, nick_name, is_leader, is_self)
 values ($1, $2, '', $3, $4)

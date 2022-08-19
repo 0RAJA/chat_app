@@ -1528,10 +1528,6 @@ paths:
         required: true
         type: string
       - in: query
-        name: account_id
-        required: true
-        type: integer
-      - in: query
         name: description
         required: true
         type: string
@@ -1594,9 +1590,11 @@ paths:
         required: true
         type: string
       - in: query
+        items:
+          type: integer
         name: account_id
         required: true
-        type: integer
+        type: array
       - in: query
         name: relation_id
         required: true
@@ -1687,10 +1685,6 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: from_account_id
-        required: true
-        type: integer
       - in: query
         name: relation_id
         required: true

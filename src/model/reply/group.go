@@ -18,6 +18,7 @@ type UpdateGroup struct {
 	Description string `json:"description" form:"description" binding:"required"`
 }
 type InviteAccount struct {
+	InviteMember []int64 `json:"invite_member"`
 }
 type QuitGroup struct {
 }

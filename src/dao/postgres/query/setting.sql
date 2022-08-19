@@ -290,3 +290,7 @@ where r.id = (select s.relation_id
               where relation_id = s.relation_id
                 and (setting.account_id = $1))
 order by s.last_show;
+
+-- name: CreateManySetting :copyfrom
+insert into setting (account_id, relation_id)
+values ($1, $2);
