@@ -122,7 +122,7 @@ func (mGroup) UpdateGroup(c *gin.Context, params request.UpdateGroup, accountID 
 	return result, nil
 }
 
-func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int64) (result reply.InviteAccount, mErr errcode.Err) {
+func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID []int64, fID int64) (result reply.InviteAccount, mErr errcode.Err) {
 	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
 		AccountID:  fID,
 		RelationID: relationID,
@@ -133,14 +133,38 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int
 	if !t {
 		return result, myerr.NotGroupMember
 	}
-	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, tID, false)
+	result.InviteMember = make([]int64, 0, len(tID))
+	for _, v := range tID {
+		f1, e1 := dao.Group.DB.ExistsFriendSetting(c, &db.ExistsFriendSettingParams{
+			Account1ID: v,
+			Account2ID: fID,
+		})
+		if e1 != nil {
+			continue
+		}
+		f2, e2 := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+			AccountID:  v,
+			RelationID: relationID,
+		})
+		if e2 != nil {
+			continue
+		}
+		if f1 && !f2 {
+			err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, v, false)
+			if err != nil {
+				global.Logger.Error(err.Error())
+				continue
+			}
+			result.InviteMember = append(result.InviteMember, v)
+		}
 
-	if err != nil {
-		global.Logger.Error(err.Error())
-		return result, errcode.ErrServer
 	}
+
 	accessToken, _ := mid.GetToken(c.Request.Header)
-	global.Worker.SendTask(task.InviteAccount(accessToken, relationID, tID))
+	for _, v := range tID {
+		global.Worker.SendTask(task.InviteAccount(accessToken, relationID, v))
+	}
+
 	return result, nil
 }
 func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (result reply.QuitGroup, mErr errcode.Err) {
@@ -171,7 +195,7 @@ func (mGroup) GroupList(c *gin.Context, accountID int64) (reply.GetGroup, errcod
 	if err != nil {
 		return reply.GetGroup{}, errcode.ErrServer
 	}
-	groupList := make([]model.SettingGroup, 0, data[0].Total)
+	groupList := make([]model.SettingGroup, 0, len(data))
 	for _, v := range data {
 		t := model.SettingGroup{
 			SettingInfo: model.SettingInfo{
@@ -195,7 +219,7 @@ func (mGroup) GroupList(c *gin.Context, accountID int64) (reply.GetGroup, errcod
 	}
 	return reply.GetGroup{
 		List:  groupList,
-		Total: data[0].Total,
+		Total: int64(len(data)),
 	}, nil
 }
 func (mGroup) GetGroupByName(c *gin.Context, accountID int64, limit int32, offset int32, name string) (reply.GetGroup, errcode.Err) {
@@ -234,4 +258,32 @@ func (mGroup) GetGroupByName(c *gin.Context, accountID int64, limit int32, offse
 		List:  groupList,
 		Total: data[0].Total,
 	}, nil
+}
+func (mGroup) GeGroupMembers(c *gin.Context, accountID int64, relationID int64) ([]reply.GetGroupMembers, errcode.Err) {
+	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+		AccountID:  accountID,
+		RelationID: relationID,
+	})
+	if err != nil {
+		return nil, errcode.ErrServer
+	}
+	if !t {
+		return nil, myerr.NotGroupMember
+	}
+	data, err := dao.Group.DB.GetGroupMembersByID(c, relationID)
+	if err != nil {
+		global.Logger.Error(err.Error())
+	}
+	result := make([]reply.GetGroupMembers, 0, len(data))
+	for _, v := range data {
+		t := reply.GetGroupMembers{
+			ID:       v.ID,
+			Name:     v.Name,
+			Avatar:   v.Avatar,
+			NickName: v.NickName.String,
+			IsLeader: v.IsLeader.Bool,
+		}
+		result = append(result, t)
+	}
+	return result, nil
 }

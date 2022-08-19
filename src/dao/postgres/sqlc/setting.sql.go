@@ -11,6 +11,12 @@ import (
 	"time"
 )
 
+type CreateManySettingParams struct {
+	AccountID  int64  `json:"account_id"`
+	RelationID int64  `json:"relation_id"`
+	NickName   string `json:"nick_name"`
+}
+
 const createSetting = `-- name: CreateSetting :exec
 insert into setting (account_id, relation_id, nick_name, is_leader, is_self)
 values ($1, $2, '', $3, $4)
@@ -570,6 +576,49 @@ func (q *Queries) GetGroupMembers(ctx context.Context, relationID int64) ([]int6
 			return nil, err
 		}
 		items = append(items, account_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGroupMembersByID = `-- name: GetGroupMembersByID :many
+select a.id,a.name,a.avatar,s.nick_name,s.is_leader
+from account a
+         left join
+     setting s
+     on a.id = s.account_id
+where  s.relation_id = $1
+`
+
+type GetGroupMembersByIDRow struct {
+	ID       int64          `json:"id"`
+	Name     string         `json:"name"`
+	Avatar   string         `json:"avatar"`
+	NickName sql.NullString `json:"nick_name"`
+	IsLeader sql.NullBool   `json:"is_leader"`
+}
+
+func (q *Queries) GetGroupMembersByID(ctx context.Context, relationID int64) ([]*GetGroupMembersByIDRow, error) {
+	rows, err := q.db.Query(ctx, getGroupMembersByID, relationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*GetGroupMembersByIDRow{}
+	for rows.Next() {
+		var i GetGroupMembersByIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Avatar,
+			&i.NickName,
+			&i.IsLeader,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

@@ -427,6 +427,22 @@ definitions:
       total:
         type: integer
     type: object
+  reply.GetGroupMembers:
+    properties:
+      account_id:
+        description: 账号ID
+        type: integer
+      avatar:
+        description: 头像
+        type: string
+      is_leader:
+        type: boolean
+      name:
+        description: 名称
+        type: string
+      nick_name:
+        type: string
+    type: object
   reply.GetMsgsByContent:
     properties:
       list:
@@ -526,6 +542,11 @@ definitions:
         type: integer
     type: object
   reply.InviteAccount:
+    properties:
+      invite_member:
+        items:
+          type: integer
+        type: array
     type: object
   reply.ListApplications:
     properties:
@@ -1528,10 +1549,6 @@ paths:
         required: true
         type: string
       - in: query
-        name: account_id
-        required: true
-        type: integer
-      - in: query
         name: description
         required: true
         type: string
@@ -1594,9 +1611,11 @@ paths:
         required: true
         type: string
       - in: query
+        items:
+          type: integer
         name: account_id
         required: true
-        type: integer
+        type: array
       - in: query
         name: relation_id
         required: true
@@ -1616,7 +1635,7 @@ paths:
       summary: 邀请人进群
       tags:
       - group
-  /api/group/quit:
+  /api/group/list:
     get:
       consumes:
       - application/json
@@ -1641,6 +1660,7 @@ paths:
       summary: 获取群列表
       tags:
       - group
+  /api/group/name:
     post:
       consumes:
       - application/json
@@ -1651,16 +1671,8 @@ paths:
         required: true
         type: string
       - in: query
-        name: name
+        name: relation_id
         required: true
-        type: string
-      - description: 第几页
-        in: query
-        name: page
-        type: integer
-      - description: 每页大小
-        in: query
-        name: page_size
         type: integer
       produces:
       - application/json
@@ -1672,9 +1684,43 @@ paths:
             - $ref: '#/definitions/common.State'
             - properties:
                 data:
-                  $ref: '#/definitions/reply.GetGroup'
+                  $ref: '#/definitions/reply.GetGroupMembers'
               type: object
-      summary: 通过群名称模糊查找群
+      summary: 查看所有群员
+      tags:
+      - group
+  /api/group/quit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: account_id
+        required: true
+        type: integer
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主
+            7003:非群员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.QuitGroup'
+              type: object
+      summary: 退群
       tags:
       - group
   /api/group/transfer:
@@ -1687,10 +1733,6 @@ paths:
         name: Authorization
         required: true
         type: string
-      - in: query
-        name: from_account_id
-        required: true
-        type: integer
       - in: query
         name: relation_id
         required: true

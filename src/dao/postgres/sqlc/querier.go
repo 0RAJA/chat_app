@@ -17,6 +17,7 @@ type Querier interface {
 	CreateFriendRelation(ctx context.Context, arg *CreateFriendRelationParams) (int64, error)
 	CreateGroupNotify(ctx context.Context, arg *CreateGroupNotifyParams) (*CreateGroupNotifyRow, error)
 	CreateGroupRelation(ctx context.Context, arg *CreateGroupRelationParams) (int64, error)
+	CreateManySetting(ctx context.Context, arg []*CreateManySettingParams) (int64, error)
 	CreateMsg(ctx context.Context, arg *CreateMsgParams) (*CreateMsgRow, error)
 	CreateSetting(ctx context.Context, arg *CreateSettingParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) (*User, error)
@@ -68,6 +69,7 @@ type Querier interface {
 	GetGroupAvatar(ctx context.Context, relationID sql.NullInt64) (*File, error)
 	GetGroupList(ctx context.Context, accountID int64) ([]*GetGroupListRow, error)
 	GetGroupMembers(ctx context.Context, relationID int64) ([]int64, error)
+	GetGroupMembersByID(ctx context.Context, relationID int64) ([]*GetGroupMembersByIDRow, error)
 	GetGroupNotifyByID(ctx context.Context, relationID sql.NullInt64) ([]*GetGroupNotifyByIDRow, error)
 	GetGroupPinSettingsOrderByPinTime(ctx context.Context, accountID int64) ([]*GetGroupPinSettingsOrderByPinTimeRow, error)
 	GetGroupRelationByID(ctx context.Context, id int64) (*GetGroupRelationByIDRow, error)
