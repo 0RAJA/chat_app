@@ -33,8 +33,12 @@ func (mGroup) CreateGroup(c *gin.Context) {
 		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-
-	relationID, mErr := logic.Group.MGroup.CreateGroup(c, params.AccountID, params.Name, params.Description)
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	relationID, mErr := logic.Group.MGroup.CreateGroup(c, content.ID, params.Name, params.Description)
 	if mErr != nil {
 		rly.Reply(mErr)
 		return
@@ -43,7 +47,7 @@ func (mGroup) CreateGroup(c *gin.Context) {
 
 	rly.Reply(mErr, reply.CreateGroup{
 		Name:        params.Name,
-		AccountID:   params.AccountID,
+		AccountID:   content.ID,
 		RelationID:  relationID,
 		Description: params.Description,
 		Avatar:      url.Url,
@@ -71,7 +75,7 @@ func (mGroup) TransferGroup(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, mErr := logic.Group.MGroup.TransferGroup(c, params.RelationID, params.FromAccountID, params.ToAccountID)
+	result, mErr := logic.Group.MGroup.TransferGroup(c, params.RelationID, content.ID, params.ToAccountID)
 	rly.Reply(mErr, result)
 }
 
@@ -171,7 +175,7 @@ func (mGroup) QuitGroup(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, mErr := logic.Group.MGroup.QuitGroup(c, params.RelationID, params.AccountID)
+	result, mErr := logic.Group.MGroup.QuitGroup(c, params.RelationID, content.ID)
 	rly.Reply(mErr, result)
 }
 
