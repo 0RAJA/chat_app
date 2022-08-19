@@ -17,8 +17,8 @@ func (store *SqlStore) AcceptApplicationTx(c context.Context, rdb *query.Queries
 		var err error
 		err = tool.DoThat(err, func() error {
 			return queries.UpdateApplication(c, &db.UpdateApplicationParams{
-				Account1ID: account1.ID,
-				Account2ID: account2.ID,
+				Account1ID: account2.ID,
+				Account2ID: account1.ID,
 				Status:     db.ApplicationstatusValue1,
 			})
 		})
