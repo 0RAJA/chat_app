@@ -186,7 +186,7 @@ func (mGroup) QuitGroup(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                              true  "Bearer 账户令牌"
 // @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router   /api/group/quit [get]
+// @Router   /api/group/list [get]
 func (mGroup) GroupList(c *gin.Context) {
 	rly := app.NewResponse(c)
 	content, ok := mid.GetTokenContent(c)
@@ -205,8 +205,8 @@ func (mGroup) GroupList(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                              true  "Bearer 账户令牌"
 // @Param    data           query     request.GetGroupByName                   true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router   /api/group/quit [post]
+// @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
+// @Router   /api/group/name [post]
 func (mGroup) GetGroupByName(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetGroupByName{}
@@ -221,5 +221,30 @@ func (mGroup) GetGroupByName(c *gin.Context) {
 	}
 	limit, offset := global.Page.GetPageSizeAndOffset(c.Request)
 	result, mErr := logic.Group.MGroup.GetGroupByName(c, content.ID, limit, offset, params.Name)
+	rly.Reply(mErr, result)
+}
+
+// GetGroupMembers
+// @Tags     group
+// @Summary  查看所有群员
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
+// @Param    data           query     request.GetGroupMembers                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.GetGroupMembers}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router   /api/group/members [get]
+func (mGroup) GetGroupMembers(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := request.GetGroupMembers{}
+	if err := c.ShouldBindQuery(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	result, mErr := logic.Group.MGroup.GeGroupMembers(c, content.ID, params.RelationID)
 	rly.Reply(mErr, result)
 }

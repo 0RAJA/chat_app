@@ -153,7 +153,7 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID []int64, fID i
 			err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, v, false)
 			if err != nil {
 				global.Logger.Error(err.Error())
-				return result, errcode.ErrServer
+				continue
 			}
 			result.InviteMember = append(result.InviteMember, v)
 		}
@@ -258,4 +258,32 @@ func (mGroup) GetGroupByName(c *gin.Context, accountID int64, limit int32, offse
 		List:  groupList,
 		Total: data[0].Total,
 	}, nil
+}
+func (mGroup) GeGroupMembers(c *gin.Context, accountID int64, relationID int64) ([]reply.GetGroupMembers, errcode.Err) {
+	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+		AccountID:  accountID,
+		RelationID: relationID,
+	})
+	if err != nil {
+		return nil, errcode.ErrServer
+	}
+	if !t {
+		return nil, myerr.NotGroupMember
+	}
+	data, err := dao.Group.DB.GetGroupMembersByID(c, relationID)
+	if err != nil {
+		global.Logger.Error(err.Error())
+	}
+	result := make([]reply.GetGroupMembers, 0, len(data))
+	for _, v := range data {
+		t := reply.GetGroupMembers{
+			ID:       v.ID,
+			Name:     v.Name,
+			Avatar:   v.Avatar,
+			NickName: v.NickName.String,
+			IsLeader: v.IsLeader.Bool,
+		}
+		result = append(result, t)
+	}
+	return result, nil
 }

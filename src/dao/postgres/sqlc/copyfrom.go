@@ -31,6 +31,7 @@ func (r iteratorForCreateManySetting) Values() ([]interface{}, error) {
 	return []interface{}{
 		r.rows[0].AccountID,
 		r.rows[0].RelationID,
+		r.rows[0].NickName,
 	}, nil
 }
 
@@ -39,5 +40,5 @@ func (r iteratorForCreateManySetting) Err() error {
 }
 
 func (q *Queries) CreateManySetting(ctx context.Context, arg []*CreateManySettingParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"setting"}, []string{"account_id", "relation_id"}, &iteratorForCreateManySetting{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"setting"}, []string{"account_id", "relation_id", "nick_name"}, &iteratorForCreateManySetting{rows: arg})
 }

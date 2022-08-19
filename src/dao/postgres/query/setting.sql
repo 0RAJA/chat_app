@@ -292,5 +292,13 @@ where r.id = (select s.relation_id
 order by s.last_show;
 
 -- name: CreateManySetting :copyfrom
-insert into setting (account_id, relation_id)
-values ($1, $2);
+insert into setting (account_id, relation_id, nick_name)
+values ($1, $2, $3);
+
+-- name: GetGroupMembersByID :many
+select a.id,a.name,a.avatar,s.nick_name,s.is_leader
+from account a
+         left join
+     setting s
+     on a.id = s.account_id
+where  s.relation_id = $1

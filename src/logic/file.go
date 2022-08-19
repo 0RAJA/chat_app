@@ -101,9 +101,11 @@ func (file) DeleteFile(c context.Context, fileID int64) (result reply.DeleteFile
 		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
 		BucketName:      global.PvSettings.AliyunOSS.BucketName,
 	})
-	_, err = oss.DeleteFile(key)
-	if err != nil {
-		return result, myerr.FileDeleteFailed
+	if key != "" {
+		_, err = oss.DeleteFile(key)
+		if err != nil {
+			return result, myerr.FileDeleteFailed
+		}
 	}
 	err = dao.Group.DB.DeleteFileByID(c, fileID)
 	if err != nil {

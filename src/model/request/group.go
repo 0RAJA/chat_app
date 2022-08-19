@@ -34,3 +34,6 @@ type GetGroupByName struct {
 	Name string `json:"name" form:"name" binding:"required"`
 	common.Pager
 }
+type GetGroupMembers struct {
+	RelationID int64 `json:"relation_id" form:"relation_id" binding:"required"`
+}
