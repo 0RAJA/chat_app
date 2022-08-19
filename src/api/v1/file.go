@@ -66,7 +66,7 @@ type file struct {
 // GetRelationFile
 // @Tags     file
 // @Summary  获取关系文件列表
-// @accept   application/json
+// @accept             application/json
 // @Param    Authorization  header    string                           true  "Bearer 账户令牌"
 // @Param    data           query     request.GetRelationFile          true  "关系ID"
 // @Success  200            {object}  common.State{data=[]reply.File}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 8001:存储失败"

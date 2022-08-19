@@ -778,12 +778,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "account_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "name": "description",
                         "in": "query",
@@ -888,7 +882,10 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
                         "name": "account_id",
                         "in": "query",
                         "required": true
@@ -922,7 +919,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/group/quit": {
+        "/api/group/list": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -963,7 +960,58 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/group/members": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "查看所有群员",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.GetGroupMembers"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/name": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -1004,7 +1052,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足",
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员",
                         "schema": {
                             "allOf": [
                                 {
@@ -1015,6 +1063,61 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/reply.GetGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/quit": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "退群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 账户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "account_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "relation_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主 7003:非群员",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.State"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/reply.QuitGroup"
                                         }
                                     }
                                 }
@@ -1042,12 +1145,6 @@ const docTemplate = `{
                         "description": "Bearer 账户令牌",
                         "name": "Authorization",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "name": "from_account_id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -3130,6 +3227,29 @@ const docTemplate = `{
                 }
             }
         },
+        "reply.GetGroupMembers": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "description": "账号ID",
+                    "type": "integer"
+                },
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "is_leader": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string"
+                },
+                "nick_name": {
+                    "type": "string"
+                }
+            }
+        },
         "reply.GetMsgsByContent": {
             "type": "object",
             "properties": {
@@ -3282,7 +3402,15 @@ const docTemplate = `{
             }
         },
         "reply.InviteAccount": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "invite_member": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
         },
         "reply.ListApplications": {
             "type": "object",

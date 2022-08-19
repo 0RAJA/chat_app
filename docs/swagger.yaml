@@ -1660,8 +1660,8 @@ paths:
       summary: 获取群列表
       tags:
       - group
-  /api/group/name:
-    post:
+  /api/group/members:
+    get:
       consumes:
       - application/json
       parameters:
@@ -1687,6 +1687,43 @@ paths:
                   $ref: '#/definitions/reply.GetGroupMembers'
               type: object
       summary: 查看所有群员
+      tags:
+      - group
+  /api/group/name:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: name
+        required: true
+        type: string
+      - description: 第几页
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.State'
+            - properties:
+                data:
+                  $ref: '#/definitions/reply.GetGroup'
+              type: object
+      summary: 通过群名称模糊查找群
       tags:
       - group
   /api/group/quit:
