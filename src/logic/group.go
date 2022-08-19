@@ -195,7 +195,7 @@ func (mGroup) GroupList(c *gin.Context, accountID int64) (reply.GetGroup, errcod
 	if err != nil {
 		return reply.GetGroup{}, errcode.ErrServer
 	}
-	groupList := make([]model.SettingGroup, 0, data[0].Total)
+	groupList := make([]model.SettingGroup, 0, len(data))
 	for _, v := range data {
 		t := model.SettingGroup{
 			SettingInfo: model.SettingInfo{
@@ -219,7 +219,7 @@ func (mGroup) GroupList(c *gin.Context, accountID int64) (reply.GetGroup, errcod
 	}
 	return reply.GetGroup{
 		List:  groupList,
-		Total: data[0].Total,
+		Total: int64(len(data)),
 	}, nil
 }
 func (mGroup) GetGroupByName(c *gin.Context, accountID int64, limit int32, offset int32, name string) (reply.GetGroup, errcode.Err) {
