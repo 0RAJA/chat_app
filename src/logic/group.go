@@ -122,7 +122,7 @@ func (mGroup) UpdateGroup(c *gin.Context, params request.UpdateGroup, accountID 
 	return result, nil
 }
 
-func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int64) (result reply.InviteAccount, mErr errcode.Err) {
+func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID []int64, fID int64) (result reply.InviteAccount, mErr errcode.Err) {
 	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
 		AccountID:  fID,
 		RelationID: relationID,
@@ -133,14 +133,19 @@ func (mGroup) InviteAccount(c *gin.Context, relationID int64, tID int64, fID int
 	if !t {
 		return result, myerr.NotGroupMember
 	}
-	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, tID, false)
+	for _, v := range tID {
+		err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, v, false)
 
-	if err != nil {
-		global.Logger.Error(err.Error())
-		return result, errcode.ErrServer
+		if err != nil {
+			global.Logger.Error(err.Error())
+			return result, errcode.ErrServer
+		}
 	}
 	accessToken, _ := mid.GetToken(c.Request.Header)
-	global.Worker.SendTask(task.InviteAccount(accessToken, relationID, tID))
+	for _, v := range tID {
+		global.Worker.SendTask(task.InviteAccount(accessToken, relationID, v))
+	}
+
 	return result, nil
 }
 func (mGroup) QuitGroup(c *gin.Context, relationID int64, accountID int64) (result reply.QuitGroup, mErr errcode.Err) {
