@@ -77,7 +77,7 @@ func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.
 	}
 	result := make([]*model.SettingPin, 0, len(friendData)+len(groupData))
 	for i, j := 0, 0; i < len(friendData) || j < len(groupData); {
-		if i < len(friendData) && (j >= len(groupData) || friendData[i].PinTime.After(groupData[j].PinTime)) {
+		if i < len(friendData) && (j >= len(groupData) || friendData[i].PinTime.Before(groupData[j].PinTime)) {
 			v := friendData[i]
 			friendInfo := &model.SettingFriendInfo{
 				AccountID: v.AccountID,

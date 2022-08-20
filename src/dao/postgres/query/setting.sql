@@ -67,7 +67,7 @@ from (select setting.relation_id, setting.nick_name, setting.pin_time
         and relation.relation_type = 'friend') as s,
      account a
 where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
-order by s.pin_time desc;
+order by s.pin_time;
 
 -- name: GetGroupPinSettingsOrderByPinTime :many
 select s.relation_id,
@@ -84,7 +84,7 @@ from (select setting.relation_id, setting.nick_name, setting.pin_time
         and relation.relation_type = 'group') as s,
      relation r
 where r.id = (select relation_id from setting where relation_id = s.relation_id and account_id = $1)
-order by s.pin_time desc;
+order by s.pin_time;
 
 -- name: GetFriendShowSettingsOrderByShowTime :many
 select s.*,
