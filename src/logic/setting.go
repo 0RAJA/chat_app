@@ -81,7 +81,7 @@ func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.
 			v := friendData[i]
 			friendInfo := &model.SettingFriendInfo{
 				AccountID: v.AccountID,
-				Name:      v.NickName,
+				Name:      v.AccountName,
 				Avatar:    v.AccountAvatar,
 			}
 			result = append(result, &model.SettingPin{
@@ -91,7 +91,6 @@ func (setting) GetPins(c *gin.Context, accountID int64) (reply.GetPins, errcode.
 					NickName:     v.NickName,
 					PinTime:      v.PinTime,
 				},
-				GroupInfo:  nil,
 				FriendInfo: friendInfo,
 			})
 			i++
@@ -135,7 +134,7 @@ func (setting) GetShows(c *gin.Context, accountID int64) (reply.GetShows, errcod
 			v := friendData[i]
 			friendInfo := &model.SettingFriendInfo{
 				AccountID: v.AccountID,
-				Name:      v.NickName,
+				Name:      v.AccountName,
 				Avatar:    v.AccountAvatar,
 			}
 			result = append(result, &model.Setting{
