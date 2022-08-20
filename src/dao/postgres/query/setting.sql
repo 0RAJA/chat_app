@@ -107,7 +107,7 @@ from (select relation_id,
         and relation.relation_type = 'friend') as s,
      account a
 where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
-order by s.pin_time;
+order by s.last_show desc;
 
 -- name: GetGroupShowSettingsOrderByShowTime :many
 select s.*,
@@ -124,7 +124,7 @@ from (select relation_id,
       from setting,
            relation
       where setting.account_id = $1
-        and setting.is_pin = true
+        and setting.is_show = true
         and setting.relation_id = relation.id
         and relation.relation_type = 'group') as s,
      relation r
@@ -151,7 +151,7 @@ from (select relation_id,
         and relation.relation_type = 'friend') as s,
      account a
 where a.id = (select account_id from setting where relation_id = s.relation_id and (account_id != $1 or is_self = true))
-order by s.pin_time;
+order by a.name;
 
 -- name: ExistsFriendSetting :one
 select exists(
@@ -189,7 +189,7 @@ where a.id = (select account_id
               where relation_id = s.relation_id
                 and (account_id != $1 or is_self = true))
   and ((a.name like (%@name::varchar % || '%')) or (nick_name like (@name::varchar || '%')))
-order by s.pin_time
+order by a.name
 limit $2 offset $3;
 
 -- name: GetGroupSettingsByName :many
@@ -296,9 +296,9 @@ insert into setting (account_id, relation_id, nick_name)
 values ($1, $2, $3);
 
 -- name: GetGroupMembersByID :many
-select a.id,a.name,a.avatar,s.nick_name,s.is_leader
+select a.id, a.name, a.avatar, s.nick_name, s.is_leader
 from account a
          left join
      setting s
      on a.id = s.account_id
-where  s.relation_id = $1
+where s.relation_id = $1;
