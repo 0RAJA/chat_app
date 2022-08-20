@@ -124,7 +124,7 @@ from (select relation_id,
       from setting,
            relation
       where setting.account_id = $1
-        and setting.is_pin = true
+        and setting.is_show = true
         and setting.relation_id = relation.id
         and relation.relation_type = 'group') as s,
      relation r
@@ -301,4 +301,4 @@ from account a
          left join
      setting s
      on a.id = s.account_id
-where  s.relation_id = $1
+where  s.relation_id = $1;

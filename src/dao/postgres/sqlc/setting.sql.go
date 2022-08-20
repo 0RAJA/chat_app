@@ -785,7 +785,7 @@ from (select relation_id,
       from setting,
            relation
       where setting.account_id = $1
-        and setting.is_pin = true
+        and setting.is_show = true
         and setting.relation_id = relation.id
         and relation.relation_type = 'group') as s,
      relation r
