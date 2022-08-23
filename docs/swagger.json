@@ -10,7 +10,7 @@
         "version": "1.0"
     },
     "host": "chat.humraja.xyz",
-    "basePath": "/api",
+    "basePath": "/",
     "paths": {
         "/api/account/create": {
             "post": {
@@ -2870,7 +2870,7 @@
                     "description": "名称",
                     "type": "string"
                 },
-                "relationID": {
+                "relation_id": {
                     "description": "好友关系ID，0表示没有好友关系",
                     "type": "integer"
                 }

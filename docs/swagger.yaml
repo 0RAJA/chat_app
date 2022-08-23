@@ -1,4 +1,4 @@
-basePath: /api
+basePath: /
 definitions:
   common.State:
     properties:
@@ -192,7 +192,7 @@ definitions:
       name:
         description: 名称
         type: string
-      relationID:
+      relation_id:
         description: 好友关系ID，0表示没有好友关系
         type: integer
     type: object
