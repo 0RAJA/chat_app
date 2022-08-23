@@ -15,14 +15,14 @@ type notify struct {
 }
 
 // CreateNotify
-// @Tags    notify
-// @Summary 创建群通知
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                               true "Bearer 账户令牌"
-// @Param   data          body     request.CreateNotify                 true "请求信息"
-// @Success 200           {object} common.State{data=reply.GroupNotify} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
-// @Router  /api/notify/create [post]
+// @Tags     notify
+// @Summary  创建群通知
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           body      request.CreateNotify                  true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.GroupNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
+// @Router   /api/notify/create [post]
 func (notify) CreateNotify(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.CreateNotify{}
@@ -41,14 +41,14 @@ func (notify) CreateNotify(c *gin.Context) {
 }
 
 // UpdateNotify
-// @Tags    notify
-// @Summary 更新群通知
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                                true "Bearer 账户令牌"
-// @Param   data          body     request.UpdateNotify                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.UpdateNotify} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
-// @Router  /api/notify/update [post]
+// @Tags     notify
+// @Summary  更新群通知
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                 true  "Bearer 账户令牌"
+// @Param    data           body      request.UpdateNotify                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.UpdateNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
+// @Router   /api/notify/update [post]
 func (notify) UpdateNotify(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.UpdateNotify{}
@@ -67,14 +67,14 @@ func (notify) UpdateNotify(c *gin.Context) {
 }
 
 // GetNotifyByID
-// @Tags    notify
-// @Summary 获取群通知
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                               true "Bearer 账户令牌"
-// @Param   data          query    request.GetNotifyByID                true "请求信息"
-// @Success 200           {object} common.State{data=[]reply.GetNotify} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
-// @Router  /api/notify/getnotify [get]
+// @Tags     notify
+// @Summary  获取群通知
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           query     request.GetNotifyByID                 true  "请求信息"
+// @Success  200            {object}  common.State{data=[]reply.GetNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
+// @Router   /api/notify/getnotify [get]
 func (notify) GetNotifyByID(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetNotifyByID{}

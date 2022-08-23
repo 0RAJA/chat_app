@@ -41,7 +41,7 @@ type GetAccountsByUserID struct {
 
 type AccountFriendInfo struct {
 	AccountInfo
-	RelationID int64 // 好友关系ID，0表示没有好友关系
+	RelationID int64 `json:"relation_id"` // 好友关系ID，0表示没有好友关系
 }
 
 type GetAccountsByName struct {

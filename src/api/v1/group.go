@@ -17,14 +17,14 @@ type mGroup struct {
 }
 
 // CreateGroup
-// @Tags    group
-// @Summary 创建群
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                               true "Bearer 账户令牌"
-// @Param   data          body     request.CreateGroup                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.CreateGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router  /api/group/create [post]
+// @Tags     group
+// @Summary  创建群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           body      request.CreateGroup                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.CreateGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router   /api/group/create [post]
 func (mGroup) CreateGroup(c *gin.Context) {
 
 	rly := app.NewResponse(c)
@@ -55,14 +55,14 @@ func (mGroup) CreateGroup(c *gin.Context) {
 }
 
 // TransferGroup
-// @Tags    group
-// @Summary 转让群
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                                 true "Bearer 账户令牌"
-// @Param   data          body     request.TransferGroup                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.TransferGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主 7003:非群成员"
-// @Router  /api/group/transfer [post]
+// @Tags     group
+// @Summary  转让群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                  true  "Bearer 账户令牌"
+// @Param    data           body      request.TransferGroup                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.TransferGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主 7003:非群成员"
+// @Router   /api/group/transfer [post]
 func (mGroup) TransferGroup(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := &request.TransferGroup{}
@@ -80,14 +80,14 @@ func (mGroup) TransferGroup(c *gin.Context) {
 }
 
 // DissolveGroup
-// @Tags    group
-// @Summary 解散群
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                                 true "Bearer 账户令牌"
-// @Param   data          body     request.DissolveGroup                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.DissolveGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主"
-// @Router  /api/group/dissolve [post]
+// @Tags     group
+// @Summary  解散群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                  true  "Bearer 账户令牌"
+// @Param    data           body      request.DissolveGroup                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.DissolveGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主"
+// @Router   /api/group/dissolve [post]
 func (mGroup) DissolveGroup(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := &request.DissolveGroup{}
@@ -105,14 +105,14 @@ func (mGroup) DissolveGroup(c *gin.Context) {
 }
 
 // UpdateGroup
-// @Tags    group
-// @Summary 更新群信息
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                               true "Bearer 账户令牌"
-// @Param   data          body     request.UpdateGroup                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.UpdateGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
-// @Router  /api/group/update [post]
+// @Tags     group
+// @Summary  更新群信息
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           body      request.UpdateGroup                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.UpdateGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
+// @Router   /api/group/update [post]
 func (mGroup) UpdateGroup(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.UpdateGroup{}
@@ -130,14 +130,14 @@ func (mGroup) UpdateGroup(c *gin.Context) {
 }
 
 // InviteAccount
-// @Tags    group
-// @Summary 邀请人进群
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                                 true "Bearer 账户令牌"
-// @Param   data          body     request.InviteAccount                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.InviteAccount} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
-// @Router  /api/group/invite [post]
+// @Tags     group
+// @Summary  邀请人进群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                  true  "Bearer 账户令牌"
+// @Param    data           body      request.InviteAccount                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.InviteAccount}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
+// @Router   /api/group/invite [post]
 func (mGroup) InviteAccount(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := &request.InviteAccount{}
@@ -155,14 +155,14 @@ func (mGroup) InviteAccount(c *gin.Context) {
 }
 
 // QuitGroup
-// @Tags    group
-// @Summary 退群
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                             true "Bearer 账户令牌"
-// @Param   data          body     request.QuitGroup                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.QuitGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主 7003:非群员"
-// @Router  /api/group/quit [post]
+// @Tags     group
+// @Summary  退群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                              true  "Bearer 账户令牌"
+// @Param    data           body      request.QuitGroup                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.QuitGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7002:是群主 7003:非群员"
+// @Router   /api/group/quit [post]
 func (mGroup) QuitGroup(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := &request.QuitGroup{}
@@ -180,13 +180,13 @@ func (mGroup) QuitGroup(c *gin.Context) {
 }
 
 // GroupList 1
-// @Tags    group
-// @Summary 获取群列表
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                            true "Bearer 账户令牌"
-// @Success 200           {object} common.State{data=reply.GetGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router  /api/group/list [get]
+// @Tags     group
+// @Summary  获取群列表
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                             true  "Bearer 账户令牌"
+// @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router   /api/group/list [get]
 func (mGroup) GroupList(c *gin.Context) {
 	rly := app.NewResponse(c)
 	content, ok := mid.GetTokenContent(c)
@@ -199,14 +199,14 @@ func (mGroup) GroupList(c *gin.Context) {
 }
 
 // GetGroupByName
-// @Tags    group
-// @Summary 通过群名称模糊查找群
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                            true "Bearer 账户令牌"
-// @Param   data          body     request.GetGroupByName            true "请求信息"
-// @Success 200           {object} common.State{data=reply.GetGroup} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
-// @Router  /api/group/name [post]
+// @Tags     group
+// @Summary  通过群名称模糊查找群
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                             true  "Bearer 账户令牌"
+// @Param    data           body      request.GetGroupByName             true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.GetGroup}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群员"
+// @Router   /api/group/name [post]
 func (mGroup) GetGroupByName(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetGroupByName{}
@@ -225,14 +225,14 @@ func (mGroup) GetGroupByName(c *gin.Context) {
 }
 
 // GetGroupMembers
-// @Tags    group
-// @Summary 查看所有群员
-// @accept  application/json
-// @Produce application/json
-// @Param   Authorization header   string                                   true "Bearer 账户令牌"
-// @Param   data          query    request.GetGroupMembers                  true "请求信息"
-// @Success 200           {object} common.State{data=reply.GetGroupMembers} "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
-// @Router  /api/group/members [get]
+// @Tags     group
+// @Summary  查看所有群员
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                    true  "Bearer 账户令牌"
+// @Param    data           query     request.GetGroupMembers                   true  "请求信息"
+// @Success  200            {object}  common.State{data=reply.GetGroupMembers}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足"
+// @Router   /api/group/members [get]
 func (mGroup) GetGroupMembers(c *gin.Context) {
 	rly := app.NewResponse(c)
 	params := request.GetGroupMembers{}
