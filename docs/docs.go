@@ -3823,15 +3823,10 @@ const docTemplate = `{
         "request.CreateNotify": {
             "type": "object",
             "required": [
-                "account_id",
                 "msg_content",
-                "msg_expand",
                 "relation_id"
             ],
             "properties": {
-                "account_id": {
-                    "type": "integer"
-                },
                 "msg_content": {
                     "type": "string"
                 },
@@ -4175,16 +4170,11 @@ const docTemplate = `{
         "request.UpdateNotify": {
             "type": "object",
             "required": [
-                "account_id",
                 "id",
                 "msg_content",
-                "msg_expand",
                 "relation_id"
             ],
             "properties": {
-                "account_id": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "integer"
                 },

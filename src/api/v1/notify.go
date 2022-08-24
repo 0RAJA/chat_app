@@ -35,7 +35,7 @@ func (notify) CreateNotify(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, mErr := logic.Group.Notify.CreateNotify(c, &params)
+	result, mErr := logic.Group.Notify.CreateNotify(c, &params, content.ID)
 
 	rly.Reply(mErr, result)
 }
@@ -61,7 +61,7 @@ func (notify) UpdateNotify(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
-	result, mErr := logic.Group.Notify.UpdateNotify(c, &params)
+	result, mErr := logic.Group.Notify.UpdateNotify(c, &params, content.ID)
 
 	rly.Reply(mErr, result)
 }

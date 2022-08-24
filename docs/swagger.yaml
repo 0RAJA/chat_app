@@ -853,8 +853,6 @@ definitions:
     type: object
   request.CreateNotify:
     properties:
-      account_id:
-        type: integer
       msg_content:
         type: string
       msg_expand:
@@ -862,9 +860,7 @@ definitions:
       relation_id:
         type: integer
     required:
-    - account_id
     - msg_content
-    - msg_expand
     - relation_id
     type: object
   request.DeleteAccount:
@@ -1103,8 +1099,6 @@ definitions:
     type: object
   request.UpdateNotify:
     properties:
-      account_id:
-        type: integer
       id:
         type: integer
       msg_content:
@@ -1114,10 +1108,8 @@ definitions:
       relation_id:
         type: integer
     required:
-    - account_id
     - id
     - msg_content
-    - msg_expand
     - relation_id
     type: object
   request.UpdateSettingDisturb:
