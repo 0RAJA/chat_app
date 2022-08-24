@@ -1,4 +1,9 @@
 使用go语言实现的基于websocket的服务端
+
+<a src="https://ubqf66qdnq.feishu.cn/docx/doxcnef0UsiFJzmNTbBaPr85Kfc">需求文档</a>
+
+<a src="https://ubqf66qdnq.feishu.cn/docx/doxcndbrG2BzzYCQXWxBCuP9bqg">错误码以及ws事件说明</a>
+
 请在`config/app`下新建`private.yml`配置文件,格式为:
 
 ```yaml
@@ -70,3 +75,4 @@ AliyunOSS: # OSS配置
 1. 功能仍不完善，仍有改善空间
 2. 数据库表设计仍存在不合理之处，需要后期进行调整，例如已读回执的存储需要进行调整
 3. 服务需要进行拆分，例如IM服务可以单独部署，与主服务之间通过RPC进行通信
+
