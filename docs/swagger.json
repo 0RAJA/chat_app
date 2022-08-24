@@ -1926,10 +1926,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/reply.GetNotify"
-                                            }
+                                            "$ref": "#/definitions/reply.GetNotify"
                                         }
                                     }
                                 }
@@ -3263,28 +3260,13 @@
         "reply.GetNotify": {
             "type": "object",
             "properties": {
-                "account_id": {
-                    "type": "integer"
-                },
-                "create_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "msg_content": {
-                    "type": "string"
-                },
-                "msg_expand": {
-                    "$ref": "#/definitions/model.MsgExtend"
-                },
-                "read_ids": {
+                "list": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/reply.Notify"
                     }
                 },
-                "relation_id": {
+                "total": {
                     "type": "integer"
                 }
             }
@@ -3637,6 +3619,35 @@
                 }
             }
         },
+        "reply.Notify": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "create_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "msg_content": {
+                    "type": "string"
+                },
+                "msg_expand": {
+                    "$ref": "#/definitions/model.MsgExtend"
+                },
+                "read_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "relation_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "reply.QuitGroup": {
             "type": "object"
         },
@@ -3818,7 +3829,7 @@
                     "type": "string"
                 },
                 "msg_expand": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.MsgExtend"
                 },
                 "relation_id": {
                     "type": "integer"
@@ -4174,7 +4185,7 @@
                     "type": "string"
                 },
                 "msg_expand": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.MsgExtend"
                 },
                 "relation_id": {
                     "type": "integer"

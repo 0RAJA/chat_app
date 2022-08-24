@@ -463,21 +463,11 @@ definitions:
     type: object
   reply.GetNotify:
     properties:
-      account_id:
-        type: integer
-      create_at:
-        type: string
-      id:
-        type: integer
-      msg_content:
-        type: string
-      msg_expand:
-        $ref: '#/definitions/model.MsgExtend'
-      read_ids:
+      list:
         items:
-          type: integer
+          $ref: '#/definitions/reply.Notify'
         type: array
-      relation_id:
+      total:
         type: integer
     type: object
   reply.GetPinMsgsByRelationID:
@@ -725,6 +715,25 @@ definitions:
         $ref: '#/definitions/reply.RlyMsg'
         description: 回复消息详情 可能为null
     type: object
+  reply.Notify:
+    properties:
+      account_id:
+        type: integer
+      create_at:
+        type: string
+      id:
+        type: integer
+      msg_content:
+        type: string
+      msg_expand:
+        $ref: '#/definitions/model.MsgExtend'
+      read_ids:
+        items:
+          type: integer
+        type: array
+      relation_id:
+        type: integer
+    type: object
   reply.QuitGroup:
     type: object
   reply.Register:
@@ -849,7 +858,7 @@ definitions:
       msg_content:
         type: string
       msg_expand:
-        type: string
+        $ref: '#/definitions/model.MsgExtend'
       relation_id:
         type: integer
     required:
@@ -1101,7 +1110,7 @@ definitions:
       msg_content:
         type: string
       msg_expand:
-        type: string
+        $ref: '#/definitions/model.MsgExtend'
       relation_id:
         type: integer
     required:
@@ -2385,9 +2394,7 @@ paths:
             - $ref: '#/definitions/common.State'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/reply.GetNotify'
-                  type: array
+                  $ref: '#/definitions/reply.GetNotify'
               type: object
       summary: 获取群通知
       tags:
