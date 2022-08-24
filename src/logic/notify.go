@@ -22,10 +22,10 @@ import (
 type notify struct {
 }
 
-func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.GroupNotify, errcode.Err) {
+func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify, accountID int64) (reply.GroupNotify, errcode.Err) {
 	result := reply.GroupNotify{}
 	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
-		AccountID:  params.AccountID,
+		AccountID:  accountID,
 		RelationID: params.RelationID,
 	})
 	if err != nil {
@@ -40,8 +40,8 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
 		MsgExpand:  expand,
-		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
-		ReadIds:    []int64{params.AccountID},
+		AccountID:  sql.NullInt64{Int64: accountID, Valid: true},
+		ReadIds:    []int64{accountID},
 		CreateAt:   time.Now(),
 	})
 	if err != nil {
@@ -63,14 +63,14 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.
 		ReadIds:    nil,
 	}
 	accessToken, _ := mid.GetToken(c.Request.Header)
-	global.Worker.SendTask(task.CreateNotify(accessToken, params.AccountID, params.RelationID, r.MsgContent, msgExpand))
+	global.Worker.SendTask(task.CreateNotify(accessToken, accountID, params.RelationID, r.MsgContent, msgExpand))
 	return result, nil
 }
 
-func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result reply.UpdateNotify, mErr errcode.Err) {
+func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify, accountID int64) (result reply.UpdateNotify, mErr errcode.Err) {
 
 	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
-		AccountID:  params.AccountID,
+		AccountID:  accountID,
 		RelationID: params.RelationID,
 	})
 	if err != nil {
@@ -84,8 +84,8 @@ func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
 		MsgExpand:  expand,
-		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
-		ReadIds:    []int64{params.AccountID},
+		AccountID:  sql.NullInt64{Int64: accountID, Valid: true},
+		ReadIds:    []int64{accountID},
 		CreateAt:   time.Now(),
 		ID:         params.ID,
 	})
@@ -98,7 +98,7 @@ func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result
 		return result, errcode.ErrServer
 	}
 	accessToken, _ := mid.GetToken(c.Request.Header)
-	global.Worker.SendTask(task.UpdateNotify(accessToken, params.AccountID, params.RelationID, params.MsgContent, params.MsgExtend))
+	global.Worker.SendTask(task.UpdateNotify(accessToken, accountID, params.RelationID, params.MsgContent, params.MsgExtend))
 	return result, nil
 }
 func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (result reply.GetNotify, mErr errcode.Err) {
