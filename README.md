@@ -1,8 +1,8 @@
 使用go语言实现的基于websocket的服务端
 
-<a src="https://ubqf66qdnq.feishu.cn/docx/doxcnef0UsiFJzmNTbBaPr85Kfc">需求文档</a>
+需求文档 https://ubqf66qdnq.feishu.cn/docx/doxcnef0UsiFJzmNTbBaPr85Kfc
 
-<a src="https://ubqf66qdnq.feishu.cn/docx/doxcndbrG2BzzYCQXWxBCuP9bqg">错误码以及ws事件说明</a>
+错误码以及ws事件说明 https://ubqf66qdnq.feishu.cn/docx/doxcndbrG2BzzYCQXWxBCuP9bqg
 
 请在`config/app`下新建`private.yml`配置文件,格式为:
 
