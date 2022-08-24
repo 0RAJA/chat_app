@@ -73,7 +73,7 @@ func (notify) UpdateNotify(c *gin.Context) {
 // @Produce  application/json
 // @Param    Authorization  header    string                                true  "Bearer 账户令牌"
 // @Param    data           query     request.GetNotifyByID                 true  "请求信息"
-// @Success  200            {object}  common.State{data=[]reply.GetNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
+// @Success  200            {object}  common.State{data=reply.GetNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
 // @Router   /api/notify/getnotify [get]
 func (notify) GetNotifyByID(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -89,5 +89,5 @@ func (notify) GetNotifyByID(c *gin.Context) {
 	}
 	result, mErr := logic.Group.Notify.GetNotifyByID(c, params.RelationID, content.ID)
 
-	rly.ReplyList(mErr, int64(len(result)), result)
+	rly.ReplyList(mErr, result.Total, result.List)
 }

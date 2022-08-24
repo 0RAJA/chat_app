@@ -19,7 +19,7 @@ type GroupNotify struct {
 type UpdateNotify struct {
 }
 
-type GetNotify struct {
+type Notify struct {
 	ID         int64            `json:"id"`
 	RelationID int64            `json:"relation_id"`
 	MsgContent string           `json:"msg_content"`
@@ -27,4 +27,9 @@ type GetNotify struct {
 	AccountID  int64            `json:"account_id"`
 	CreateAt   time.Time        `json:"create_at"`
 	ReadIds    []int64          `json:"read_ids"`
+}
+
+type GetNotify struct {
+	List  []Notify `json:"list"`
+	Total int64    `json:"total,omitempty"`
 }
