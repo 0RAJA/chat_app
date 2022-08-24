@@ -17,7 +17,6 @@ import (
 	"github.com/0RAJA/chat_app/src/model/request"
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgtype"
 )
 
 type notify struct {
@@ -36,10 +35,11 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify) (reply.
 	if !t {
 		return result, myerr.NotGroupMember
 	}
+	expand, _ := model.ExpandToJson(params.MsgExtend)
 	r, err := dao.Group.DB.CreateGroupNotify(c, &db.CreateGroupNotifyParams{
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
-		MsgExpand:  pgtype.JSON{Status: pgtype.Status(2), Bytes: []byte(params.MsgExpand)},
+		MsgExpand:  expand,
 		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
 		ReadIds:    []int64{params.AccountID},
 		CreateAt:   time.Now(),
@@ -79,10 +79,11 @@ func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result
 	if !t {
 		return result, myerr.NotGroupMember
 	}
+	expand, _ := model.ExpandToJson(params.MsgExtend)
 	_, err = dao.Group.DB.UpdateGroupNotify(c, &db.UpdateGroupNotifyParams{
 		RelationID: sql.NullInt64{Int64: params.RelationID, Valid: true},
 		MsgContent: params.MsgContent,
-		MsgExpand:  pgtype.JSON{Status: pgtype.Status(2), Bytes: []byte(params.MsgExpand)},
+		MsgExpand:  expand,
 		AccountID:  sql.NullInt64{Int64: params.AccountID, Valid: true},
 		ReadIds:    []int64{params.AccountID},
 		CreateAt:   time.Now(),
@@ -92,16 +93,15 @@ func (notify) UpdateNotify(c *gin.Context, params *request.UpdateNotify) (result
 		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
 		return result, errcode.ErrServer
 	}
-	msgExpand, err := model.JsonToExpand(pgtype.JSON{Status: pgtype.Status(2), Bytes: []byte(params.MsgExpand)})
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
 	accessToken, _ := mid.GetToken(c.Request.Header)
-	global.Worker.SendTask(task.UpdateNotify(accessToken, params.AccountID, params.RelationID, params.MsgContent, msgExpand))
+	global.Worker.SendTask(task.UpdateNotify(accessToken, params.AccountID, params.RelationID, params.MsgContent, params.MsgExtend))
 	return result, nil
 }
-func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (result []reply.GetNotify, mErr errcode.Err) {
+func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (result reply.GetNotify, mErr errcode.Err) {
 	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
 		AccountID:  accountId,
 		RelationID: relationID,
@@ -128,9 +128,9 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 		msgExpand, err := model.JsonToExpand(v.MsgExpand)
 		if err != nil {
 			global.Logger.Error(err.Error())
-			return nil, errcode.ErrServer
+			return reply.GetNotify{}, errcode.ErrServer
 		}
-		re := reply.GetNotify{
+		re := reply.Notify{
 			ID:         v.ID,
 			RelationID: v.RelationID.Int64,
 			MsgContent: v.MsgContent,
@@ -139,8 +139,8 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 			CreateAt:   v.CreateAt,
 			ReadIds:    v.ReadIds,
 		}
-		result = append(result, re)
+		result.List = append(result.List, re)
 	}
-
+	result.Total = int64(len(r))
 	return result, nil
 }
