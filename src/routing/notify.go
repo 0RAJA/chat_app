@@ -15,5 +15,6 @@ func (notify) Init(router *gin.RouterGroup) {
 		r.POST("create", v1.Group.Notify.CreateNotify)
 		r.POST("update", v1.Group.Notify.UpdateNotify)
 		r.GET("getnotify", v1.Group.Notify.GetNotifyByID)
+		r.GET("delete", v1.Group.Notify.DeleteNotify)
 	}
 }

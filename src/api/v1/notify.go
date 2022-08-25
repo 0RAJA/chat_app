@@ -21,7 +21,7 @@ type notify struct {
 // @Produce  application/json
 // @Param    Authorization  header    string                                true  "Bearer 账户令牌"
 // @Param    data           body      request.CreateNotify                  true  "请求信息"
-// @Success  200            {object}  common.State{data=reply.GroupNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员"
+// @Success  200            {object}  common.State{data=reply.GroupNotify}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主 7003:非群成员"
 // @Router   /api/notify/create [post]
 func (notify) CreateNotify(c *gin.Context) {
 	rly := app.NewResponse(c)
@@ -90,4 +90,29 @@ func (notify) GetNotifyByID(c *gin.Context) {
 	result, mErr := logic.Group.Notify.GetNotifyByID(c, params.RelationID, content.ID)
 
 	rly.ReplyList(mErr, result.Total, result.List)
+}
+
+// DeleteNotify
+// @Tags     notify
+// @Summary  获取群通知
+// @accept   application/json
+// @Produce  application/json
+// @Param    Authorization  header    string                                true  "Bearer 账户令牌"
+// @Param    data           query     request.DeleteNotify                 true  "请求信息"
+// @Success  200            {object}  common.State{}  "1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主 7003:非群成员"
+// @Router   /api/notify/delete [get]
+func (notify) DeleteNotify(c *gin.Context) {
+	rly := app.NewResponse(c)
+	params := request.DeleteNotify{}
+	if err := c.ShouldBindQuery(&params); err != nil {
+		rly.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
+		return
+	}
+	content, ok := mid.GetTokenContent(c)
+	if !ok || content.Type != model.AccountToken {
+		rly.Reply(myerr.AuthNotExist)
+		return
+	}
+	mErr := logic.Group.Notify.DeleteNotify(c, params.ID, params.RelationID, content.ID)
+	rly.Reply(mErr)
 }

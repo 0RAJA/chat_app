@@ -24,7 +24,7 @@ type notify struct {
 
 func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify, accountID int64) (reply.GroupNotify, errcode.Err) {
 	result := reply.GroupNotify{}
-	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+	t, err := dao.Group.DB.ExistsIsLeader(c, &db.ExistsIsLeaderParams{
 		AccountID:  accountID,
 		RelationID: params.RelationID,
 	})
@@ -33,7 +33,7 @@ func (notify) CreateNotify(c *gin.Context, params *request.CreateNotify, account
 		return result, errcode.ErrServer
 	}
 	if !t {
-		return result, myerr.NotGroupMember
+		return result, myerr.NotLeader
 	}
 	expand, _ := model.ExpandToJson(params.MsgExtend)
 	r, err := dao.Group.DB.CreateGroupNotify(c, &db.CreateGroupNotifyParams{
@@ -143,4 +143,24 @@ func (notify) GetNotifyByID(c *gin.Context, relationID int64, accountId int64) (
 	}
 	result.Total = int64(len(r))
 	return result, nil
+}
+
+func (notify) DeleteNotify(c *gin.Context, id, relationID, accountID int64) errcode.Err {
+	t, err := dao.Group.DB.ExistsIsLeader(c, &db.ExistsIsLeaderParams{
+		AccountID:  accountID,
+		RelationID: relationID,
+	})
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return errcode.ErrServer
+	}
+	if !t {
+		return myerr.NotLeader
+	}
+	err = dao.Group.DB.DeleteGroupNotify(c, id)
+	if err != nil {
+		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		return errcode.ErrServer
+	}
+	return nil
 }
