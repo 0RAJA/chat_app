@@ -2352,7 +2352,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7003:非群成员
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主
+            7003:非群成员
           schema:
             allOf:
             - $ref: '#/definitions/common.State'
@@ -2361,6 +2362,35 @@ paths:
                   $ref: '#/definitions/reply.GroupNotify'
               type: object
       summary: 创建群通知
+      tags:
+      - notify
+  /api/notify/delete:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 账户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: id
+        required: true
+        type: integer
+      - in: query
+        name: relation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 1001:参数有误 1003:系统错误 2007:身份不存在 2008:身份验证失败 2009:权限不足 7001:非群主
+            7003:非群成员
+          schema:
+            $ref: '#/definitions/common.State'
+      summary: 获取群通知
       tags:
       - notify
   /api/notify/getnotify:
@@ -2375,6 +2405,7 @@ paths:
         type: string
       - in: query
         name: relation_id
+        required: true
         type: integer
       produces:
       - application/json
