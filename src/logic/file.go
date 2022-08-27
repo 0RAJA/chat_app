@@ -151,7 +151,7 @@ func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart
 	url, key, err := oss.UploadFile(file)
 	result := reply.UploadAvatar{}
 	if err != nil {
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		global.Logger.Error(err.Error())
 		return result, myerr.FiledStore
 	}
 	avatar, err := dao.Group.DB.GetAvatar(c, sql.NullInt64{
@@ -216,7 +216,7 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 	if file != nil {
 		url, key, err = oss.UploadFile(file)
 		if err != nil {
-			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			global.Logger.Error(err.Error())
 			return result, myerr.FiledStore
 		}
 	}
