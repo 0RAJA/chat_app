@@ -29,6 +29,15 @@ func (handle) OnError(s socketio.Conn, e error) {
 	if s == nil {
 		return
 	}
+	token, ok := s.Context().(*model.Token)
+	if !ok {
+		return
+	}
+	// 从在线中退出
+	global.ChatMap.Leave(s, token.Content.ID)
+	// 通知其他设备
+	global.Worker.SendTask(task.AccountLogout(token.AccessToken, s.RemoteAddr().String(), token.Content.ID))
+	log.Println("disconnected:", s.RemoteAddr().String())
 	_ = s.Close()
 }
 

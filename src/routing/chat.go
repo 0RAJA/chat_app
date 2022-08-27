@@ -10,7 +10,7 @@ import (
 type ws struct {
 }
 
-func (ws) Init(router *gin.RouterGroup) *socketio.Server {
+func (ws) Init(router *gin.Engine) *socketio.Server {
 	server := socketio.NewServer(nil)
 	{
 		server.OnConnect("/", v1.Group.Chat.Handle.OnConnect)

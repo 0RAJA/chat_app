@@ -574,7 +574,7 @@ func (message) CreateFileMsg(c *gin.Context, params model.CreateFileMsg) (*reply
 		RelationID: params.RelationID,
 	})
 	if err != nil {
-		global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+		global.Logger.Error(err.Error())
 		return nil, errcode.ErrServer
 	}
 	// 获取token
