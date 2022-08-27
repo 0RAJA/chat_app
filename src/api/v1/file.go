@@ -109,12 +109,13 @@ func (file) UploadAvatar(c *gin.Context) {
 		rly.Reply(myerr.AuthNotExist)
 		return
 	}
+
 	if params.RelationID == 0 {
-		result, mErr := logic.Group.File.UploadAccountAvatar(c, params.AccountID, params.File)
+		result, mErr := logic.Group.File.UploadAccountAvatar(c, content.ID, params.File)
 		rly.Reply(mErr, result)
 		return
 	}
-	result, mErr := logic.Group.File.UploadGroupAvatar(c, params.File, params.RelationID)
+	result, mErr := logic.Group.File.UploadGroupAvatar(c, params.File, params.RelationID, content.ID)
 	rly.Reply(mErr, result)
 }
 

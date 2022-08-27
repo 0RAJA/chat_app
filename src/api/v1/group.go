@@ -43,7 +43,7 @@ func (mGroup) CreateGroup(c *gin.Context) {
 		rly.Reply(mErr)
 		return
 	}
-	url, mErr := logic.Group.File.UploadGroupAvatar(c, nil, relationID)
+	url, mErr := logic.Group.File.UploadGroupAvatar(c, nil, relationID, content.ID)
 
 	rly.Reply(mErr, reply.CreateGroup{
 		Name:        params.Name,
