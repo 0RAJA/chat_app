@@ -191,10 +191,20 @@ func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart
 	}
 	return reply.UploadAvatar{Url: url}, nil
 }
-func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relationID int64) (reply.UploadAvatar, errcode.Err) {
+func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relationID int64, accountID int64) (reply.UploadAvatar, errcode.Err) {
 	var url, key string
 	var err error
 	result := reply.UploadAvatar{}
+	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+		AccountID:  accountID,
+		RelationID: relationID,
+	})
+	if err == nil {
+		return result, errcode.ErrServer
+	}
+	if !t {
+		return result, myerr.NotGroupMember
+	}
 	oss = aliyun.Init(aliyun.Config{
 		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
 		BasePath:        global.PvSettings.AliyunOSS.BasePath,
