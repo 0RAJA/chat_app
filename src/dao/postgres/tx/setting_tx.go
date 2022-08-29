@@ -2,9 +2,6 @@ package tx
 
 import (
 	"context"
-	"github.com/0RAJA/Rutils/pkg/app/errcode"
-	"github.com/0RAJA/chat_app/src/dao"
-	"github.com/0RAJA/chat_app/src/global"
 
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/dao/redis/query"
@@ -12,17 +9,9 @@ import (
 )
 
 // AddSettingWithTx 向数据库和redis中同时添加群员
-func (store *SqlStore) AddSettingWithTx(c context.Context, rdb *query.Queries, accountID int64, isLeader bool, name, desc string) error {
+func (store *SqlStore) AddSettingWithTx(c context.Context, rdb *query.Queries, relationID, accountID int64, isLeader bool) error {
 	return store.execTx(c, func(queries *db.Queries) error {
-		relationID, err := dao.Group.DB.CreateGroupRelation(c, &db.CreateGroupRelationParams{
-			Name:        name,
-			Description: desc,
-			Avatar:      global.PbSettings.Rule.DefaultAvatarURL,
-		})
-		if err != nil {
-			return errcode.ErrServer
-		}
-		err = queries.CreateSetting(c, &db.CreateSettingParams{
+		err := queries.CreateSetting(c, &db.CreateSettingParams{
 			AccountID:  accountID,
 			RelationID: relationID,
 			IsLeader:   isLeader,

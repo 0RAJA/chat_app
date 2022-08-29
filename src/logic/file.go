@@ -195,16 +195,6 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 	var url, key string
 	var err error
 	result := reply.UploadAvatar{}
-	t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
-		AccountID:  accountID,
-		RelationID: relationID,
-	})
-	if err == nil {
-		return result, errcode.ErrServer
-	}
-	if !t {
-		return result, myerr.NotGroupMember
-	}
 	oss = aliyun.Init(aliyun.Config{
 		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
 		BasePath:        global.PvSettings.AliyunOSS.BasePath,
@@ -214,6 +204,17 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 		BucketName:      global.PvSettings.AliyunOSS.BucketName,
 	})
 	if file != nil {
+		t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
+			AccountID:  accountID,
+			RelationID: relationID,
+		})
+		if err != nil {
+			global.Logger.Error(err.Error())
+			return result, errcode.ErrServer
+		}
+		if !t {
+			return result, myerr.NotGroupMember
+		}
 		url, key, err = oss.UploadFile(file)
 		if err != nil {
 			global.Logger.Error(err.Error())
@@ -230,6 +231,7 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 		AccountID:  sql.NullInt64{},
 	})
 	if err != nil {
+		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
 	if file == nil {
