@@ -18,7 +18,7 @@ type mGroup struct {
 }
 
 func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc string) (relationID int64, mErr errcode.Err) {
-	err := dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true)
+	err := dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true, name, desc)
 
 	if err != nil {
 		global.Logger.Error(err.Error())
