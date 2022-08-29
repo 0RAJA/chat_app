@@ -30,7 +30,7 @@ type TXer interface {
 	// DeleteRelationWithTx 从数据库中删除关系并删除redis中的关系
 	DeleteRelationWithTx(c context.Context, rdb *query.Queries, relationID int64) error
 	// AddSettingWithTx 向数据库和redis中同时添加群员
-	AddSettingWithTx(c context.Context, rdb *query.Queries, relationID int64, accountID int64, isLeader bool) error
+	AddSettingWithTx(c context.Context, rdb *query.Queries, relationID, accountID int64, isLeader bool) error
 	// DeleteSettingWithTx 向数据库和redis中同时删除群员
 	DeleteSettingWithTx(c context.Context, rdb *query.Queries, relationID int64, accountID int64) error
 	// TransferGroup 转让群

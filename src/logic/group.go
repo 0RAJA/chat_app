@@ -24,11 +24,10 @@ func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc str
 		Avatar:      global.PbSettings.Rule.DefaultAvatarURL,
 	})
 	if err != nil {
+		global.Logger.Error(err.Error())
 		return 0, errcode.ErrServer
 	}
-
 	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true)
-
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return 0, errcode.ErrServer

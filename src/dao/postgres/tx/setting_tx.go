@@ -9,7 +9,7 @@ import (
 )
 
 // AddSettingWithTx 向数据库和redis中同时添加群员
-func (store *SqlStore) AddSettingWithTx(c context.Context, rdb *query.Queries, relationID int64, accountID int64, isLeader bool) error {
+func (store *SqlStore) AddSettingWithTx(c context.Context, rdb *query.Queries, relationID, accountID int64, isLeader bool) error {
 	return store.execTx(c, func(queries *db.Queries) error {
 		err := queries.CreateSetting(c, &db.CreateSettingParams{
 			AccountID:  accountID,
