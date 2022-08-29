@@ -18,16 +18,7 @@ type mGroup struct {
 }
 
 func (mGroup) CreateGroup(c *gin.Context, accountID int64, name string, desc string) (relationID int64, mErr errcode.Err) {
-	relationID, err := dao.Group.DB.CreateGroupRelation(c, &db.CreateGroupRelationParams{
-		Name:        name,
-		Description: desc,
-		Avatar:      global.PbSettings.Rule.DefaultAvatarURL,
-	})
-	if err != nil {
-		return 0, errcode.ErrServer
-	}
-
-	err = dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true)
+	err := dao.Group.DB.AddSettingWithTx(c, dao.Group.Redis, relationID, accountID, true)
 
 	if err != nil {
 		global.Logger.Error(err.Error())
