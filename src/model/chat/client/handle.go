@@ -1,8 +1,8 @@
 package client
 
 type TestParams struct {
-	Name string `json:"name" validate:"required"` // 姓名
-	Age  string `json:"age" validate:"required"`  // 年龄
+	Name string `json:"name" validate:"required,gte=1,lte=50"` // 姓名
+	Age  string `json:"age" validate:"required,gte=1"`         // 年龄
 }
 
 type TestRly struct {

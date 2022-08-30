@@ -44,8 +44,6 @@ func main() {
 	s := &http.Server{
 		Addr:           global.PbSettings.Server.Address,
 		Handler:        r,
-		ReadTimeout:    global.PbSettings.Server.ReadTimeout,
-		WriteTimeout:   global.PbSettings.Server.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 	global.Logger.Info("Server started!")

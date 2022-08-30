@@ -15,8 +15,7 @@ import (
 func NewRouter() (*gin.Engine, *socketio.Server) {
 	r := gin.New()
 	r.Use(mid.Cors(), mid.GinLogger(), mid.Recovery(true))
-	gen := r.Group("/")
-	root := gen.Group("api", mid.LogBody(), mid.Auth())
+	root := r.Group("api", mid.LogBody(), mid.Auth())
 	{
 		root.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		root.GET("ping", func(c *gin.Context) {
@@ -35,5 +34,5 @@ func NewRouter() (*gin.Engine, *socketio.Server) {
 		rg.Message.Init(root)
 		rg.MGroup.Init(root)
 	}
-	return r, routing.Group.Chat.Init(gen)
+	return r, routing.Group.Chat.Init(r)
 }
