@@ -18,8 +18,8 @@ func (ws) Init(router *gin.Engine) *socketio.Server {
 		server.OnDisconnect("/", v1.Group.Chat.Handle.OnDisconnect)
 	}
 	chatHandle(server)
-	router.GET("socket.io/*any", gin.WrapH(server))
-	router.POST("socket.io/*any", gin.WrapH(server))
+	router.GET("/socket.io/*any", gin.WrapH(server))
+	router.POST("/socket.io/*any", gin.WrapH(server))
 	return server
 }
 

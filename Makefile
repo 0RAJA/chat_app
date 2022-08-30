@@ -39,7 +39,7 @@ init: migrate_install goimports_install golang-cli_install swag_install # 安装
 docker_build: # 构建docker镜像
 	docker build -t chat:app .
 docker_run: # docker运行镜像
-	docker run -d --name chat_app --network chat_net -p 8080:8080 chat:app
+	docker run -d --name chat_app --network chat_default -p 8080:8080 chat:app
 build:
 	go build -ldflags="-s -w" -o bin/chat src/main.go
 run: build# 运行server

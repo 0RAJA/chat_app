@@ -7,8 +7,6 @@ import (
 	"mime/multipart"
 	"strconv"
 
-	upload "github.com/0RAJA/Rutils/pkg/upload/oss"
-	"github.com/0RAJA/Rutils/pkg/upload/oss/aliyun"
 	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/pkg/gtype"
 
@@ -16,7 +14,6 @@ import (
 	"github.com/0RAJA/chat_app/src/dao"
 	db "github.com/0RAJA/chat_app/src/dao/postgres/sqlc"
 	"github.com/0RAJA/chat_app/src/global"
-	mid "github.com/0RAJA/chat_app/src/middleware"
 	"github.com/0RAJA/chat_app/src/model/reply"
 	"github.com/0RAJA/chat_app/src/myerr"
 	"github.com/gin-gonic/gin"
@@ -24,8 +21,6 @@ import (
 
 type file struct {
 }
-
-var oss upload.OSS
 
 // PublishFile 上传文件，传出context与relationID,accountID,file(*multipart.FileHeader),返回 model.PublishFileRe
 // 错误代码 1003:系统错误 8001:文件存储失败(aly) 8004:文件过大
@@ -43,15 +38,7 @@ func PublishFile(c context.Context, params model.PublishFile) (model.PublishFile
 	} else {
 		filetype = "img"
 	}
-	oss = aliyun.Init(aliyun.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	})
-	url, key, err := oss.UploadFile(params.File)
+	url, key, err := global.OSS.UploadFile(params.File)
 	if err != nil {
 		global.Logger.Error(err.Error())
 		return result, myerr.FiledStore
@@ -93,16 +80,8 @@ func (file) DeleteFile(c context.Context, fileID int64) (result reply.DeleteFile
 		}
 		return result, errcode.ErrServer
 	}
-	oss = aliyun.Init(aliyun.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	})
 	if key != "" {
-		_, err = oss.DeleteFile(key)
+		_, err = global.OSS.DeleteFile(key)
 		if err != nil {
 			return result, myerr.FileDeleteFailed
 		}
@@ -140,15 +119,7 @@ func (file) GetRelationFile(c *gin.Context, relationID int64) ([]reply.File, err
 }
 
 func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart.FileHeader) (reply.UploadAvatar, errcode.Err) {
-	oss = aliyun.Init(aliyun.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	})
-	url, key, err := oss.UploadFile(file)
+	url, key, err := global.OSS.UploadFile(file)
 	result := reply.UploadAvatar{}
 	if err != nil {
 		global.Logger.Error(err.Error())
@@ -163,13 +134,13 @@ func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart
 		if err.Error() == "no rows in result set" {
 			t = 1
 		} else {
-			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			global.Logger.Error(err.Error())
 			return result, errcode.ErrServer
 		}
 	} else {
 		t, err = strconv.ParseInt(avatar.FileName, 0, 0)
 		if err != nil {
-			global.Logger.Error(err.Error(), mid.ErrLogMsg(c)...)
+			global.Logger.Error(err.Error())
 			return result, errcode.ErrServer
 		}
 		t += 1
@@ -187,6 +158,7 @@ func (file) UploadAccountAvatar(c *gin.Context, accountId int64, file *multipart
 		},
 	})
 	if err != nil {
+		global.Logger.Error(err.Error())
 		return result, errcode.ErrServer
 	}
 	return reply.UploadAvatar{Url: url}, nil
@@ -195,14 +167,6 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 	var url, key string
 	var err error
 	result := reply.UploadAvatar{}
-	oss = aliyun.Init(aliyun.Config{
-		BucketUrl:       global.PvSettings.AliyunOSS.BucketUrl,
-		BasePath:        global.PvSettings.AliyunOSS.BasePath,
-		Endpoint:        global.PvSettings.AliyunOSS.Endpoint,
-		AccessKeyId:     global.PvSettings.AliyunOSS.AccessKeyId,
-		AccessKeySecret: global.PvSettings.AliyunOSS.AccessKeySecret,
-		BucketName:      global.PvSettings.AliyunOSS.BucketName,
-	})
 	if file != nil {
 		t, err := dao.Group.DB.ExistsSetting(c, &db.ExistsSettingParams{
 			AccountID:  accountID,
@@ -215,7 +179,7 @@ func (file) UploadGroupAvatar(c *gin.Context, file *multipart.FileHeader, relati
 		if !t {
 			return result, myerr.NotGroupMember
 		}
-		url, key, err = oss.UploadFile(file)
+		url, key, err = global.OSS.UploadFile(file)
 		if err != nil {
 			global.Logger.Error(err.Error())
 			return result, myerr.FiledStore

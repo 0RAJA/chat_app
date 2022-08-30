@@ -12,6 +12,7 @@ type group struct {
 	Load      load
 	GenID     genID
 	Chat      chat
+	OSS       oss
 }
 
 var Group = new(group)
@@ -19,6 +20,7 @@ var Group = new(group)
 func AllInit() {
 	Group.Config.Init()
 	Group.Dao.Init()
+	Group.OSS.Init()
 	Group.Maker.Init()
 	Group.Log.Init()
 	Group.Page.Init()

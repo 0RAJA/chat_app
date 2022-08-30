@@ -5,7 +5,6 @@ import (
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/global"
-	"github.com/0RAJA/chat_app/src/model"
 	"github.com/0RAJA/chat_app/src/model/chat/client"
 	"github.com/0RAJA/chat_app/src/model/common"
 	"github.com/0RAJA/chat_app/src/task"
@@ -18,7 +17,7 @@ type handle struct {
 // OnConnect
 // 当客户端连接时触发
 func (handle) OnConnect(s socketio.Conn) error {
-	log.Println("connected:", s.RemoteAddr().String())
+	log.Println("connected:", s.RemoteAddr().String(), s.ID())
 	return nil
 }
 
@@ -29,30 +28,18 @@ func (handle) OnError(s socketio.Conn, e error) {
 	if s == nil {
 		return
 	}
-	token, ok := s.Context().(*model.Token)
-	if !ok {
-		return
-	}
 	// 从在线中退出
-	global.ChatMap.Leave(s, token.Content.ID)
-	// 通知其他设备
-	global.Worker.SendTask(task.AccountLogout(token.AccessToken, s.RemoteAddr().String(), token.Content.ID))
-	log.Println("disconnected:", s.RemoteAddr().String())
+	global.ChatMap.Leave(s)
+	log.Println("disconnected:", s.RemoteAddr().String(), s.ID())
 	_ = s.Close()
 }
 
 // OnDisconnect
 // 当客户端断开连接时触发
 func (handle) OnDisconnect(s socketio.Conn, _ string) {
-	token, ok := s.Context().(*model.Token)
-	if !ok {
-		return
-	}
 	// 从在线中退出
-	global.ChatMap.Leave(s, token.Content.ID)
-	// 通知其他设备
-	global.Worker.SendTask(task.AccountLogout(token.AccessToken, s.RemoteAddr().String(), token.Content.ID))
-	log.Println("disconnected:", s.RemoteAddr().String())
+	global.ChatMap.Leave(s)
+	log.Println("disconnected:", s.RemoteAddr().String(), s.ID())
 }
 
 // Auth 身份验证
@@ -66,7 +53,7 @@ func (handle) Auth(s socketio.Conn, accessToken string) string {
 	global.ChatMap.Link(s, token.Content.ID)
 	// 通知其他设备
 	global.Worker.SendTask(task.AccountLogin(token.AccessToken, s.RemoteAddr().String(), token.Content.ID))
-	log.Println("connected:", s.RemoteAddr().String())
+	log.Println("auth accept:", s.RemoteAddr().String())
 	return common.NewState(nil).JsonStr()
 }
 

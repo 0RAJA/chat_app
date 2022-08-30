@@ -13,15 +13,17 @@ func NewChatMap() *ChatMap {
 }
 
 type ChatMap struct {
-	m sync.Map
+	m   sync.Map // k: accountID v: ConnMap
+	sID sync.Map // k: sID v: accountID
 }
 
 type ConnMap struct {
-	m sync.Map
+	m sync.Map // k: sID v: socketio.Conn
 }
 
 // Link 添加设备
 func (c *ChatMap) Link(s socketio.Conn, accountID int64) {
+	c.m.Store(s.ID(), accountID) // 存入SID和accountID对应关系
 	cm, ok := c.m.Load(accountID)
 	if !ok {
 		cm := &ConnMap{}
@@ -33,7 +35,11 @@ func (c *ChatMap) Link(s socketio.Conn, accountID int64) {
 }
 
 // Leave 去除设备
-func (c *ChatMap) Leave(s socketio.Conn, accountID int64) {
+func (c *ChatMap) Leave(s socketio.Conn) {
+	accountID, ok := c.sID.LoadAndDelete(s.ID())
+	if !ok {
+		return
+	}
 	cm, ok := c.m.Load(accountID)
 	if !ok {
 		return
