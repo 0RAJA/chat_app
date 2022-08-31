@@ -35,42 +35,18 @@ func DeleteExpiredFile() task.DoFunc {
 		global.Logger.Info("auto task run : deleteExpiredFile")
 		ctx, cancel := context.WithTimeout(parentCtx, global.PbSettings.Server.DefaultContextTimeout)
 		defer cancel()
-		data, err := dao.Group.DB.GetAllRelationOnRelation(ctx)
+		d, err := dao.Group.DB.GetFileByRelationIDIsNUll(ctx)
 		if err != nil {
 			global.Logger.Error(err.Error())
 			return
 		}
-		relations := make(map[int64]int)
-		for _, v := range data {
-			relations[v] = 1
-		}
-		data2, err := dao.Group.DB.GetAllRelationsOnFile(ctx)
-		if err != nil {
-			global.Logger.Error(err.Error())
-			return
-		}
-		for _, v := range data2 {
-			_, ok := relations[v.Int64]
-			if !ok {
-				//err := dao.Group.DB.DeleteFileByRelationID(ctx)
-				//if err != nil {
-				//	global.Logger.Error(err.Error())
-				//	return
-				//}
-				d, err := dao.Group.DB.GetFileByRelationIDIsNUll(ctx)
-				if err != nil {
-					global.Logger.Error(err.Error())
-					return
-				}
-				for _, v := range d {
-					_, err := Group.File.DeleteFile(ctx, v.ID)
-					if err != nil {
-						global.Logger.Error(err.Error())
-						return
-					}
-				}
-
+		for _, v := range d {
+			_, err := Group.File.DeleteFile(ctx, v.ID)
+			if err != nil {
+				global.Logger.Error(err.Error())
+				return
 			}
 		}
+
 	}
 }

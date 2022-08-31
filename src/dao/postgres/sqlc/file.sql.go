@@ -90,22 +90,14 @@ func (q *Queries) GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, e
 }
 
 const getAvatar = `-- name: GetAvatar :one
-select f.url, f.file_name
-from file f
-where file_name =
-      (select max(file_name) from file f1 where f1.account_id = $1 and f1.relation_id is null)
+select exists(select 1 from file where account_id= $1 and file_name= 'AccountAvatar')
 `
 
-type GetAvatarRow struct {
-	Url      string `json:"url"`
-	FileName string `json:"file_name"`
-}
-
-func (q *Queries) GetAvatar(ctx context.Context, accountID sql.NullInt64) (*GetAvatarRow, error) {
+func (q *Queries) GetAvatar(ctx context.Context, accountID sql.NullInt64) (bool, error) {
 	row := q.db.QueryRow(ctx, getAvatar, accountID)
-	var i GetAvatarRow
-	err := row.Scan(&i.Url, &i.FileName)
-	return &i, err
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const getFileByRelationID = `-- name: GetFileByRelationID :many
@@ -147,7 +139,7 @@ func (q *Queries) GetFileByRelationID(ctx context.Context, relationID sql.NullIn
 const getFileByRelationIDIsNUll = `-- name: GetFileByRelationIDIsNUll :many
 select id, key
 from file
-where relation_id is null
+where relation_id is null and file_name != 'AccountAvatar'
 `
 
 type GetFileByRelationIDIsNUllRow struct {
@@ -235,10 +227,26 @@ func (q *Queries) GetGroupAvatar(ctx context.Context, relationID sql.NullInt64) 
 	return &i, err
 }
 
+const updateAccountFile = `-- name: UpdateAccountFile :exec
+update  file
+set  url = $1
+where account_id = $2 and file_name = 'AccountAvatar'
+`
+
+type UpdateAccountFileParams struct {
+	Url       string        `json:"url"`
+	AccountID sql.NullInt64 `json:"account_id"`
+}
+
+func (q *Queries) UpdateAccountFile(ctx context.Context, arg *UpdateAccountFileParams) error {
+	_, err := q.db.Exec(ctx, updateAccountFile, arg.Url, arg.AccountID)
+	return err
+}
+
 const updateGroupAvatar = `-- name: UpdateGroupAvatar :exec
 update file
 set url= $1
-where relation_id = $2
+where relation_id = $2 and file_name = 'groupAvatar'
 `
 
 type UpdateGroupAvatarParams struct {

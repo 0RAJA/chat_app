@@ -21,6 +21,8 @@ type TXer interface {
 	DeleteAccountWithTx(c context.Context, rdb *query.Queries, accountID int64) error
 	// UploadGroupAvatar 创建群组头像文件
 	UploadGroupAvatar(c context.Context, arg db.CreateFileParams) error
+	// UploadAccountAvatar 更新用户头像
+	UploadAccountAvatar(c context.Context, accountID int64, url, key string) error
 	// DissolveGroup 删除群关系并删除所有群员
 	DissolveGroup(c context.Context, relationID int64) error
 	// UpdateMsgTopTrueByMsgIDWithTx 更新此消息置顶(会删除其他置顶)
@@ -36,7 +38,6 @@ type TXer interface {
 	// TransferGroup 转让群
 	TransferGroup(c context.Context, relationID int64, fID int64, tID int64) error
 }
-
 type SqlStore struct {
 	*db.Queries
 	DB *pgxpool.Pool
