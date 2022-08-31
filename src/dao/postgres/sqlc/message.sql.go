@@ -748,7 +748,7 @@ set read_ids = array_append(read_ids, $2::bigint)
 where id = any ($3::bigint[])
   and $2::bigint != ANY (read_ids)
   and relation_id = $1
-returning id
+returning id,account_id::bigint
 `
 
 type UpdateMsgReadsParams struct {
@@ -757,19 +757,24 @@ type UpdateMsgReadsParams struct {
 	Msgids     []int64 `json:"msgids"`
 }
 
-func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]int64, error) {
+type UpdateMsgReadsRow struct {
+	ID        int64 `json:"id"`
+	AccountID int64 `json:"account_id"`
+}
+
+func (q *Queries) UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]*UpdateMsgReadsRow, error) {
 	rows, err := q.db.Query(ctx, updateMsgReads, arg.RelationID, arg.Accountid, arg.Msgids)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []int64{}
+	items := []*UpdateMsgReadsRow{}
 	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
+		var i UpdateMsgReadsRow
+		if err := rows.Scan(&i.ID, &i.AccountID); err != nil {
 			return nil, err
 		}
-		items = append(items, id)
+		items = append(items, &i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

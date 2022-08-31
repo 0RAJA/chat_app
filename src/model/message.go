@@ -36,8 +36,8 @@ func JsonToExpand(data pgtype.JSON) (*MsgExtend, error) {
 }
 
 type Remind struct {
-	Idx       int64 `json:"idx" binding:"required,gte=1"`        // 第几个@
-	AccountID int64 `json:"account_id" binding:"required,gte=1"` // 被@的账号ID
+	Idx       int64 `json:"idx" binding:"required,gte=1" validate:"required,gte=1"`        // 第几个@
+	AccountID int64 `json:"account_id" binding:"required,gte=1" validate:"required,gte=1"` // 被@的账号ID
 }
 
 // MsgExtend 消息扩展信息 可能为null

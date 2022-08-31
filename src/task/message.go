@@ -24,7 +24,7 @@ func PublishMsg(accessToken string, msgInfo reply.MsgInfo, rlyMsg *reply.RlyMsg)
 		}
 		global.ChatMap.SendMany(accountIDs, chat.ServerSendMsg, server.SendMsg{
 			EnToken: utils.EncodeMD5(accessToken),
-			MsgInfoWithRly: reply.MsgInfoWithRly{
+			MsgInfo: reply.MsgInfoWithRly{
 				MsgInfo: msgInfo,
 				RlyMsg:  rlyMsg,
 			},
@@ -33,22 +33,25 @@ func PublishMsg(accessToken string, msgInfo reply.MsgInfo, rlyMsg *reply.RlyMsg)
 }
 
 // ReadMsg 推送阅读消息事件
-// 参数: 读者ID，消息发起者ID，消息ID
-func ReadMsg(accessToken string, relationID, readerID int64, msgIDs []int64) func() {
+// 参数: 读者ID，消息Map(accountID:[]msgID),所有msgIDs
+func ReadMsg(accessToken string, readerID int64, msgMap map[int64][]int64, allMsgIDs []int64) func() {
 	return func() {
-		if len(msgIDs) == 0 {
+		if len(msgMap) == 0 {
 			return
 		}
-		ctx, cancel := global.DefaultContextWithTimeOut()
-		defer cancel()
-		accountIDs, err := dao.Group.Redis.GetAccountsByRelationID(ctx, relationID)
-		if err != nil {
-			global.Logger.Error(err.Error())
-			return
+		enToken := utils.EncodeMD5(accessToken)
+		// 给发送消息者推送
+		for accountID, msgIDs := range msgMap {
+			global.ChatMap.Send(accountID, chat.ServerReadMsg, server.ReadMsg{
+				EnToken:  enToken,
+				MsgIDs:   msgIDs,
+				ReaderID: readerID,
+			})
 		}
-		global.ChatMap.SendMany(accountIDs, chat.ServerReadMsg, server.ReadMsg{
-			EnToken:  utils.EncodeMD5(accessToken),
-			MsgIDs:   msgIDs,
+		// 给自己的其他设备同步
+		global.ChatMap.Send(readerID, chat.ServerSendMsg, server.ReadMsg{
+			EnToken:  enToken,
+			MsgIDs:   allMsgIDs,
 			ReaderID: readerID,
 		})
 	}

@@ -7,8 +7,8 @@ import (
 // chat 中 server 端有关消息请求的结构
 
 type SendMsg struct {
-	EnToken string `json:"en_token"` // 加密后的Token
-	reply.MsgInfoWithRly
+	EnToken string               `json:"en_token"` // 加密后的Token
+	MsgInfo reply.MsgInfoWithRly `json:"msg_info"`
 }
 
 type ReadMsg struct {
@@ -27,7 +27,7 @@ const (
 
 type UpdateMsgState struct {
 	EnToken string  `json:"en_token"` // 加密后的Token
-	MsgType MsgType `json:"msg_type"` // 消息类型 [pin,top,revoke]
+	MsgType MsgType `json:"type"`     // 消息类型 [pin,top,revoke]
 	MsgID   int64   `json:"msg_id"`   // 消息ID
 	State   bool    `json:"state"`    // 状态设置
 }

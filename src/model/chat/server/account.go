@@ -9,5 +9,5 @@ type UpdateAccount struct {
 
 type UpdateEmail struct {
 	EnToken string `json:"en_token"`
-	Email   string `json:"email"`
+	Email   string `json:"email"` // 更新后的邮箱
 }
