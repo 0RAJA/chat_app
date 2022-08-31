@@ -19,7 +19,7 @@ set read_ids = array_append(read_ids, @accountID::bigint)
 where id = any (@msgIDs::bigint[])
   and @accountID::bigint != ANY (read_ids)
   and relation_id = $1
-returning id;
+returning id,account_id::bigint;
 
 -- name: GetMsgsByRelationIDAndTime :many
 select m1.id,

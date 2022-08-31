@@ -101,7 +101,7 @@ func (message) ReadMsg(c context.Context, params *model.HandleReadMsg) errcode.E
 	if !ok {
 		return myerr.AuthPermissionsInsufficient
 	}
-	msgIDs, err := dao.Group.DB.UpdateMsgReads(c, &db.UpdateMsgReadsParams{
+	readerMsgs, err := dao.Group.DB.UpdateMsgReads(c, &db.UpdateMsgReadsParams{
 		Msgids:     params.MsgIDs,
 		RelationID: params.RelationID,
 		Accountid:  params.ReaderID,
@@ -110,12 +110,17 @@ func (message) ReadMsg(c context.Context, params *model.HandleReadMsg) errcode.E
 		global.Logger.Error(err.Error())
 		return errcode.ErrServer
 	}
+	msgMap := make(map[int64][]int64)
+	for _, v := range readerMsgs {
+		msgID, accountID := v.ID, v.AccountID
+		msgMap[accountID] = append(msgMap[accountID], msgID)
+	}
 	// 推送消息已经被读取
 	global.Worker.SendTask(task.ReadMsg(
 		params.AccessToken,
-		params.RelationID,
 		params.ReaderID,
-		msgIDs,
+		msgMap,
+		params.MsgIDs,
 	))
 	return nil
 }

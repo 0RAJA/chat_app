@@ -96,7 +96,7 @@ type Querier interface {
 	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*UpdateGroupNotifyRow, error)
 	UpdateGroupRelation(ctx context.Context, arg *UpdateGroupRelationParams) error
 	UpdateMsgPin(ctx context.Context, arg *UpdateMsgPinParams) error
-	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]int64, error)
+	UpdateMsgReads(ctx context.Context, arg *UpdateMsgReadsParams) ([]*UpdateMsgReadsRow, error)
 	UpdateMsgRevoke(ctx context.Context, arg *UpdateMsgRevokeParams) error
 	UpdateMsgTopFalseByMsgID(ctx context.Context, id int64) error
 	UpdateMsgTopFalseByRelationID(ctx context.Context, relationID int64) error
