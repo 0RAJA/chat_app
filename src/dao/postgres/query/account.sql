@@ -63,3 +63,7 @@ from (select id, name, avatar, gender from account where name like (@name::varch
                                    (r.friend_type).account2_id = a.id and
                                    (r.friend_type).account1_id = @account_id::bigint))
 limit $1 offset $2;
+-- name: UpdateAccountAvatar :exec
+update account
+set avatar = $1
+where id = $2

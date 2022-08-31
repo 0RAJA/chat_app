@@ -56,7 +56,7 @@ type Querier interface {
 	GetAllRelationsOnFile(ctx context.Context) ([]sql.NullInt64, error)
 	GetApplicationByID(ctx context.Context, arg *GetApplicationByIDParams) (*Application, error)
 	GetApplications(ctx context.Context, arg *GetApplicationsParams) ([]*GetApplicationsRow, error)
-	GetAvatar(ctx context.Context, accountID sql.NullInt64) (*GetAvatarRow, error)
+	GetAvatar(ctx context.Context, accountID sql.NullInt64) (bool, error)
 	GetFileByRelationID(ctx context.Context, relationID sql.NullInt64) ([]*File, error)
 	GetFileByRelationIDIsNUll(ctx context.Context) ([]*GetFileByRelationIDIsNUllRow, error)
 	GetFileDetailsByID(ctx context.Context, id int64) (*File, error)
@@ -89,6 +89,8 @@ type Querier interface {
 	TransferIsSelfFalse(ctx context.Context, arg *TransferIsSelfFalseParams) error
 	TransferIsSelfTrue(ctx context.Context, arg *TransferIsSelfTrueParams) error
 	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
+	UpdateAccountAvatar(ctx context.Context, arg *UpdateAccountAvatarParams) error
+	UpdateAccountFile(ctx context.Context, arg *UpdateAccountFileParams) error
 	UpdateApplication(ctx context.Context, arg *UpdateApplicationParams) error
 	UpdateGroupAvatar(ctx context.Context, arg *UpdateGroupAvatarParams) error
 	UpdateGroupNotify(ctx context.Context, arg *UpdateGroupNotifyParams) (*UpdateGroupNotifyRow, error)

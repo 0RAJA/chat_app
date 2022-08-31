@@ -287,3 +287,19 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg *UpdateAccountParams) e
 	)
 	return err
 }
+
+const updateAccountAvatar = `-- name: UpdateAccountAvatar :exec
+update account
+set avatar = $1
+where id = $2
+`
+
+type UpdateAccountAvatarParams struct {
+	Avatar string `json:"avatar"`
+	ID     int64  `json:"id"`
+}
+
+func (q *Queries) UpdateAccountAvatar(ctx context.Context, arg *UpdateAccountAvatarParams) error {
+	_, err := q.db.Exec(ctx, updateAccountAvatar, arg.Avatar, arg.ID)
+	return err
+}
