@@ -4,6 +4,8 @@
 
 错误码以及ws事件说明 https://ubqf66qdnq.feishu.cn/docx/doxcndbrG2BzzYCQXWxBCuP9bqg
 
+接口文档及ws模型 https://www.apifox.cn/apidoc/shared-0f3a6116-24fe-4b37-8ae6-da7a33c850a6
+
 请在`config/app`下新建`private.yml`配置文件,格式为:
 
 ```yaml
