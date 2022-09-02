@@ -2,6 +2,7 @@ package chat
 
 import (
 	"log"
+	"time"
 
 	"github.com/0RAJA/Rutils/pkg/app/errcode"
 	"github.com/0RAJA/chat_app/src/global"
@@ -18,6 +19,12 @@ type handle struct {
 // 当客户端连接时触发
 func (handle) OnConnect(s socketio.Conn) error {
 	log.Println("connected:", s.RemoteAddr().String(), s.ID())
+	// 一定时间内需要进行AUTH认证，否则断开连接
+	time.AfterFunc(global.PbSettings.Server.DefaultContextTimeout, func() {
+		if s.Context() == nil {
+			_ = s.Close()
+		}
+	})
 	return nil
 }
 
