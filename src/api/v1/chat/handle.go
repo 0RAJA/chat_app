@@ -15,13 +15,17 @@ import (
 type handle struct {
 }
 
+const AuthLimitTimeout = 10 * time.Second
+
 // OnConnect
 // 当客户端连接时触发
 func (handle) OnConnect(s socketio.Conn) error {
 	log.Println("connected:", s.RemoteAddr().String(), s.ID())
 	// 一定时间内需要进行AUTH认证，否则断开连接
-	time.AfterFunc(global.PbSettings.Server.DefaultContextTimeout, func() {
-		if s.Context() == nil {
+	go time.AfterFunc(AuthLimitTimeout, func() {
+		if !global.ChatMap.HasSID(s.ID()) {
+			log.Println("auth failed:", s.RemoteAddr().String(), s.ID())
+			log.Println("auth failed", s.ID())
 			_ = s.Close()
 		}
 	})

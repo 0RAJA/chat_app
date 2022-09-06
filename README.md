@@ -78,3 +78,17 @@ AliyunOSS: # OSS配置
 2. 数据库表设计仍存在不合理之处，需要后期进行调整，例如已读回执的存储需要进行调整
 3. 服务需要进行拆分，例如IM服务可以单独部署，与主服务之间通过RPC进行通信
 
+遇到的问题:
+
+1. docker 部署后访问oss服务出现io timeout`…read udp 127.0.0.1:39705->127.0.0.11:53: i/o timeout…`
+   原因: 仅docker内部DNS解析，无法访问oss域名
+   解决方法:
+      ```
+      # vim /etc/docker/daemon.json
+      { 
+      ... 
+      "dns": ["<your dns server"] 
+      ...
+      }
+      # systemd restart docker
+      ```

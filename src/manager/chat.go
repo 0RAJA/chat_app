@@ -23,7 +23,7 @@ type ConnMap struct {
 
 // Link 添加设备
 func (c *ChatMap) Link(s socketio.Conn, accountID int64) {
-	c.m.Store(s.ID(), accountID) // 存入SID和accountID对应关系
+	c.sID.Store(s.ID(), accountID) // 存入SID和accountID对应关系
 	cm, ok := c.m.Load(accountID)
 	if !ok {
 		cm := &ConnMap{}
@@ -104,4 +104,10 @@ func (c *ChatMap) ForEach(accountID int64, f EachFunc) {
 		f(v.(socketio.Conn))
 		return true
 	})
+}
+
+// HasSID 判断SID是否已经存在
+func (c *ChatMap) HasSID(sID string) bool {
+	_, ok := c.sID.Load(sID)
+	return ok
 }
