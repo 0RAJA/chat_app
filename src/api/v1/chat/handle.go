@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -24,7 +25,7 @@ func (handle) OnConnect(s socketio.Conn) error {
 	// 一定时间内需要进行AUTH认证，否则断开连接
 	time.AfterFunc(AuthLimitTimeout, func() {
 		if !global.ChatMap.HasSID(s.ID()) {
-			log.Println("auth failed:", s.RemoteAddr().String(), s.ID())
+			global.Logger.Info(fmt.Sprintln("auth failed:", s.RemoteAddr().String(), s.ID()))
 			_ = s.Close()
 		}
 	})
