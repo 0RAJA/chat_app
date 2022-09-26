@@ -10,7 +10,7 @@ import (
 
 type HandleSendMsgParams struct {
 	RelationID int64            `json:"relation_id" validate:"required,gte=1"`          // 关系ID
-	MsgContent string           `json:"msg_content" validate:"validate,gte=1,lte=1000"` // 消息内容
+	MsgContent string           `json:"msg_content" validate:"required,gte=1,lte=1000"` // 消息内容
 	MsgExtend  *model.MsgExtend `json:"msg_extend"`                                     // 消息扩展信息
 	RlyMsgID   int64            `json:"rly_msg_id"`                                     // 回复消息ID (如果是回复消息，则此字段大于0)
 }
